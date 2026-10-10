@@ -12,6 +12,12 @@ Cuatro aspectos, cada uno en semáforo (verde = logrado, amarillo = en proceso, 
 3. Comunicación (con compañeros, docentes, coordinación y CITEF).
 4. Cumplimiento de trabajos y presentaciones orales (opción "hoy no había entrega").
 
+## Hitos de cumplimiento
+Cada componente define hitos con fecha (trabajo práctico, presentación oral, prueba). Se evalúan en semáforo o «No corresponde». Cada hito vale como N tareas de clase (2 por defecto) dentro de Cumplimiento. La pestaña Hitos ofrece hitos sugeridos a partir del programa de cada componente.
+
+## Calendario
+Inicio 13/10/2026. Módulo 1: 13/10–23/12. Receso: 24/12–31/01. Módulo 2: 01/02–15/03/2027 (fechas provisorias, editables en Configuración). Semanas y quincenas se cuentan de lunes a viernes; las que caen enteras en receso se omiten.
+
 ## Cálculo
 - Verde = 100, amarillo = 50, rojo = 0. Se promedia cada aspecto en el período.
 - Índice de empleabilidad = promedio ponderado (25 % cada aspecto por defecto, editable).
@@ -27,3 +33,4 @@ Cuatro aspectos, cada uno en semáforo (verde = logrado, amarillo = en proceso, 
 ## Datos
 - `config/curso`: configuración.
 - `clases/{fecha}_{componente}`: un documento por clase con la evaluación de cada estudiante.
+- `hitos/{fecha}_{componente}_{id}`: un documento por hito con la evaluación de cada estudiante.

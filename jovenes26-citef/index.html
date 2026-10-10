@@ -108,7 +108,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .cut.amp{border-top-style:dotted;color:var(--muted);border-color:var(--muted)}
 @media (max-width:520px){.rk{grid-template-columns:1.8em minmax(0,1fr) 3em}.rk .bar{grid-column:2/4;grid-row:2}}
 
-.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.grid2{display:grid;align-items:start;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
 .kpi{background:var(--surface-2);border-radius:8px;padding:10px}
 .kpi b{display:block;font-family:var(--font-data);font-size:1.4rem}
@@ -118,14 +118,31 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .tl .obs{grid-column:1/-1;font-size:.86rem;color:var(--muted);padding-left:6.5em}
 .cfg-list{display:flex;flex-direction:column;gap:6px}
 .cfg-item{display:grid;grid-template-columns:2em minmax(0,1fr) minmax(0,10em) auto;gap:6px;align-items:center}
-.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 5em auto}
-@media (max-width:560px){.cfg-item,.cfg-item.comp{grid-template-columns:1fr auto}.cfg-item>.idx{display:none}}
+.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 4.5em minmax(0,9em) auto}
+.cfg-item.per{grid-template-columns:minmax(0,1fr) auto auto auto}
+@media (max-width:560px){.cfg-item,.cfg-item.comp,.cfg-item.per{grid-template-columns:1fr 1fr}.cfg-item>.idx{display:none}.cfg-item>input:first-of-type{grid-column:1/-1}}
 .rubric{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
 .rubric div{background:var(--surface-2);border-radius:8px;padding:10px;font-size:.88rem}
 .rubric h3{font-size:1rem;margin-bottom:6px}
 .rubric p{margin:4px 0;display:flex;gap:6px}
 .rubric p .dot{margin-top:3px}
 .empty{padding:28px 16px;text-align:center;color:var(--muted)}
+/* Hitos */
+.hitos{display:flex;flex-direction:column;gap:6px}
+.hito{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;width:100%}
+.hito[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.hito .hn{font-weight:700;min-width:0}
+.hito .hm{font-size:.8rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px dashed var(--line);background:none;border-radius:99px;padding:5px 10px;cursor:pointer;font-size:.85rem}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) repeat(4,auto);gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.hrow .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .lvl{min-height:40px;padding:6px 10px}
+.hrow .lvl[data-l=x][aria-pressed=true]{background:var(--surface-2);border-color:var(--muted)}
+.hrow .obs-in{grid-column:1/-1;min-height:34px;padding:6px 8px;font-size:.88rem}
+@media (max-width:520px){.hrow{grid-template-columns:repeat(4,1fr)}.hrow .nm{grid-column:1/-1}}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
 
@@ -138,6 +155,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
     </div>
     <nav class="tabs" role="tablist" aria-label="Secciones">
       <button role="tab" data-tab="registrar" aria-selected="true">Registrar clase</button>
+      <button role="tab" data-tab="hitos" aria-selected="false">Hitos</button>
       <button role="tab" data-tab="semaforo" aria-selected="false">Semáforo</button>
       <button role="tab" data-tab="ranking" aria-selected="false">Ranking</button>
       <button role="tab" data-tab="ficha" aria-selected="false">Ficha</button>
@@ -157,9 +175,35 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
         <div class="field" style="flex:1;min-width:200px"><label for="r-comp">Componente</label><select id="r-comp"></select></div>
         <button class="btn" id="r-todos" type="button">Todos presentes y puntuales</button>
       </div>
+      <p class="banner warn" id="r-aviso" hidden style="margin:10px 0 0"></p>
       <p class="status" id="r-status"></p>
     </div>
     <div class="students" id="r-list"></div>
+  </section>
+
+  <section data-view="hitos" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field" style="flex:1;min-width:220px"><label for="h-comp">Componente</label><select id="h-comp"></select></div>
+      </div>
+      <p class="note">Un hito es una entrega o instancia con fecha: un trabajo práctico, una presentación oral, una prueba. Cada hito pesa en el aspecto <b>Cumplimiento</b> más que una tarea de clase.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h2 style="font-size:1.1rem;margin-bottom:8px">Hitos del componente</h2>
+        <div class="hitos" id="h-list"></div>
+        <h3 style="font-size:.95rem;margin:16px 0 6px">Nuevo hito</h3>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:180px"><label for="h-nombre">Nombre</label><input type="text" id="h-nombre" placeholder="Ej.: Currículum en Word"></div>
+          <div class="field"><label for="h-tipo">Tipo</label><select id="h-tipo"><option value="trabajo">Trabajo práctico</option><option value="oral">Presentación oral</option><option value="prueba">Prueba o ejercicio</option><option value="otro">Otro</option></select></div>
+          <div class="field"><label for="h-fecha">Fecha de entrega</label><input type="date" id="h-fecha"></div>
+          <button class="btn primary" id="h-crear" type="button">Crear hito</button>
+        </div>
+        <p class="status" id="h-cstatus"></p>
+        <div id="h-sug"></div>
+      </div>
+      <div class="panel" id="h-eval"></div>
+    </div>
   </section>
 
   <section data-view="semaforo" class="view" hidden>
@@ -173,7 +217,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <p class="note" id="s-cov"></p>
     </div>
     <div class="tablewrap"><table id="s-table"></table></div>
-    <p class="note">Cada celda muestra el porcentaje de logro del período (verde = 100, amarillo = 50, rojo = 0) y debajo la cantidad de registros verde/amarillo/rojo. Color de la celda: verde desde 80 %, amarillo de 50 a 79 %, rojo por debajo de 50 %.</p>
+    <p class="note">Cada celda muestra el porcentaje de logro del período (verde = 100, amarillo = 50, rojo = 0) y debajo la cantidad de calificaciones verde/amarillo/rojo; en Cumplimiento, la línea «H» cuenta los hitos. Color de la celda: verde desde 80 %, amarillo de 50 a 79 %, rojo por debajo de 50 %.</p>
   </section>
 
   <section data-view="ranking" class="view" hidden>
@@ -211,6 +255,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <div class="row">
         <div class="field" style="flex:1;min-width:200px"><label for="c-nombre">Nombre</label><input type="text" id="c-nombre"></div>
         <div class="field"><label for="c-inicio">Inicio del curso</label><input type="date" id="c-inicio"></div>
+        <div class="field"><label for="c-fin">Fin del curso</label><input type="date" id="c-fin"></div>
         <div class="field"><label for="c-hora">Hora de entrada</label><input type="text" id="c-hora" size="6"></div>
         <div class="field"><label for="c-tol">Tolerancia (min)</label><input type="number" id="c-tol" min="0" max="30" style="width:6em"></div>
       </div>
@@ -218,6 +263,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
         <div class="field"><label for="c-cupos">Cupos de pasantía</label><input type="number" id="c-cupos" min="1" max="25" style="width:6em"></div>
         <div class="field"><label for="c-cupos2">Cupos ampliados</label><input type="number" id="c-cupos2" min="1" max="25" style="width:6em"></div>
         <div class="field"><label for="c-min">Mín. registros para rankear</label><input type="number" id="c-min" min="0" max="50" style="width:6em"></div>
+        <div class="field"><label for="c-pesoHito">Un hito equivale a … tareas de clase</label><input type="number" id="c-pesoHito" min="1" max="10" style="width:6em"></div>
       </div>
       <div class="row" style="margin-top:10px">
         <div class="field"><label for="c-w0">Peso asistencia %</label><input type="number" id="c-w0" min="0" max="100" style="width:6em"></div>
@@ -227,17 +273,27 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       </div>
     </div>
     <div class="grid2">
-      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
-        <p class="note">Nombre y nivel educativo alcanzado (dato de contexto, no puntúa).</p>
-        <div class="cfg-list" id="c-est"></div>
-        <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
-        <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Módulos</h2>
+        <p class="note">Tramos del curso. Cada componente se asigna a un módulo o a «Todo el curso» (transversal).</p>
+        <div class="cfg-list" id="c-mod"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="c-mod-add" type="button">Agregar módulo</button></div>
       </div>
-      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Componentes</h2>
-        <p class="note">Asignatura o espacio, docente a cargo y horas semanales.</p>
-        <div class="cfg-list" id="c-comp"></div>
-        <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Recesos</h2>
+        <p class="note">Las semanas y quincenas que caen enteras en un receso no se cuentan.</p>
+        <div class="cfg-list" id="c-rec"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="c-rec-add" type="button">Agregar receso</button></div>
       </div>
+    </div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Componentes</h2>
+      <p class="note">Nombre, docente a cargo, horas semanales y módulo en que se dicta.</p>
+      <div class="cfg-list" id="c-comp"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
+    </div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
+      <p class="note">Nombre y nivel educativo alcanzado (dato de contexto, no puntúa).</p>
+      <div class="cfg-list" id="c-est"></div>
+      <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
+      <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
     </div>
     <div class="panel row" style="justify-content:space-between">
       <p class="status" id="c-status" style="margin:0"></p>
@@ -265,19 +321,36 @@ const DIMS=[
   a:"Comunica de forma incompleta o tardía, o con un registro poco adecuado al contexto.",
   r:"No avisa ni responde, o mantiene un trato irrespetuoso con compañeros, docentes o coordinación."},
  {k:"cu",n:"Cumplimiento de trabajos",
-  v:"Entrega o presenta en tiempo y forma, siguiendo la consigna.",
-  a:"Entrega fuera de plazo o incompleta; presentación oral con preparación insuficiente.",
-  r:"No entrega o no presenta lo solicitado.",
-  extra:{k:"na",n:"Hoy no había entrega"}}
+  v:"Realiza la tarea de la clase siguiendo la consigna.",
+  a:"La realiza a medias o necesita que se la recuerden varias veces.",
+  r:"No realiza la tarea de la clase.",
+  extra:{k:"na",n:"Hoy no había tarea"}}
 ];
+const HITO_LV={v:"Entregó o presentó en tiempo y forma, según la consigna.",
+  a:"Entregó fuera de plazo o incompleto; presentación con preparación insuficiente.",
+  r:"No entregó o no presentó.", x:"No corresponde (exonerado o ausencia justificada): no computa."};
+const TIPOS={trabajo:"Trabajo práctico",oral:"Presentación oral",prueba:"Prueba o ejercicio",otro:"Otro"};
 const LV={v:{t:"Logrado",p:100},a:{t:"En proceso",p:50},r:{t:"No logrado",p:0}};
-const DEFAULT_CFG={nombre:"Jóvenes 26 · CITEF",inicio:"",hora:"08:15",tol:10,cupos:12,cupos2:15,min:4,
-  pesos:[25,25,25,25],estudiantes:[],componentes:[]};
+// Hitos sugeridos a partir del programa de cada componente (se agregan con un toque y se les pone fecha)
+const SUGERIDOS={
+ informatica:[["Prueba de velocidad de digitación","prueba"],["Currículum en Word con formato","trabajo"],["Planilla Excel: boleta de venta o sueldos","trabajo"],["Presentación visual en PowerPoint o Canva","oral"],["Práctica en plataforma de certificación Microsoft","prueba"],["Correo electrónico con asunto, adjunto y CC","trabajo"]],
+ contabilidad:[["Facturación y registro de ventas","trabajo"],["Cálculo de IVA, descuentos y moras","prueba"],["Liquidación simple de sueldo","trabajo"],["Flujo de caja en planilla","trabajo"]],
+ administracion:[["FODA de una empresa del medio","trabajo"],["Plan de acción con diagrama de Gantt","trabajo"],["Organigrama de una organización","trabajo"]],
+ ventas:[["Simulación de venta con técnica AIDA","oral"],["Manejo de una queja o reclamo (simulación)","oral"],["Producto digital: tienda online o catálogo","trabajo"]],
+ marketing:[["Marketing mix (4P) de un producto","trabajo"],["Anuncio o campaña para redes sociales","trabajo"],["Video de venta o venta en vivo","oral"]],
+ lectoescritura:[["Currículum vitae revisado","trabajo"],["Carta de presentación y solicitud de empleo","trabajo"],["Correspondencia empresarial (correo o nota formal)","trabajo"],["Texto argumentativo breve","trabajo"]],
+ comunicacion:[["Presentación oral planificada","oral"],["Redacción comercial: correo o propuesta","trabajo"],["Simulación de atención al cliente con escucha activa","oral"]],
+ emprendimiento:[["Idea de negocio identificada y fundamentada","trabajo"],["Plan de negocio con FODA","trabajo"],["Pitch de emprendimiento","oral"]],
+ proyecto:[["Metas a corto, mediano y largo plazo","trabajo"],["Currículum entregado a una empresa","trabajo"],["Entrevista laboral simulada","oral"],["Visita a empresa del medio","otro"]],
+ acompanamiento:[["Entrevista individual de seguimiento","otro"]]
+};
+const DEFAULT_CFG={nombre:"Jóvenes 26 · CITEF",inicio:"",fin:"",hora:"08:15",tol:10,cupos:12,cupos2:15,min:4,pesoHito:2,
+  pesos:[25,25,25,25],modulos:[],recesos:[],estudiantes:[],componentes:[]};
 
-let cfg=structuredClone(DEFAULT_CFG), cfgLoaded=false;
-let clases={};        // id -> data
+let cfg=structuredClone(DEFAULT_CFG);
+let clases={}, hitos={};
 let db=null, user=null, myId=null, canAdmin=false;
-let openCard=null;
+let openCard=null, selHito=null, delAsk=false;
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -285,6 +358,7 @@ const uid=p=>p+Math.random().toString(36).slice(2,8);
 function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
 const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/864e5);
 const fromDay=n=>new Date(n*864e5).toISOString().slice(0,10);
+const wday=n=>new Date(n*864e5).getUTCDay(); // 0 domingo
 const fmt=s=>{const [y,m,d]=s.split("-");return d+"/"+m};
 const sp=(k,v)=>{try{localStorage.setItem("j26."+k,v)}catch(e){}};
 const gp=k=>{try{return localStorage.getItem("j26."+k)}catch(e){return null}};
@@ -297,37 +371,50 @@ function showTab(t){
 }
 $$("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
 
-// ---------- Períodos ----------
+// ---------- Calendario ----------
+function enReceso(fecha){const d=dayNum(fecha);return (cfg.recesos||[]).some(r=>r.desde&&r.hasta&&d>=dayNum(r.desde)&&d<=dayNum(r.hasta))}
+function rangoEnReceso(a,b){ // todos los días hábiles del rango caen en receso
+  for(let d=a;d<=b;d++){const w=wday(d); if(w===0||w===6) continue; if(!enReceso(fromDay(d))) return false;} return true;}
+function moduloActivo(comp,fecha){
+  if(!comp.modulo||comp.modulo==="t") return true;
+  const m=(cfg.modulos||[]).find(x=>x.id===comp.modulo); if(!m||!m.desde||!m.hasta) return true;
+  const d=dayNum(fecha); return d>=dayNum(m.desde)&&d<=dayNum(m.hasta);
+}
 function startDay(){
-  if(cfg.inicio) return dayNum(cfg.inicio);
-  const ds=Object.values(clases).map(c=>c.fecha).filter(Boolean).sort();
-  return dayNum(ds[0]||todayStr());
+  let s;
+  if(cfg.inicio) s=dayNum(cfg.inicio);
+  else {const ds=Object.values(clases).map(c=>c.fecha).filter(Boolean).sort(); s=dayNum(ds[0]||todayStr());}
+  return s-((wday(s)+6)%7); // lunes de esa semana
 }
 function periodOptions(tipo){
   if(tipo==="curso") return [{v:"all",t:"Todo el curso (acumulado)"}];
-  const len=tipo==="semana"?7:14, s=startDay(), last=Math.max(dayNum(todayStr()),...Object.values(clases).map(c=>dayNum(c.fecha)));
-  const out=[]; for(let i=0;s+i*len<=last;i++){const a=s+i*len,b=a+len-1;
-    out.push({v:a+":"+b,t:(tipo==="semana"?"Semana ":"Quincena ")+(i+1)+" · "+fmt(fromDay(a))+" al "+fmt(fromDay(b))});}
+  if(tipo==="modulo") return (cfg.modulos||[]).filter(m=>m.desde&&m.hasta).map(m=>({v:dayNum(m.desde)+":"+dayNum(m.hasta),t:m.nombre+" · "+fmt(m.desde)+" al "+fmt(m.hasta)})).reverse();
+  const len=tipo==="semana"?7:14, s=startDay();
+  let last=dayNum(todayStr()); if(cfg.fin) last=Math.min(last,dayNum(cfg.fin));
+  Object.values(clases).forEach(c=>{if(c.fecha) last=Math.max(last,dayNum(c.fecha))});
+  const out=[]; let k=0;
+  for(let i=0;s+i*len<=last;i++){const a=s+i*len,b=a+len-1; if(rangoEnReceso(a,b)) continue; k++;
+    out.push({v:a+":"+b,t:(tipo==="semana"?"Semana ":"Quincena ")+k+" · "+fmt(fromDay(a))+" al "+fmt(fromDay(b-2))});}
   return out.reverse();
 }
 function fillPeriodSelectors(){
   $$(".per-tipo").forEach(sel=>{
-    if(!sel.options.length){sel.innerHTML='<option value="quincena">Quincenal</option><option value="semana">Semanal</option><option value="curso">Todo el curso</option>';
+    if(!sel.options.length){sel.innerHTML='<option value="quincena">Quincenal</option><option value="semana">Semanal</option><option value="modulo">Por módulo</option><option value="curso">Todo el curso</option>';
       sel.value=gp(sel.id)||(sel.id==="k-tipo"?"curso":"quincena");
       sel.onchange=()=>{sp(sel.id,sel.value);fillPeriodSelectors();renderAll()};}
     const per=sel.closest(".row").querySelector(".per-sel"), prev=per.value;
     const opts=periodOptions(sel.value);
-    per.innerHTML=opts.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join("");
+    per.innerHTML=opts.length?opts.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join(""):'<option value="none">Sin períodos todavía</option>';
     if(opts.some(o=>o.v===prev)) per.value=prev;
     per.onchange=renderAll;
   });
 }
-function inPeriod(fecha,pv){ if(!pv||pv==="all") return true; const [a,b]=pv.split(":").map(Number), d=dayNum(fecha); return d>=a&&d<=b; }
+function inPeriod(fecha,pv){ if(!pv||pv==="all") return true; if(pv==="none") return false; const [a,b]=pv.split(":").map(Number), d=dayNum(fecha); return d>=a&&d<=b; }
 
 // ---------- Cálculo ----------
-function stats(pv,compId,studentFilter){
-  const res={};
-  cfg.estudiantes.forEach(e=>res[e.id]={id:e.id,dims:DIMS.map(()=>({v:0,a:0,r:0})),n:0,recs:[]});
+function stats(pv,compId){
+  const res={}, wh=+cfg.pesoHito||1;
+  cfg.estudiantes.forEach(e=>res[e.id]={id:e.id,dims:DIMS.map(()=>({v:0,a:0,r:0})),h:{v:0,a:0,r:0},n:0,recs:[],hrecs:[]});
   Object.values(clases).forEach(c=>{
     if(!c.fecha||!inPeriod(c.fecha,pv)) return;
     if(compId&&compId!=="all"&&c.comp!==compId) return;
@@ -337,18 +424,30 @@ function stats(pv,compId,studentFilter){
       if(any||e.j) {s.n++; s.recs.push({fecha:c.fecha,comp:c.comp,e});}
     }
   });
+  Object.entries(hitos).forEach(([hid,h])=>{
+    if(!h.fecha||!inPeriod(h.fecha,pv)) return;
+    if(compId&&compId!=="all"&&h.comp!==compId) return;
+    const ev=h.ev||{};
+    for(const sid in ev){const s=res[sid]; if(!s) continue; const l=ev[sid]&&ev[sid].l;
+      if(l==="v"||l==="a"||l==="r"){s.h[l]++;} if(l) s.hrecs.push({id:hid,h,e:ev[sid]});}
+  });
   const w=cfg.pesos.map(Number);
   Object.values(res).forEach(s=>{
-    s.pct=s.dims.map(d=>{const t=d.v+d.a+d.r;return t?Math.round((d.v*100+d.a*50)/t):null});
+    s.pct=s.dims.map((d,i)=>{
+      let num=d.v*100+d.a*50, den=d.v+d.a+d.r;
+      if(i===3){num+=wh*(s.h.v*100+s.h.a*50); den+=wh*(s.h.v+s.h.a+s.h.r);}
+      return den?Math.round(num/den):null});
     let sw=0,acc=0; s.pct.forEach((p,i)=>{if(p!==null){acc+=p*w[i];sw+=w[i]}});
     s.idx=sw?Math.round(acc/sw*10)/10:null;
-    s.rojos=s.dims.reduce((a,d)=>a+d.r,0); s.amar=s.dims.reduce((a,d)=>a+d.a,0);
-    const tot=s.dims.reduce((a,d)=>a+d.v+d.a+d.r,0);
+    s.rojos=s.dims.reduce((a,d)=>a+d.r,0)+s.h.r; s.amar=s.dims.reduce((a,d)=>a+d.a,0)+s.h.a;
+    const tot=s.dims.reduce((a,d)=>a+d.v+d.a+d.r,0)+s.h.v+s.h.a+s.h.r;
+    s.n+=s.h.v+s.h.a+s.h.r;
     s.alerta=s.pct.some(p=>p!==null&&p<50)||(tot>0&&s.rojos/tot>=0.15);
   });
   return res;
 }
-const band=p=>p===null?"":p>=80?"v":p>=50?"a":"r";
+const band=p=>p===null||p===undefined?"":p>=80?"v":p>=50?"a":"r";
+const bandVar=p=>({v:"verde",a:"amarillo",r:"rojo"}[band(p)]||"muted");
 function ranked(st){
   return Object.values(st).sort((x,y)=>{
     const ex=x.idx===null||x.n<cfg.min, ey=y.idx===null||y.n<cfg.min;
@@ -359,40 +458,68 @@ function ranked(st){
 const nameOf=id=>(cfg.estudiantes.find(e=>e.id===id)||{}).nombre||"(sin nombre)";
 const compOf=id=>(cfg.componentes.find(c=>c.id===id)||{}).nombre||"(componente eliminado)";
 
-// ---------- Registrar ----------
-const pending={}; const inflight={};
-function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
-function setEval(sid,patch){
-  if(!db){status("Sin conexión al registro compartido: el cambio no se guardó.");return}
-  const id=clsId(); if(!$("#r-comp").value){status("Elija un componente primero.");return}
-  const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
-  c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
-  (pending[id]=pending[id]||{})[sid]=Object.assign({},pending[id][sid],patch);
-  renderRegistrar(); status("Guardando…"); clearTimeout(pending[id]._t); pending[id]._t=setTimeout(()=>flush(id),500);
+// ---------- Escritura compartida (una escritura a la vez por documento) ----------
+const pending={}, inflight={}, creators={};
+function queueWrite(path,sid,patch,createFn,statusFn){
+  (pending[path]=pending[path]||{})[sid]=Object.assign({},pending[path][sid],patch);
+  creators[path]=createFn; statusFn("Guardando…");
+  clearTimeout(pending[path]._t); pending[path]._t=setTimeout(()=>flush(path,statusFn),500);
 }
-async function flush(id){
-  if(inflight[id]) return; const p=pending[id]; if(!p) return; delete pending[id]; clearTimeout(p._t); delete p._t;
-  inflight[id]=true; const ref=db.doc("clases/"+id); const c=clases[id];
+async function flush(path,statusFn){
+  if(inflight[path]) return; const p=pending[path]; if(!p) return; delete pending[path]; clearTimeout(p._t); delete p._t;
+  inflight[path]=true; const ref=db.doc(path);
   const body={ev:p,editadoEn:new Date().toISOString(),...(myId?{editadoPor:myId}:{})};
   try{
     try{ await ref.update(body); }
-    catch(e){ if(e&&e.code==="invalid_argument"){ await ref.set({fecha:c.fecha,comp:c.comp,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),...body,ev:c.ev}); } else throw e; }
-    status("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
-  }catch(e){ status("No se pudo guardar ("+(e&&e.code||"error")+"). "+(e&&e.code==="permission_denied"?"Su acceso es de solo lectura: pida a la coordinación permiso de colaborador.":"Vuelva a intentarlo."));
-    pending[id]=Object.assign(p,pending[id]||{}); }
-  finally{ inflight[id]=false; if(pending[id]&&!pending[id]._t) pending[id]._t=setTimeout(()=>flush(id),1500); }
+    catch(e){ if(e&&e.code==="invalid_argument"&&creators[path]){ await ref.set(Object.assign(creators[path](),body,{ev:creators[path]().ev})); } else throw e; }
+    statusFn("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
+  }catch(e){ statusFn("No se pudo guardar ("+(e&&e.code||"error")+"). "+(e&&e.code==="permission_denied"?"Su acceso es de solo lectura: pida a la coordinación permiso de colaborador.":"Se reintentará."));
+    pending[path]=Object.assign(p,pending[path]||{}); }
+  finally{ inflight[path]=false; if(pending[path]&&!pending[path]._t) pending[path]._t=setTimeout(()=>flush(path,statusFn),1500); }
 }
-function status(t){$("#r-status").textContent=t}
+function mergePending(coll,next,prev){
+  for(const path in pending){ if(!path.startsWith(coll+"/")) continue; const id=path.slice(coll.length+1);
+    if(!next[id]){ if(prev[id]) next[id]=prev[id]; continue; }
+    next[id].ev=next[id].ev||{};
+    for(const sid in pending[path]) if(sid!=="_t") next[id].ev[sid]=Object.assign({},next[id].ev[sid],pending[path][sid]);
+  }
+}
 
+// ---------- Registrar ----------
+function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
+function status(t){$("#r-status").textContent=t}
+function setEval(sid,patch){
+  if(!db){status("Sin conexión al registro compartido: el cambio no se guardó.");return}
+  if(!$("#r-comp").value){status("Elija un componente primero.");return}
+  const id=clsId();
+  const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
+  c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
+  const snapshot={fecha:c.fecha,comp:c.comp};
+  queueWrite("clases/"+id,sid,patch,()=>({...snapshot,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),ev:clases[id].ev}),status);
+  renderRegistrar();
+}
+function compSelect(sel,fecha,allowAll){
+  const cur=sel.value||gp(sel.id);
+  if(!cfg.componentes.length){sel.innerHTML='<option value="">Sin componentes: configúrelos primero</option>';return}
+  const act=cfg.componentes.filter(c=>!fecha||moduloActivo(c,fecha)), otros=cfg.componentes.filter(c=>fecha&&!moduloActivo(c,fecha));
+  const opt=c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`;
+  sel.innerHTML=(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join(""));
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else if(act[0]&&!allowAll) sel.value=act[0].id;
+}
 function renderRegistrar(){
-  const sel=$("#r-comp"), cur=sel.value||gp("comp");
-  sel.innerHTML=cfg.componentes.length?cfg.componentes.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`).join(""):'<option value="">Sin componentes: configúrelos primero</option>';
-  if(cfg.componentes.some(c=>c.id===cur)) sel.value=cur;
+  const fecha=$("#r-fecha").value; compSelect($("#r-comp"),fecha,false);
+  const w=fecha?wday(dayNum(fecha)):1, av=$("#r-aviso");
+  const comp=cfg.componentes.find(c=>c.id===$("#r-comp").value);
+  const msgs=[]; if(fecha&&(w===0||w===6)) msgs.push("La fecha elegida es fin de semana.");
+  if(fecha&&enReceso(fecha)) msgs.push("La fecha elegida cae en el receso.");
+  if(fecha&&comp&&!moduloActivo(comp,fecha)) msgs.push("Este componente no se dicta en esta fecha según su módulo.");
+  if(cfg.inicio&&fecha&&fecha<cfg.inicio) msgs.push("La fecha es anterior al inicio del curso.");
+  av.hidden=!msgs.length; av.textContent=msgs.join(" ");
   const list=$("#r-list");
-  if(!cfg.estudiantes.length){list.innerHTML=`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b> (se pueden pegar los 25 nombres de una vez). Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`;return}
+  if(!cfg.estudiantes.length){list.innerHTML=`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`;return}
   const c=clases[clsId()]||{}, ev=c.ev||{};
-  const meta=c.fecha?`Registro de esta clase: ${Object.keys(ev).length} de ${cfg.estudiantes.length} estudiantes con datos.`:"Clase sin registros todavía.";
-  if(!$("#r-status").textContent.startsWith("Guard")&&!$("#r-status").textContent.startsWith("No se")) status(meta);
+  const st=$("#r-status").textContent;
+  if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")) status(c.fecha?`Esta clase tiene datos de ${Object.keys(ev).length} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");
   list.innerHTML=cfg.estudiantes.map((s,i)=>{
     const e=ev[s.id]||{}, open=openCard===s.id;
     const sum=DIMS.map(d=>`<span class="dot ${e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"")}" title="${esc(d.n)}"></span>`).join("");
@@ -404,7 +531,7 @@ function renderRegistrar(){
           <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="${val===l}"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
           ${d.extra?`<label class="extra"><input type="checkbox" class="ex" data-x="${d.extra.k}" ${ex?"checked":""}> ${esc(d.extra.n)}</label>`:""}
           <div class="desc">${val?esc(d[val]):ex?"No se tiene en cuenta en el cálculo.":""}</div></div>`}).join("")}
-        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a Natalia que llegaba tarde">${esc(e.obs||"")}</textarea></div>
+        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde">${esc(e.obs||"")}</textarea></div>
       </div>`:""}
     </div>`}).join("");
 }
@@ -432,31 +559,90 @@ $("#r-todos").onclick=()=>{
   status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
 };
 $("#r-fecha").onchange=()=>{openCard=null;status("");renderRegistrar()};
-$("#r-comp").onchange=()=>{sp("comp",$("#r-comp").value);openCard=null;status("");renderRegistrar()};
+$("#r-comp").onchange=()=>{sp("r-comp",$("#r-comp").value);openCard=null;status("");renderRegistrar()};
+
+// ---------- Hitos ----------
+function hStatus(t){const el=$("#h-estatus"); if(el) el.textContent=t}
+function renderHitos(){
+  compSelect($("#h-comp"),todayStr(),false);
+  const comp=$("#h-comp").value, list=$("#h-list");
+  const hs=Object.entries(hitos).filter(([id,h])=>h.comp===comp).sort((a,b)=>(a[1].fecha||"").localeCompare(b[1].fecha||""));
+  if(selHito&&!hitos[selHito]) selHito=null;
+  if(selHito&&hitos[selHito].comp!==comp) selHito=null;
+  const total=cfg.estudiantes.length, hoy=todayStr();
+  list.innerHTML=hs.length?hs.map(([id,h])=>{const n=Object.values(h.ev||{}).filter(e=>e&&e.l).length, venc=h.fecha&&h.fecha<hoy&&n<total;
+    return `<button type="button" class="hito" data-id="${esc(id)}" aria-current="${selHito===id}"><span class="hn">${esc(h.nombre)}<br><span class="hm">${esc(TIPOS[h.tipo]||"")}</span></span><span class="hm num">${h.fecha?fmt(h.fecha):"sin fecha"}</span><span class="pill ${n>=total?"v":venc?"r":""}">${n}/${total}</span></button>`}).join("")
+    :'<p class="muted">Este componente todavía no tiene hitos. Cree uno abajo o elija uno sugerido.</p>';
+  const sug=(SUGERIDOS[comp]||[]).filter(([n])=>!hs.some(([,h])=>h.nombre===n));
+  $("#h-sug").innerHTML=sug.length?`<p class="note" style="margin:12px 0 6px">Sugeridos a partir del programa (toque para completar el formulario):</p><div class="chips">${sug.map(([n,t])=>`<button type="button" class="chip" data-n="${esc(n)}" data-t="${t}">${esc(n)}</button>`).join("")}</div>`:"";
+  renderHitoEval();
+}
+function renderHitoEval(){
+  const box=$("#h-eval");
+  if(!selHito){box.innerHTML='<div class="empty">Elija un hito de la lista para evaluar a cada estudiante.</div>';return}
+  const h=hitos[selHito], ev=h.ev||{};
+  box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
+    <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
+    <p class="status" id="h-estatus"></p>
+    <div>${cfg.estudiantes.map(s=>{const e=ev[s.id]||{};return `<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
+      ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="${e.l===l}" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
+      <button type="button" class="lvl" data-l="x" aria-pressed="${e.l==="x"}" title="${esc(HITO_LV.x)}">N/C</button>
+      ${e.l?`<input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" value="${esc(e.obs||"")}" placeholder="Observación (opcional)">`:""}</div>`}).join("")}</div>
+    <div class="confirm" style="margin-top:14px">${delAsk?`<span>¿Eliminar este hito y sus ${Object.keys(ev).length} evaluaciones?</span><button class="btn" id="h-del-si" type="button">Sí, eliminar</button><button class="btn" id="h-del-no" type="button">Cancelar</button>`:`<button class="btn" id="h-del" type="button">Eliminar hito</button>`}</div>`;
+}
+$("#h-comp").onchange=()=>{sp("h-comp",$("#h-comp").value);selHito=null;delAsk=false;renderHitos()};
+$("#h-list").addEventListener("click",e=>{const b=e.target.closest(".hito"); if(!b) return; selHito=b.dataset.id; delAsk=false; renderHitos();});
+$("#h-sug").addEventListener("click",e=>{const b=e.target.closest(".chip"); if(!b) return; $("#h-nombre").value=b.dataset.n; $("#h-tipo").value=b.dataset.t; $("#h-fecha").focus(); $("#h-cstatus").textContent="Ponga la fecha de entrega y toque «Crear hito».";});
+$("#h-crear").onclick=async()=>{
+  const nombre=$("#h-nombre").value.trim(), fecha=$("#h-fecha").value, comp=$("#h-comp").value;
+  if(!db) return; if(!comp){$("#h-cstatus").textContent="Elija un componente.";return}
+  if(!nombre||!fecha){$("#h-cstatus").textContent="El hito necesita nombre y fecha de entrega.";return}
+  const id=fecha+"_"+comp+"_"+uid("h");
+  const data={comp,nombre,tipo:$("#h-tipo").value,fecha,ev:{},creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{})};
+  $("#h-cstatus").textContent="Creando…";
+  try{await db.doc("hitos/"+id).set(data); hitos[id]=data; selHito=id; $("#h-nombre").value=""; $("#h-cstatus").textContent="Hito creado ✓"; renderHitos();}
+  catch(e){$("#h-cstatus").textContent="No se pudo crear ("+(e.code||"error")+").";}
+};
+$("#h-eval").addEventListener("click",async e=>{
+  if(e.target.id==="h-del"){delAsk=true;renderHitoEval();return}
+  if(e.target.id==="h-del-no"){delAsk=false;renderHitoEval();return}
+  if(e.target.id==="h-del-si"){const id=selHito; try{await db.doc("hitos/"+id).delete(); delete hitos[id]; selHito=null; delAsk=false; renderHitos();}catch(err){hStatus("No se pudo eliminar ("+(err.code||"error")+").")} return}
+  const b=e.target.closest(".lvl"); if(!b||!selHito) return; const sid=b.closest(".hrow").dataset.sid;
+  const h=hitos[selHito]; h.ev=h.ev||{}; const cur=(h.ev[sid]||{}).l; const patch={l:cur===b.dataset.l?null:b.dataset.l};
+  h.ev[sid]=Object.assign({},h.ev[sid],patch);
+  queueWrite("hitos/"+selHito,sid,patch,null,hStatus); renderHitos();
+});
+$("#h-eval").addEventListener("change",e=>{
+  if(!e.target.classList.contains("obs-in")||!selHito) return; const sid=e.target.closest(".hrow").dataset.sid;
+  const h=hitos[selHito]; const patch={obs:e.target.value.trim()}; h.ev[sid]=Object.assign({},h.ev[sid],patch);
+  queueWrite("hitos/"+selHito,sid,patch,null,hStatus);
+});
 
 // ---------- Semáforo ----------
-function compOptions(sel){const cur=sel.value; sel.innerHTML='<option value="all">Todos</option>'+cfg.componentes.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join(""); if([...sel.options].some(o=>o.value===cur)) sel.value=cur;}
 function renderSemaforo(){
-  compOptions($("#s-comp")); const pv=$("#s-per").value, comp=$("#s-comp").value;
+  compSelect($("#s-comp"),null,true); const pv=$("#s-per").value, comp=$("#s-comp").value;
   const st=stats(pv,comp), order=ranked(st);
   if(!cfg.estudiantes.length){$("#s-table").innerHTML='<tr><td class="empty">Sin estudiantes cargados.</td></tr>';$("#s-cov").textContent="";return}
   $("#s-table").innerHTML=`<thead><tr><th>Estudiante</th>${DIMS.map(d=>`<th>${esc(d.n)}</th>`).join("")}<th>Índice</th><th>Registros</th><th>Seguimiento</th></tr></thead><tbody>${
-    order.map(s=>`<tr><td><b>${esc(nameOf(s.id))}</b></td>${s.pct.map((p,i)=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}<small>${s.dims[i].v}/${s.dims[i].a}/${s.dims[i].r}</small></td>`).join("")}
+    order.map(s=>`<tr><td><b>${esc(nameOf(s.id))}</b></td>${s.pct.map((p,i)=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}<small>${s.dims[i].v}/${s.dims[i].a}/${s.dims[i].r}${i===3&&(s.h.v+s.h.a+s.h.r)?` · H ${s.h.v}/${s.h.a}/${s.h.r}`:""}</small></td>`).join("")}
       <td class="cell ${band(s.idx)}"><b>${s.idx===null?"—":s.idx}</b></td><td class="num">${s.n}</td>
       <td>${s.alerta?'<span class="pill r">Entrevista</span>':s.amar>=3?'<span class="pill a">Conversar</span>':s.n?'<span class="pill v">En curso</span>':'<span class="pill">Sin datos</span>'}</td></tr>`).join("")}</tbody>`;
-  // cobertura: qué componentes registraron en el período
-  const cov=cfg.componentes.map(c=>{const n=Object.values(clases).filter(x=>x.comp===c.id&&inPeriod(x.fecha,pv)).length;return `${c.nombre}: ${n} clase${n===1?"":"s"}`});
-  $("#s-cov").textContent=cov.length?"Clases registradas en el período · "+cov.join(" · "):"";
+  const hoy=todayStr();
+  const cov=cfg.componentes.filter(c=>comp==="all"||c.id===comp).map(c=>{
+    const n=Object.values(clases).filter(x=>x.comp===c.id&&inPeriod(x.fecha,pv)).length;
+    const hv=Object.values(hitos).filter(h=>h.comp===c.id&&inPeriod(h.fecha,pv)), pend=hv.filter(h=>h.fecha<hoy&&Object.values(h.ev||{}).filter(e=>e&&e.l).length<cfg.estudiantes.length).length;
+    return `${c.nombre}: ${n} clase${n===1?"":"s"}${hv.length?`, ${hv.length} hito${hv.length===1?"":"s"}${pend?` (${pend} sin completar)`:""}`:""}`});
+  $("#s-cov").textContent=cov.length?"Registros del período · "+cov.join(" · "):"";
 }
 
 // ---------- Ranking ----------
 function renderRanking(){
   const pv=$("#k-per").value, st=stats(pv), order=ranked(st), w=cfg.pesos;
-  $("#k-formula").textContent=`Índice de empleabilidad = asistencia ${w[0]}% + actitud ${w[1]}% + comunicación ${w[2]}% + cumplimiento ${w[3]}%. Desempate: menos rojos, luego mejor asistencia. Quedan al final quienes tienen menos de ${cfg.min} registros en el período.`;
-  if(!order.length){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya estudiantes y registros de clase.</div>';return}
+  $("#k-formula").textContent=`Índice de empleabilidad = asistencia ${w[0]}% + actitud ${w[1]}% + comunicación ${w[2]}% + cumplimiento ${w[3]}% (cada hito vale como ${cfg.pesoHito} tareas de clase). Desempate: menos rojos, luego mejor asistencia. Quedan al final quienes tienen menos de ${cfg.min} registros en el período.`;
+  if(!order.length||order.every(s=>!s.n)){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya registros de clase o hitos evaluados en el período.</div>';return}
   let html=""; order.forEach((s,i)=>{
     const pos=i+1, few=s.idx===null||s.n<cfg.min;
-    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r">!</span>':""}</span>
+    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r" title="Requiere entrevista">!</span>':""}</span>
       <span class="bar"><i style="width:${s.idx||0}%;background:var(--${few?"gris-dot":band(s.idx)==="v"?"verde":band(s.idx)==="a"?"amarillo-dot":"rojo"})"></i></span><span class="val">${s.idx===null?"—":s.idx.toFixed(1)}</span></div>`;
     if(pos===+cfg.cupos) html+=`<div class="cut">Línea de pasantías · ${cfg.cupos} cupos</div>`;
     if(pos===+cfg.cupos2&&+cfg.cupos2>+cfg.cupos) html+=`<div class="cut amp">Cupos ampliados · ${cfg.cupos2}</div>`;
@@ -471,16 +657,18 @@ function renderFicha(){
   if(cfg.estudiantes.some(e=>e.id===cur)) sel.value=cur;
   const sid=sel.value, body=$("#f-body"); if(!sid){body.innerHTML='<div class="panel empty">Sin estudiantes cargados.</div>';return}
   const pv=$("#f-per").value, st=stats(pv), s=st[sid], pos=ranked(stats("all")).findIndex(x=>x.id===sid)+1, est=cfg.estudiantes.find(e=>e.id===sid);
-  const byComp=cfg.componentes.map(c=>{const x=stats(pv,c.id)[sid];return {c,x}}).filter(o=>o.x.n);
+  const byComp=cfg.componentes.map(c=>({c,x:stats(pv,c.id)[sid]})).filter(o=>o.x.n);
   const recs=s.recs.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const hrecs=s.hrecs.sort((a,b)=>(b.h.fecha||"").localeCompare(a.h.fecha||""));
   body.innerHTML=`<div class="panel"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div>
     <div class="kpis" style="margin-top:12px">
       <div class="kpi"><b>${s.idx===null?"—":s.idx}</b><span>Índice del período</span></div>
       <div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>
-      ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${band(s.pct[i])==="v"?"verde":band(s.pct[i])==="a"?"amarillo":band(s.pct[i])==="r"?"rojo":"muted"})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
+      ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${bandVar(s.pct[i])})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
     </div></div>
     <div class="grid2">
-      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}</div>
+      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}
+        <h3 style="margin:16px 0 8px">Hitos</h3><div class="timeline">${hrecs.length?hrecs.map(r=>`<div class="tl"><span class="num">${r.h.fecha?fmt(r.h.fecha):""}</span><span style="min-width:0">${esc(r.h.nombre)} <span class="muted">· ${esc(compOf(r.h.comp))}</span></span><span>${r.e.l==="x"?'<span class="pill">N/C</span>':`<span class="dot ${r.e.l}"></span>`}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin hitos evaluados en el período.</p>'}</div></div>
       <div class="panel"><h3 style="margin-bottom:8px">Registro clase a clase</h3><div class="timeline">${recs.length?recs.map(r=>`<div class="tl"><span class="num">${fmt(r.fecha)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(compOf(r.comp))}</span><span style="display:flex;gap:4px">${DIMS.map(d=>`<span class="dot ${r.e[d.k]||(d.k==="as"&&r.e.j?"x":"")}" title="${esc(d.n)}"></span>`).join("")}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin registros en el período.</p>'}</div></div>
     </div>`;
 }
@@ -490,38 +678,47 @@ $("#s-comp").onchange=renderSemaforo;
 // ---------- Criterios ----------
 function renderCriterios(){
   $("#rubric").innerHTML=DIMS.map(d=>`<div><h3>${esc(d.n)}</h3>${["v","a","r"].map(l=>`<p><span class="dot ${l}"></span><span><b>${LV[l].t}.</b> ${esc(d[l])}</span></p>`).join("")}${d.extra?`<p class="muted"><span class="dot x"></span><span>${esc(d.extra.n)}.</span></p>`:""}</div>`).join("")+
+  `<div><h3>Hitos de cumplimiento</h3>${["v","a","r"].map(l=>`<p><span class="dot ${l}"></span><span><b>${LV[l].t}.</b> ${esc(HITO_LV[l])}</span></p>`).join("")}<p class="muted"><span class="dot x"></span><span>${esc(HITO_LV.x)}</span></p><p>Cada hito vale como ${cfg.pesoHito} tareas de clase dentro de Cumplimiento.</p></div>`+
   `<div><h3>Cómo se calcula</h3><p>Verde vale 100, amarillo 50 y rojo 0. Se promedia cada aspecto en el período y se ponderan los cuatro con los pesos de Configuración. Si el estudiante está ausente (rojo en asistencia), los otros tres aspectos de esa clase no se califican, para no castigar dos veces la misma falta.</p><p><b>Entrevista</b> se activa cuando un aspecto queda por debajo del 50 % o cuando los rojos son al menos el 15 % de las calificaciones del período.</p><p>Horario de referencia: entrada ${esc(cfg.hora)} con ${cfg.tol} min de tolerancia; salida 12:30.</p></div>`;
 }
 
 // ---------- Configuración ----------
 let draft=null;
+const modName=id=>id==="t"||!id?"Todo el curso":((cfg.modulos||[]).find(m=>m.id===id)||{}).nombre||"—";
 function renderConfig(){
   $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin;
   if(!draft) draft=structuredClone(cfg);
-  $("#c-nombre").value=draft.nombre; $("#c-inicio").value=draft.inicio; $("#c-hora").value=draft.hora; $("#c-tol").value=draft.tol;
-  $("#c-cupos").value=draft.cupos; $("#c-cupos2").value=draft.cupos2; $("#c-min").value=draft.min;
+  ["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).value=draft[k]??"");
   draft.pesos.forEach((p,i)=>$("#c-w"+i).value=p);
+  $("#c-mod").innerHTML=draft.modulos.length?draft.modulos.map((m,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cm-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" aria-label="Nombre del módulo"><input type="date" id="cm-d-${esc(m.id)}" data-f="desde" value="${esc(m.desde)}" aria-label="Desde"><input type="date" id="cm-h-${esc(m.id)}" data-f="hasta" value="${esc(m.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin módulos.</p>';
+  $("#c-rec").innerHTML=draft.recesos.length?draft.recesos.map((r,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cr-n-${i}" data-f="nombre" value="${esc(r.nombre||"")}" placeholder="Receso" aria-label="Nombre del receso"><input type="date" id="cr-d-${i}" data-f="desde" value="${esc(r.desde)}" aria-label="Desde"><input type="date" id="cr-h-${i}" data-f="hasta" value="${esc(r.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin recesos.</p>';
+  const modOpts=v=>`<option value="t"${!v||v==="t"?" selected":""}>Todo el curso</option>`+draft.modulos.map(m=>`<option value="${esc(m.id)}"${v===m.id?" selected":""}>${esc(m.nombre)}</option>`).join("");
+  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
   $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
-  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
 }
 function bindList(sel,key){
-  $(sel).addEventListener("input",e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value;});
+  const h=e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value;};
+  $(sel).addEventListener("input",h); $(sel).addEventListener("change",h);
   $(sel).addEventListener("click",e=>{if(!e.target.closest("[data-del]")) return; const i=+e.target.closest(".cfg-item").dataset.i; draft[key].splice(i,1); renderConfig(); $("#c-status").textContent="Quitado de la lista (los registros previos se conservan). Guarde para confirmar.";});
 }
-bindList("#c-est","estudiantes"); bindList("#c-comp","componentes");
-["nombre","inicio","hora","tol","cupos","cupos2","min"].forEach(k=>$("#c-"+k).addEventListener("input",e=>{draft[k]=e.target.type==="number"?+e.target.value:e.target.value}));
+bindList("#c-est","estudiantes"); bindList("#c-comp","componentes"); bindList("#c-mod","modulos"); bindList("#c-rec","recesos");
+["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).addEventListener("input",e=>{draft[k]=e.target.type==="number"?+e.target.value:e.target.value}));
 [0,1,2,3].forEach(i=>$("#c-w"+i).addEventListener("input",e=>{draft.pesos[i]=+e.target.value}));
 $("#c-bulk-add").onclick=()=>{
   const lines=$("#c-bulk").value.split(/\n/).map(l=>l.trim()).filter(Boolean);
   lines.forEach(l=>{const [n,nv]=l.split(/\s*[;\t]\s*/); if(n) draft.estudiantes.push({id:uid("e"),nombre:n,nivel:nv||""})});
   $("#c-bulk").value=""; renderConfig(); $("#c-status").textContent=lines.length+" agregados. Guarde para confirmar.";
 };
-$("#c-comp-add").onclick=()=>{draft.componentes.push({id:uid("c"),nombre:"",docente:"",horas:""});renderConfig();};
+$("#c-comp-add").onclick=()=>{draft.componentes.push({id:uid("c"),nombre:"",docente:"",horas:"",modulo:"t"});renderConfig();};
+$("#c-mod-add").onclick=()=>{draft.modulos.push({id:uid("m"),nombre:"Módulo "+(draft.modulos.length+1),desde:"",hasta:""});renderConfig();};
+$("#c-rec-add").onclick=()=>{draft.recesos.push({nombre:"",desde:"",hasta:""});renderConfig();};
 $("#c-save").onclick=async()=>{
   if(!db||!canAdmin) return;
   const sum=draft.pesos.reduce((a,b)=>a+(+b||0),0);
   if(sum!==100){$("#c-status").textContent=`Los pesos suman ${sum} %. Ajústelos para que sumen 100.`;return}
   if(+draft.cupos2<+draft.cupos){$("#c-status").textContent="Los cupos ampliados no pueden ser menos que los cupos.";return}
+  const bad=[...draft.modulos,...draft.recesos].find(r=>r.desde&&r.hasta&&r.hasta<r.desde);
+  if(bad){$("#c-status").textContent=`En «${bad.nombre||"un receso"}» la fecha final es anterior a la inicial.`;return}
   draft.estudiantes=draft.estudiantes.filter(e=>e.nombre.trim()); draft.componentes=draft.componentes.filter(c=>c.nombre.trim());
   $("#c-status").textContent="Guardando…";
   try{await db.doc("config/curso").set(draft); $("#c-status").textContent="Configuración guardada ✓"; }
@@ -530,24 +727,24 @@ $("#c-save").onclick=async()=>{
 
 // ---------- CSV ----------
 async function downloadCsv(kind){
-  const tipo=kind==="ranking"?"#k-per":"#s-per", pv=$(tipo).value, st=stats(pv,kind==="semaforo"?$("#s-comp").value:"all"), order=ranked(st);
+  const pv=$(kind==="ranking"?"#k-per":"#s-per").value, st=stats(pv,kind==="semaforo"?$("#s-comp").value:"all"), order=ranked(st);
   const rows=[["Puesto","Estudiante","Nivel",...DIMS.map(d=>d.n+" %"),"Índice","Registros","Rojos","Seguimiento"]];
   order.forEach((s,i)=>{const e=cfg.estudiantes.find(x=>x.id===s.id)||{};rows.push([i+1,e.nombre,e.nivel||"",...s.pct.map(p=>p??""),s.idx??"",s.n,s.rojos,s.alerta?"Entrevista":""])});
   const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");
   const dl=window.claude&&await claude.use("downloads");
-  if(!dl){alertMsg(kind,"La descarga no está disponible en esta vista.");return}
-  try{await dl.save({filename:`jovenes26-${kind}-${todayStr()}.csv`,data:csv})}catch(e){alertMsg(kind,"Descarga cancelada.")}
+  const msg=t=>(kind==="ranking"?$("#k-formula"):$("#s-cov")).textContent=t;
+  if(!dl){msg("La descarga no está disponible en esta vista.");return}
+  try{await dl.save({filename:`jovenes26-${kind}-${todayStr()}.csv`,data:csv})}catch(e){msg("Descarga cancelada.")}
 }
-function alertMsg(kind,t){(kind==="ranking"?$("#k-formula"):$("#s-cov")).textContent=t}
 $("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>downloadCsv("semaforo");
 
 // ---------- Render ----------
 function renderAll(){
   fillPeriodSelectors();
   const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
-  if(t==="registrar") renderRegistrar(); else if(t==="semaforo") renderSemaforo(); else if(t==="ranking") renderRanking();
-  else if(t==="ficha") renderFicha(); else if(t==="criterios") renderCriterios(); else if(t==="config") renderConfig();
+  ({registrar:renderRegistrar,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig}[t]||(()=>{}))();
 }
+function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, input.obs-in, #c-bulk, .cfg-item input, #h-nombre")}
 
 // ---------- Arranque ----------
 $("#r-fecha").value=todayStr();
@@ -560,21 +757,14 @@ const saved=gp("tab"); showTab(saved&&$(`[data-tab="${saved}"]`)?saved:"registra
     try{const me=await user.me(); $("#who").textContent=(me.name||"")+(canAdmin?" · coordinación":"");}catch(e){} }
   if(!db){$("#conn").textContent="No se pudo abrir el registro compartido. Inicie sesión en claude.ai y vuelva a abrir el enlace.";$("#conn").classList.add("warn");return}
   $("#conn").hidden=true;
-  db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{});cfgLoaded=true;draft=null;
-      renderAll()},
-    e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer la configuración ("+e.code+")."});
+  const err=e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer el registro compartido ("+e.code+")."};
+  db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{}); if(!typing()){draft=null;renderAll();}},err);
   db.collection("clases").orderBy("fecha","desc").limit(1000).onSnapshot(s=>{
-      const next={}; s.docs.forEach(doc=>next[doc.id]=doc.data());
-      // conservar cambios locales aún no confirmados
-      for(const id in pending){
-        if(!next[id]){ next[id]=clases[id]; continue; }
-        next[id].ev=next[id].ev||{};
-        for(const sid in pending[id]) if(sid!=="_t") next[id].ev[sid]=Object.assign({},next[id].ev[sid],pending[id][sid]);
-      }
-      clases=next;
-      const ae=document.activeElement; if(ae&&ae.classList&&ae.classList.contains("obs")) return; // no interrumpir la escritura
-      renderAll()},
-    e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer los registros ("+e.code+")."});
+      const next={}; s.docs.forEach(doc=>next[doc.id]=doc.data()); mergePending("clases",next,clases); clases=next;
+      if(!typing()) renderAll()},err);
+  db.collection("hitos").orderBy("fecha","desc").limit(1000).onSnapshot(s=>{
+      const next={}; s.docs.forEach(doc=>next[doc.id]=doc.data()); mergePending("hitos",next,hitos); hitos=next;
+      if(!typing()) renderAll()},err);
 })();
 })();
 </script>
