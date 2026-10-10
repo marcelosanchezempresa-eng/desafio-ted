@@ -458,32 +458,50 @@ function ranked(st){
 const nameOf=id=>(cfg.estudiantes.find(e=>e.id===id)||{}).nombre||"(sin nombre)";
 const compOf=id=>(cfg.componentes.find(c=>c.id===id)||{}).nombre||"(componente eliminado)";
 
-// ---------- Escritura compartida (una escritura a la vez por documento) ----------
-const pending={}, inflight={}, creators={};
-function queueWrite(path,sid,patch,createFn,statusFn){
-  (pending[path]=pending[path]||{})[sid]=Object.assign({},pending[path][sid],patch);
-  creators[path]=createFn; statusFn("Guardando…");
-  clearTimeout(pending[path]._t); pending[path]._t=setTimeout(()=>flush(path,statusFn),500);
+// ---------- Escritura compartida ----------
+// overlay: lo que este docente marcó y la base todavía no confirmó; se aplica sobre cada aviso de la base
+// para que la pantalla nunca "vuelva atrás". queue: lo que falta enviar. Una escritura a la vez por documento.
+const overlay={}, queue={}, busy={}, timers={}, makers={}, sayers={};
+const blank=v=>v===undefined||v===null||v==="";
+function queueWrite(path,sid,patch,makeDoc,statusFn){
+  const o=((overlay[path]=overlay[path]||{})[sid]=overlay[path][sid]||{});
+  const q=((queue[path]=queue[path]||{})[sid]=queue[path][sid]||{});
+  for(const f in patch){o[f]=patch[f]; q[f]=patch[f];}
+  makers[path]=makeDoc; sayers[path]=statusFn; statusFn("Guardando…");
+  clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),350);
 }
-async function flush(path,statusFn){
-  if(inflight[path]) return; const p=pending[path]; if(!p) return; delete pending[path]; clearTimeout(p._t); delete p._t;
-  inflight[path]=true; const ref=db.doc(path);
-  const body={ev:p,editadoEn:new Date().toISOString(),...(myId?{editadoPor:myId}:{})};
+async function flush(path){
+  const say=sayers[path]||(()=>{});
+  if(busy[path]){clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),300); return}
+  const body=queue[path]; if(!body) return; delete queue[path];
+  busy[path]=true; const ref=db.doc(path);
+  const data={ev:body,editadoEn:new Date().toISOString(),...(myId?{editadoPor:myId}:{})};
   try{
-    try{ await ref.update(body); }
-    catch(e){ if(e&&e.code==="invalid_argument"&&creators[path]){ await ref.set(Object.assign(creators[path](),body,{ev:creators[path]().ev})); } else throw e; }
-    statusFn("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
-  }catch(e){ statusFn("No se pudo guardar ("+(e&&e.code||"error")+"). "+(e&&e.code==="permission_denied"?"Su acceso es de solo lectura: pida a la coordinación permiso de colaborador.":"Se reintentará."));
-    pending[path]=Object.assign(p,pending[path]||{}); }
-  finally{ inflight[path]=false; if(pending[path]&&!pending[path]._t) pending[path]._t=setTimeout(()=>flush(path,statusFn),1500); }
+    try{ await ref.update(data); }
+    catch(e){ if(e&&e.code==="invalid_argument"&&makers[path]){ await ref.set(makers[path]()); } else throw e; }
+    say("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
+    // pasado un momento, la base ya refleja lo escrito: se retira del overlay lo que no cambió desde entonces
+    setTimeout(()=>{const o=overlay[path]; if(!o) return;
+      for(const sid in body){ for(const f in body[sid]) if(o[sid]&&o[sid][f]===body[sid][f]) delete o[sid][f];
+        if(o[sid]&&!Object.keys(o[sid]).length) delete o[sid]; }
+      if(!Object.keys(o).length) delete overlay[path];},4000);
+  }catch(e){
+    say("No se pudo guardar ("+(e&&e.code||"error")+"). "+(e&&e.code==="permission_denied"?"Su acceso es de solo lectura: pida a la coordinación permiso de colaborador.":"Se reintentará en unos segundos."));
+    const q=queue[path]=queue[path]||{};   // devolver a la cola sin pisar cambios más nuevos
+    for(const sid in body){q[sid]=Object.assign({},body[sid],q[sid]);}
+    clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),3000);
+  }finally{ busy[path]=false; }
 }
 function mergePending(coll,next,prev){
-  for(const path in pending){ if(!path.startsWith(coll+"/")) continue; const id=path.slice(coll.length+1);
-    if(!next[id]){ if(prev[id]) next[id]=prev[id]; continue; }
+  for(const path in overlay){ if(!path.startsWith(coll+"/")) continue; const id=path.slice(coll.length+1);
+    if(!next[id]) next[id]=prev[id]?structuredClone(prev[id]):null;
+    if(!next[id]) continue;
     next[id].ev=next[id].ev||{};
-    for(const sid in pending[path]) if(sid!=="_t") next[id].ev[sid]=Object.assign({},next[id].ev[sid],pending[path][sid]);
+    for(const sid in overlay[path]) next[id].ev[sid]=Object.assign({},next[id].ev[sid],overlay[path][sid]);
   }
 }
+// Cambia el contenido solo si de verdad cambió: así un aviso de la base no reemplaza botones que se están tocando
+function setHTML(el,html){ if(el._html!==html){ el.innerHTML=html; el._html=html; } }
 
 // ---------- Registrar ----------
 function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
@@ -494,18 +512,19 @@ function setEval(sid,patch){
   const id=clsId();
   const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
   c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
-  const snapshot={fecha:c.fecha,comp:c.comp};
-  queueWrite("clases/"+id,sid,patch,()=>({...snapshot,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),ev:clases[id].ev}),status);
-  renderRegistrar();
+  const base={fecha:c.fecha,comp:c.comp};
+  queueWrite("clases/"+id,sid,patch,()=>({...base,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),ev:structuredClone(clases[id].ev)}),status);
+  paintRegistrar();
 }
 function compSelect(sel,fecha,allowAll){
   const cur=sel.value||gp(sel.id);
-  if(!cfg.componentes.length){sel.innerHTML='<option value="">Sin componentes: configúrelos primero</option>';return}
+  if(!cfg.componentes.length){setHTML(sel,'<option value="">Sin componentes: configúrelos primero</option>');return}
   const act=cfg.componentes.filter(c=>!fecha||moduloActivo(c,fecha)), otros=cfg.componentes.filter(c=>fecha&&!moduloActivo(c,fecha));
   const opt=c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`;
-  sel.innerHTML=(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join(""));
+  setHTML(sel,(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join("")));
   if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else if(act[0]&&!allowAll) sel.value=act[0].id;
 }
+const dotCls=(e,d)=>e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"");
 function renderRegistrar(){
   const fecha=$("#r-fecha").value; compSelect($("#r-comp"),fecha,false);
   const w=fecha?wday(dayNum(fecha)):1, av=$("#r-aviso");
@@ -516,46 +535,59 @@ function renderRegistrar(){
   if(cfg.inicio&&fecha&&fecha<cfg.inicio) msgs.push("La fecha es anterior al inicio del curso.");
   av.hidden=!msgs.length; av.textContent=msgs.join(" ");
   const list=$("#r-list");
-  if(!cfg.estudiantes.length){list.innerHTML=`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`;return}
-  const c=clases[clsId()]||{}, ev=c.ev||{};
-  const st=$("#r-status").textContent;
-  if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")) status(c.fecha?`Esta clase tiene datos de ${Object.keys(ev).length} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");
-  list.innerHTML=cfg.estudiantes.map((s,i)=>{
-    const e=ev[s.id]||{}, open=openCard===s.id;
-    const sum=DIMS.map(d=>`<span class="dot ${e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"")}" title="${esc(d.n)}"></span>`).join("");
+  if(!cfg.estudiantes.length){setHTML(list,`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`);return}
+  // La estructura (tarjetas y botones) solo se arma cuando cambia la clase, la lista o la tarjeta abierta.
+  setHTML(list,cfg.estudiantes.map((s,i)=>{
+    const open=openCard===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
-      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${sum}</span><span class="chev" aria-hidden="true">▾</span></button>
-      ${open?`<div class="stu-body">${DIMS.map(d=>{
-        const val=e[d.k], ex=d.extra&&e[d.extra.k];
-        return `<div class="dim" data-k="${d.k}"><div class="dim-title">${esc(d.n)}</div>
-          <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="${val===l}"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
-          ${d.extra?`<label class="extra"><input type="checkbox" class="ex" data-x="${d.extra.k}" ${ex?"checked":""}> ${esc(d.extra.n)}</label>`:""}
-          <div class="desc">${val?esc(d[val]):ex?"No se tiene en cuenta en el cálculo.":""}</div></div>`}).join("")}
-        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde">${esc(e.obs||"")}</textarea></div>
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${DIMS.map(d=>`<span class="dot" data-k="${d.k}" title="${esc(d.n)}"></span>`).join("")}</span><span class="chev" aria-hidden="true">▾</span></button>
+      ${open?`<div class="stu-body">${DIMS.map(d=>`<div class="dim" data-k="${d.k}"><div class="dim-title">${esc(d.n)}</div>
+          <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
+          ${d.extra?`<label class="extra"><input type="checkbox" class="ex" id="ex-${d.extra.k}-${esc(s.id)}" data-x="${d.extra.k}"> ${esc(d.extra.n)}</label>`:""}
+          <div class="desc"></div></div>`).join("")}
+        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde"></textarea></div>
       </div>`:""}
-    </div>`}).join("");
+    </div>`}).join(""));
+  paintRegistrar();
+}
+// Pinta el estado (colores, botones apretados, textos) sobre la estructura existente, sin reemplazarla.
+function paintRegistrar(){
+  const c=clases[clsId()]||{}, ev=c.ev||{};
+  $$("#r-list .stu").forEach(card=>{
+    const e=ev[card.dataset.sid]||{};
+    card.querySelectorAll(".sum .dot").forEach(dt=>{const d=DIMS.find(x=>x.k===dt.dataset.k); dt.className="dot "+dotCls(e,d);});
+    card.querySelectorAll(".dim").forEach(dim=>{const d=DIMS.find(x=>x.k===dim.dataset.k), val=e[d.k], ex=d.extra&&e[d.extra.k];
+      dim.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(val===b.dataset.l)));
+      const cb=dim.querySelector(".ex"); if(cb) cb.checked=!!ex;
+      dim.querySelector(".desc").textContent=!blank(val)?d[val]:ex?"No se tiene en cuenta en el cálculo.":"";});
+    const ta=card.querySelector(".obs"); if(ta&&document.activeElement!==ta) ta.value=e.obs||"";
+  });
+  const st=$("#r-status").textContent;
+  if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")){
+    const n=Object.values(ev).filter(e=>DIMS.some(d=>!blank(e[d.k]))||e.j).length;
+    status(c.fecha?`Esta clase tiene datos de ${n} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
 }
 $("#r-list").addEventListener("click",ev=>{
   const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
   if(ev.target.closest(".stu-head")){openCard=openCard===sid?null:sid;renderRegistrar();return}
   const b=ev.target.closest(".lvl"); if(b){const k=b.closest(".dim").dataset.k, cur=((clases[clsId()]||{}).ev||{})[sid]||{};
-    const patch={[k]:cur[k]===b.dataset.l?null:b.dataset.l};
+    const patch={[k]:cur[k]===b.dataset.l?"":b.dataset.l};
     if(k==="as"&&patch.as) patch.j=false;
     if(k==="cu"&&patch.cu) patch.na=false;
-    if(k==="as"&&patch.as==="r"){patch.ac=null;patch.co=null;patch.cu=null}
+    if(k==="as"&&patch.as==="r"){patch.ac="";patch.co="";patch.cu=""}
     setEval(sid,patch);}
 });
 $("#r-list").addEventListener("change",ev=>{
   const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
   if(ev.target.classList.contains("ex")){const x=ev.target.dataset.x, patch={[x]:ev.target.checked};
-    if(ev.target.checked) {if(x==="j"){patch.as=null;patch.ac=null;patch.co=null;patch.cu=null} else patch.cu=null}
+    if(ev.target.checked) {if(x==="j"){patch.as="";patch.ac="";patch.co="";patch.cu=""} else patch.cu=""}
     setEval(sid,patch);}
   if(ev.target.classList.contains("obs")) setEval(sid,{obs:ev.target.value.trim()});
 });
 $("#r-todos").onclick=()=>{
   if(!cfg.estudiantes.length||!$("#r-comp").value) return;
   const ev=((clases[clsId()]||{}).ev)||{};
-  cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(!e.as&&!e.j) setEval(s.id,{as:"v"})});
+  cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(blank(e.as)&&!e.j) setEval(s.id,{as:"v"})});
   status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
 };
 $("#r-fecha").onchange=()=>{openCard=null;status("");renderRegistrar()};
@@ -570,25 +602,28 @@ function renderHitos(){
   if(selHito&&!hitos[selHito]) selHito=null;
   if(selHito&&hitos[selHito].comp!==comp) selHito=null;
   const total=cfg.estudiantes.length, hoy=todayStr();
-  list.innerHTML=hs.length?hs.map(([id,h])=>{const n=Object.values(h.ev||{}).filter(e=>e&&e.l).length, venc=h.fecha&&h.fecha<hoy&&n<total;
+  setHTML(list,hs.length?hs.map(([id,h])=>{const n=Object.values(h.ev||{}).filter(e=>e&&!blank(e.l)).length, venc=h.fecha&&h.fecha<hoy&&n<total;
     return `<button type="button" class="hito" data-id="${esc(id)}" aria-current="${selHito===id}"><span class="hn">${esc(h.nombre)}<br><span class="hm">${esc(TIPOS[h.tipo]||"")}</span></span><span class="hm num">${h.fecha?fmt(h.fecha):"sin fecha"}</span><span class="pill ${n>=total?"v":venc?"r":""}">${n}/${total}</span></button>`}).join("")
-    :'<p class="muted">Este componente todavía no tiene hitos. Cree uno abajo o elija uno sugerido.</p>';
+    :'<p class="muted">Este componente todavía no tiene hitos. Cree uno abajo o elija uno sugerido.</p>');
   const sug=(SUGERIDOS[comp]||[]).filter(([n])=>!hs.some(([,h])=>h.nombre===n));
-  $("#h-sug").innerHTML=sug.length?`<p class="note" style="margin:12px 0 6px">Sugeridos a partir del programa (toque para completar el formulario):</p><div class="chips">${sug.map(([n,t])=>`<button type="button" class="chip" data-n="${esc(n)}" data-t="${t}">${esc(n)}</button>`).join("")}</div>`:"";
+  setHTML($("#h-sug"),sug.length?`<p class="note" style="margin:12px 0 6px">Sugeridos a partir del programa (toque para completar el formulario):</p><div class="chips">${sug.map(([n,t])=>`<button type="button" class="chip" data-n="${esc(n)}" data-t="${t}">${esc(n)}</button>`).join("")}</div>`:"");
   renderHitoEval();
 }
 function renderHitoEval(){
   const box=$("#h-eval");
-  if(!selHito){box.innerHTML='<div class="empty">Elija un hito de la lista para evaluar a cada estudiante.</div>';return}
+  if(!selHito){setHTML(box,'<div class="empty">Elija un hito de la lista para evaluar a cada estudiante.</div>');return}
   const h=hitos[selHito], ev=h.ev||{};
-  box.innerHTML=`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
+  setHTML(box,`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
     <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
     <p class="status" id="h-estatus"></p>
-    <div>${cfg.estudiantes.map(s=>{const e=ev[s.id]||{};return `<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
-      ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="${e.l===l}" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
-      <button type="button" class="lvl" data-l="x" aria-pressed="${e.l==="x"}" title="${esc(HITO_LV.x)}">N/C</button>
-      ${e.l?`<input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" value="${esc(e.obs||"")}" placeholder="Observación (opcional)">`:""}</div>`}).join("")}</div>
-    <div class="confirm" style="margin-top:14px">${delAsk?`<span>¿Eliminar este hito y sus ${Object.keys(ev).length} evaluaciones?</span><button class="btn" id="h-del-si" type="button">Sí, eliminar</button><button class="btn" id="h-del-no" type="button">Cancelar</button>`:`<button class="btn" id="h-del" type="button">Eliminar hito</button>`}</div>`;
+    <div>${cfg.estudiantes.map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
+      ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
+      <button type="button" class="lvl" data-l="x" aria-pressed="false" title="${esc(HITO_LV.x)}">N/C</button>
+      <input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" placeholder="Observación (opcional)" hidden></div>`).join("")}</div>
+    <div class="confirm" style="margin-top:14px">${delAsk?`<span>¿Eliminar este hito y todas sus evaluaciones?</span><button class="btn" id="h-del-si" type="button">Sí, eliminar</button><button class="btn" id="h-del-no" type="button">Cancelar</button>`:`<button class="btn" id="h-del" type="button">Eliminar hito</button>`}</div>`);
+  $$("#h-eval .hrow").forEach(row=>{const e=ev[row.dataset.sid]||{};
+    row.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(e.l===b.dataset.l)));
+    const inp=row.querySelector(".obs-in"); inp.hidden=blank(e.l); if(document.activeElement!==inp) inp.value=e.obs||"";});
 }
 $("#h-comp").onchange=()=>{sp("h-comp",$("#h-comp").value);selHito=null;delAsk=false;renderHitos()};
 $("#h-list").addEventListener("click",e=>{const b=e.target.closest(".hito"); if(!b) return; selHito=b.dataset.id; delAsk=false; renderHitos();});
@@ -606,9 +641,9 @@ $("#h-crear").onclick=async()=>{
 $("#h-eval").addEventListener("click",async e=>{
   if(e.target.id==="h-del"){delAsk=true;renderHitoEval();return}
   if(e.target.id==="h-del-no"){delAsk=false;renderHitoEval();return}
-  if(e.target.id==="h-del-si"){const id=selHito; try{await db.doc("hitos/"+id).delete(); delete hitos[id]; selHito=null; delAsk=false; renderHitos();}catch(err){hStatus("No se pudo eliminar ("+(err.code||"error")+").")} return}
+  if(e.target.id==="h-del-si"){const id=selHito; try{await db.doc("hitos/"+id).delete(); delete hitos[id]; delete overlay["hitos/"+id]; selHito=null; delAsk=false; renderHitos();}catch(err){hStatus("No se pudo eliminar ("+(err.code||"error")+").")} return}
   const b=e.target.closest(".lvl"); if(!b||!selHito) return; const sid=b.closest(".hrow").dataset.sid;
-  const h=hitos[selHito]; h.ev=h.ev||{}; const cur=(h.ev[sid]||{}).l; const patch={l:cur===b.dataset.l?null:b.dataset.l};
+  const h=hitos[selHito]; h.ev=h.ev||{}; const cur=(h.ev[sid]||{}).l; const patch={l:cur===b.dataset.l?"":b.dataset.l};
   h.ev[sid]=Object.assign({},h.ev[sid],patch);
   queueWrite("hitos/"+selHito,sid,patch,null,hStatus); renderHitos();
 });
@@ -667,7 +702,7 @@ function renderFicha(){
       ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${bandVar(s.pct[i])})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
     </div></div>
     <div class="grid2">
-      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}
+      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}${o.c.docente?`<br><span class="muted" style="font-size:.8rem">${esc(o.c.docente)}</span>`:""}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}
         <h3 style="margin:16px 0 8px">Hitos</h3><div class="timeline">${hrecs.length?hrecs.map(r=>`<div class="tl"><span class="num">${r.h.fecha?fmt(r.h.fecha):""}</span><span style="min-width:0">${esc(r.h.nombre)} <span class="muted">· ${esc(compOf(r.h.comp))}</span></span><span>${r.e.l==="x"?'<span class="pill">N/C</span>':`<span class="dot ${r.e.l}"></span>`}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin hitos evaluados en el período.</p>'}</div></div>
       <div class="panel"><h3 style="margin-bottom:8px">Registro clase a clase</h3><div class="timeline">${recs.length?recs.map(r=>`<div class="tl"><span class="num">${fmt(r.fecha)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(compOf(r.comp))}</span><span style="display:flex;gap:4px">${DIMS.map(d=>`<span class="dot ${r.e[d.k]||(d.k==="as"&&r.e.j?"x":"")}" title="${esc(d.n)}"></span>`).join("")}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin registros en el período.</p>'}</div></div>
     </div>`;
