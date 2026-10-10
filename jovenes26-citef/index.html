@@ -1,0 +1,580 @@
+<title>Semáforo Jóvenes 26</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: barra superior con pestañas; cada pestaña es una herramienta de trabajo (registrar en clase, revisar, decidir). Móvil primero. */
+:root{
+  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#e8edf2; --line:#d3dbe3;
+  --fg:#16212c; --muted:#5a6876; --accent:#1d5a86; --accent-ink:#ffffff;
+  --verde:#1f8a4c; --verde-bg:#dcf2e4; --amarillo:#b77d00; --amarillo-bg:#fdf0c8; --amarillo-dot:#f0b400;
+  --rojo:#c23636; --rojo-bg:#fbe0e0; --gris-dot:#c3ccd5;
+  --font-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius:10px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f161d; --surface:#17212b; --surface-2:#1f2b37; --line:#2c3a48;
+  --fg:#e6edf3; --muted:#9aa9b8; --accent:#6db3e6; --accent-ink:#0b1620;
+  --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#3d4c5b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f161d; --surface:#17212b; --surface-2:#1f2b37; --line:#2c3a48;
+  --fg:#e6edf3; --muted:#9aa9b8; --accent:#6db3e6; --accent-ink:#0b1620;
+  --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#3d4c5b; color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--font-body);font-size:15px;line-height:1.45}
+*{box-sizing:border-box}
+h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.15}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
+.top-inner{max-width:1100px;margin:0 auto;padding:10px 16px 0;display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
+.brand h1 .lights{display:inline-flex;gap:3px;vertical-align:middle;margin-right:6px}
+.brand h1 .lights i{width:9px;height:9px;border-radius:50%;display:block}
+.brand small{color:var(--muted)}
+.who{margin-left:auto;font-size:.85rem;color:var(--muted)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
+nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;cursor:pointer;color:var(--muted);font-weight:700;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+
+main{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+input[type=text],input[type=date],input[type=number],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;max-width:100%}
+textarea{width:100%;min-height:60px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 14px;min-height:40px;cursor:pointer;font-weight:700}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.muted{color:var(--muted)}
+.note{font-size:.88rem;color:var(--muted)}
+.banner{border-radius:var(--radius);padding:12px 14px;background:var(--surface-2);border:1px solid var(--line)}
+.banner.warn{background:var(--amarillo-bg);border-color:var(--amarillo-dot)}
+
+/* Semáforo */
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;background:var(--gris-dot);flex:none}
+.dot.v{background:var(--verde)} .dot.a{background:var(--amarillo-dot)} .dot.r{background:var(--rojo)} .dot.x{background:transparent;border:2px dashed var(--gris-dot)}
+
+/* Lista de registro */
+.status{font-size:.85rem;color:var(--muted);min-height:1.2em}
+.students{display:flex;flex-direction:column;gap:8px}
+.stu{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.stu-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;width:100%;background:none;border:0;text-align:left}
+.stu-head .n{font-family:var(--font-data);color:var(--muted);width:1.8em;flex:none}
+.stu-head .name{font-weight:700;flex:1;min-width:0}
+.stu-head .sum{display:flex;gap:5px}
+.stu-head .chev{color:var(--muted);transition:transform .15s}
+.stu[open-card] .chev{transform:rotate(180deg)}
+.stu-body{padding:4px 12px 14px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line)}
+.dim{display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.dim-title{font-weight:700;font-size:.92rem}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lvl{border:2px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 6px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.lvl[data-l=v][aria-pressed=true]{background:var(--verde-bg);border-color:var(--verde)}
+.lvl[data-l=a][aria-pressed=true]{background:var(--amarillo-bg);border-color:var(--amarillo-dot)}
+.lvl[data-l=r][aria-pressed=true]{background:var(--rojo-bg);border-color:var(--rojo)}
+.extra{font-size:.85rem;display:flex;gap:6px;align-items:center;color:var(--muted)}
+.desc{font-size:.84rem;color:var(--muted);min-height:1.1em}
+@media (max-width:480px){.lvl{padding:8px 4px;font-size:.78rem;gap:4px}}
+
+/* Tablas */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+td.cell{text-align:center;font-family:var(--font-data);font-variant-numeric:tabular-nums}
+td.cell.v{background:var(--verde-bg);color:var(--verde)} td.cell.a{background:var(--amarillo-bg);color:var(--amarillo)} td.cell.r{background:var(--rojo-bg);color:var(--rojo)}
+td.cell small{display:block;font-size:.7rem;opacity:.8}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.pill.r{background:var(--rojo-bg);color:var(--rojo)} .pill.a{background:var(--amarillo-bg);color:var(--amarillo)} .pill.v{background:var(--verde-bg);color:var(--verde)}
+
+/* Ranking */
+.rank{display:flex;flex-direction:column;gap:4px}
+.rk{display:grid;grid-template-columns:2.2em minmax(0,11em) 1fr 3.4em;gap:8px;align-items:center;padding:3px 0}
+.rk .pos{font-family:var(--font-data);color:var(--muted);text-align:right}
+.rk .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.rk .bar{height:18px;background:var(--surface-2);border-radius:4px;position:relative;overflow:hidden}
+.rk .bar i{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.rk .val{font-family:var(--font-data);text-align:right}
+.cut{border-top:2px dashed var(--accent);margin:6px 0 2px;padding-top:2px;font-size:.75rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cut.amp{border-top-style:dotted;color:var(--muted);border-color:var(--muted)}
+@media (max-width:520px){.rk{grid-template-columns:1.8em minmax(0,1fr) 3em}.rk .bar{grid-column:2/4;grid-row:2}}
+
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--surface-2);border-radius:8px;padding:10px}
+.kpi b{display:block;font-family:var(--font-data);font-size:1.4rem}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.timeline{display:flex;flex-direction:column;gap:6px}
+.tl{display:grid;grid-template-columns:6.5em minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.tl .obs{grid-column:1/-1;font-size:.86rem;color:var(--muted);padding-left:6.5em}
+.cfg-list{display:flex;flex-direction:column;gap:6px}
+.cfg-item{display:grid;grid-template-columns:2em minmax(0,1fr) minmax(0,10em) auto;gap:6px;align-items:center}
+.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 5em auto}
+@media (max-width:560px){.cfg-item,.cfg-item.comp{grid-template-columns:1fr auto}.cfg-item>.idx{display:none}}
+.rubric{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.rubric div{background:var(--surface-2);border-radius:8px;padding:10px;font-size:.88rem}
+.rubric h3{font-size:1rem;margin-bottom:6px}
+.rubric p{margin:4px 0;display:flex;gap:6px}
+.rubric p .dot{margin-top:3px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1><span class="lights" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span>Jóvenes 26 · CITEF</h1>
+      <small id="subtitle">Seguimiento de empleabilidad · con respaldo de INEFOP</small>
+      <span class="who" id="who"></span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button role="tab" data-tab="registrar" aria-selected="true">Registrar clase</button>
+      <button role="tab" data-tab="semaforo" aria-selected="false">Semáforo</button>
+      <button role="tab" data-tab="ranking" aria-selected="false">Ranking</button>
+      <button role="tab" data-tab="ficha" aria-selected="false">Ficha</button>
+      <button role="tab" data-tab="criterios" aria-selected="false">Criterios</button>
+      <button role="tab" data-tab="config" aria-selected="false">Configuración</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div id="conn" class="banner">Conectando con el registro compartido…</div>
+
+  <section data-view="registrar" class="view">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="r-fecha">Fecha</label><input type="date" id="r-fecha"></div>
+        <div class="field" style="flex:1;min-width:200px"><label for="r-comp">Componente</label><select id="r-comp"></select></div>
+        <button class="btn" id="r-todos" type="button">Todos presentes y puntuales</button>
+      </div>
+      <p class="status" id="r-status"></p>
+    </div>
+    <div class="students" id="r-list"></div>
+  </section>
+
+  <section data-view="semaforo" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="s-tipo">Período</label><select id="s-tipo" class="per-tipo"></select></div>
+        <div class="field" style="flex:1;min-width:220px"><label for="s-per">Corte</label><select id="s-per" class="per-sel"></select></div>
+        <div class="field"><label for="s-comp">Componente</label><select id="s-comp"></select></div>
+        <button class="btn" id="s-csv" type="button">Descargar CSV</button>
+      </div>
+      <p class="note" id="s-cov"></p>
+    </div>
+    <div class="tablewrap"><table id="s-table"></table></div>
+    <p class="note">Cada celda muestra el porcentaje de logro del período (verde = 100, amarillo = 50, rojo = 0) y debajo la cantidad de registros verde/amarillo/rojo. Color de la celda: verde desde 80 %, amarillo de 50 a 79 %, rojo por debajo de 50 %.</p>
+  </section>
+
+  <section data-view="ranking" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="k-tipo">Período</label><select id="k-tipo" class="per-tipo"></select></div>
+        <div class="field" style="flex:1;min-width:220px"><label for="k-per">Corte</label><select id="k-per" class="per-sel"></select></div>
+        <button class="btn" id="k-csv" type="button">Descargar CSV</button>
+      </div>
+      <p class="note" id="k-formula"></p>
+    </div>
+    <div class="panel"><div class="rank" id="k-list"></div></div>
+  </section>
+
+  <section data-view="ficha" class="view" hidden>
+    <div class="panel"><div class="row">
+      <div class="field" style="flex:1;min-width:220px"><label for="f-est">Estudiante</label><select id="f-est"></select></div>
+      <div class="field"><label for="f-tipo">Período</label><select id="f-tipo" class="per-tipo"></select></div>
+      <div class="field" style="min-width:200px"><label for="f-per">Corte</label><select id="f-per" class="per-sel"></select></div>
+    </div></div>
+    <div id="f-body"></div>
+  </section>
+
+  <section data-view="criterios" class="view" hidden>
+    <div class="panel">
+      <h2 style="font-size:1.2rem;margin-bottom:6px">Qué significa cada color</h2>
+      <p class="note">Se evalúan conductas observables en la clase, no el nivel educativo previo: así un joven con primaria y uno con bachillerato compiten en igualdad de condiciones.</p>
+      <div class="rubric" id="rubric"></div>
+    </div>
+  </section>
+
+  <section data-view="config" class="view" hidden>
+    <div id="cfg-lock" class="banner warn" hidden>Solo la coordinación (permiso de edición) puede guardar cambios aquí. Puede consultar la configuración.</div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:10px">Curso</h2>
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px"><label for="c-nombre">Nombre</label><input type="text" id="c-nombre"></div>
+        <div class="field"><label for="c-inicio">Inicio del curso</label><input type="date" id="c-inicio"></div>
+        <div class="field"><label for="c-hora">Hora de entrada</label><input type="text" id="c-hora" size="6"></div>
+        <div class="field"><label for="c-tol">Tolerancia (min)</label><input type="number" id="c-tol" min="0" max="30" style="width:6em"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="c-cupos">Cupos de pasantía</label><input type="number" id="c-cupos" min="1" max="25" style="width:6em"></div>
+        <div class="field"><label for="c-cupos2">Cupos ampliados</label><input type="number" id="c-cupos2" min="1" max="25" style="width:6em"></div>
+        <div class="field"><label for="c-min">Mín. registros para rankear</label><input type="number" id="c-min" min="0" max="50" style="width:6em"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="c-w0">Peso asistencia %</label><input type="number" id="c-w0" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w1">Peso actitud %</label><input type="number" id="c-w1" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w2">Peso comunicación %</label><input type="number" id="c-w2" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w3">Peso cumplimiento %</label><input type="number" id="c-w3" min="0" max="100" style="width:6em"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
+        <p class="note">Nombre y nivel educativo alcanzado (dato de contexto, no puntúa).</p>
+        <div class="cfg-list" id="c-est"></div>
+        <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
+        <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
+      </div>
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Componentes</h2>
+        <p class="note">Asignatura o espacio, docente a cargo y horas semanales.</p>
+        <div class="cfg-list" id="c-comp"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
+      </div>
+    </div>
+    <div class="panel row" style="justify-content:space-between">
+      <p class="status" id="c-status" style="margin:0"></p>
+      <button class="btn primary" id="c-save" type="button">Guardar configuración</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+// ---------- Modelo ----------
+const DIMS=[
+ {k:"as",n:"Asistencia y puntualidad",
+  v:"Llegó en hora (dentro de la tolerancia) y permaneció toda la clase.",
+  a:"Llegó tarde o se retiró antes; o faltó avisando sin justificativo.",
+  r:"Ausente sin aviso, o llegó con un retraso que le hizo perder buena parte de la clase.",
+  extra:{k:"j",n:"Falta justificada (no computa)"}},
+ {k:"ac",n:"Actitud frente al aprendizaje",
+  v:"Se involucra, pregunta, sostiene la tarea y recibe las devoluciones para mejorar.",
+  a:"Participa solo si se le pide, se dispersa (celular, charla) o necesita recordatorios frecuentes.",
+  r:"No se involucra, rechaza la tarea o dificulta el trabajo del grupo."},
+ {k:"co",n:"Comunicación",
+  v:"Se expresa con claridad y respeto; escucha; avisa a tiempo a docentes, coordinación y CITEF.",
+  a:"Comunica de forma incompleta o tardía, o con un registro poco adecuado al contexto.",
+  r:"No avisa ni responde, o mantiene un trato irrespetuoso con compañeros, docentes o coordinación."},
+ {k:"cu",n:"Cumplimiento de trabajos",
+  v:"Entrega o presenta en tiempo y forma, siguiendo la consigna.",
+  a:"Entrega fuera de plazo o incompleta; presentación oral con preparación insuficiente.",
+  r:"No entrega o no presenta lo solicitado.",
+  extra:{k:"na",n:"Hoy no había entrega"}}
+];
+const LV={v:{t:"Logrado",p:100},a:{t:"En proceso",p:50},r:{t:"No logrado",p:0}};
+const DEFAULT_CFG={nombre:"Jóvenes 26 · CITEF",inicio:"",hora:"08:15",tol:10,cupos:12,cupos2:15,min:4,
+  pesos:[25,25,25,25],estudiantes:[],componentes:[]};
+
+let cfg=structuredClone(DEFAULT_CFG), cfgLoaded=false;
+let clases={};        // id -> data
+let db=null, user=null, myId=null, canAdmin=false;
+let openCard=null;
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/864e5);
+const fromDay=n=>new Date(n*864e5).toISOString().slice(0,10);
+const fmt=s=>{const [y,m,d]=s.split("-");return d+"/"+m};
+const sp=(k,v)=>{try{localStorage.setItem("j26."+k,v)}catch(e){}};
+const gp=k=>{try{return localStorage.getItem("j26."+k)}catch(e){return null}};
+
+// ---------- Pestañas ----------
+function showTab(t){
+  $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  $$(".view").forEach(v=>v.hidden=v.dataset.view!==t);
+  sp("tab",t); renderAll();
+}
+$$("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+// ---------- Períodos ----------
+function startDay(){
+  if(cfg.inicio) return dayNum(cfg.inicio);
+  const ds=Object.values(clases).map(c=>c.fecha).filter(Boolean).sort();
+  return dayNum(ds[0]||todayStr());
+}
+function periodOptions(tipo){
+  if(tipo==="curso") return [{v:"all",t:"Todo el curso (acumulado)"}];
+  const len=tipo==="semana"?7:14, s=startDay(), last=Math.max(dayNum(todayStr()),...Object.values(clases).map(c=>dayNum(c.fecha)));
+  const out=[]; for(let i=0;s+i*len<=last;i++){const a=s+i*len,b=a+len-1;
+    out.push({v:a+":"+b,t:(tipo==="semana"?"Semana ":"Quincena ")+(i+1)+" · "+fmt(fromDay(a))+" al "+fmt(fromDay(b))});}
+  return out.reverse();
+}
+function fillPeriodSelectors(){
+  $$(".per-tipo").forEach(sel=>{
+    if(!sel.options.length){sel.innerHTML='<option value="quincena">Quincenal</option><option value="semana">Semanal</option><option value="curso">Todo el curso</option>';
+      sel.value=gp(sel.id)||(sel.id==="k-tipo"?"curso":"quincena");
+      sel.onchange=()=>{sp(sel.id,sel.value);fillPeriodSelectors();renderAll()};}
+    const per=sel.closest(".row").querySelector(".per-sel"), prev=per.value;
+    const opts=periodOptions(sel.value);
+    per.innerHTML=opts.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join("");
+    if(opts.some(o=>o.v===prev)) per.value=prev;
+    per.onchange=renderAll;
+  });
+}
+function inPeriod(fecha,pv){ if(!pv||pv==="all") return true; const [a,b]=pv.split(":").map(Number), d=dayNum(fecha); return d>=a&&d<=b; }
+
+// ---------- Cálculo ----------
+function stats(pv,compId,studentFilter){
+  const res={};
+  cfg.estudiantes.forEach(e=>res[e.id]={id:e.id,dims:DIMS.map(()=>({v:0,a:0,r:0})),n:0,recs:[]});
+  Object.values(clases).forEach(c=>{
+    if(!c.fecha||!inPeriod(c.fecha,pv)) return;
+    if(compId&&compId!=="all"&&c.comp!==compId) return;
+    const ev=c.ev||{};
+    for(const sid in ev){ const s=res[sid]; if(!s) continue; const e=ev[sid]; let any=false;
+      DIMS.forEach((d,i)=>{const l=e[d.k]; if(l==="v"||l==="a"||l==="r"){s.dims[i][l]++;any=true}});
+      if(any||e.j) {s.n++; s.recs.push({fecha:c.fecha,comp:c.comp,e});}
+    }
+  });
+  const w=cfg.pesos.map(Number);
+  Object.values(res).forEach(s=>{
+    s.pct=s.dims.map(d=>{const t=d.v+d.a+d.r;return t?Math.round((d.v*100+d.a*50)/t):null});
+    let sw=0,acc=0; s.pct.forEach((p,i)=>{if(p!==null){acc+=p*w[i];sw+=w[i]}});
+    s.idx=sw?Math.round(acc/sw*10)/10:null;
+    s.rojos=s.dims.reduce((a,d)=>a+d.r,0); s.amar=s.dims.reduce((a,d)=>a+d.a,0);
+    const tot=s.dims.reduce((a,d)=>a+d.v+d.a+d.r,0);
+    s.alerta=s.pct.some(p=>p!==null&&p<50)||(tot>0&&s.rojos/tot>=0.15);
+  });
+  return res;
+}
+const band=p=>p===null?"":p>=80?"v":p>=50?"a":"r";
+function ranked(st){
+  return Object.values(st).sort((x,y)=>{
+    const ex=x.idx===null||x.n<cfg.min, ey=y.idx===null||y.n<cfg.min;
+    if(ex!==ey) return ex?1:-1;
+    return (y.idx??-1)-(x.idx??-1)||x.rojos-y.rojos||(y.pct[0]??-1)-(x.pct[0]??-1)||nameOf(x.id).localeCompare(nameOf(y.id));
+  });
+}
+const nameOf=id=>(cfg.estudiantes.find(e=>e.id===id)||{}).nombre||"(sin nombre)";
+const compOf=id=>(cfg.componentes.find(c=>c.id===id)||{}).nombre||"(componente eliminado)";
+
+// ---------- Registrar ----------
+const pending={}; const inflight={};
+function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
+function setEval(sid,patch){
+  if(!db){status("Sin conexión al registro compartido: el cambio no se guardó.");return}
+  const id=clsId(); if(!$("#r-comp").value){status("Elija un componente primero.");return}
+  const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
+  c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
+  (pending[id]=pending[id]||{})[sid]=Object.assign({},pending[id][sid],patch);
+  renderRegistrar(); status("Guardando…"); clearTimeout(pending[id]._t); pending[id]._t=setTimeout(()=>flush(id),500);
+}
+async function flush(id){
+  if(inflight[id]) return; const p=pending[id]; if(!p) return; delete pending[id]; clearTimeout(p._t); delete p._t;
+  inflight[id]=true; const ref=db.doc("clases/"+id); const c=clases[id];
+  const body={ev:p,editadoEn:new Date().toISOString(),...(myId?{editadoPor:myId}:{})};
+  try{
+    try{ await ref.update(body); }
+    catch(e){ if(e&&e.code==="invalid_argument"){ await ref.set({fecha:c.fecha,comp:c.comp,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),...body,ev:c.ev}); } else throw e; }
+    status("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
+  }catch(e){ status("No se pudo guardar ("+(e&&e.code||"error")+"). "+(e&&e.code==="permission_denied"?"Su acceso es de solo lectura: pida a la coordinación permiso de colaborador.":"Vuelva a intentarlo."));
+    pending[id]=Object.assign(p,pending[id]||{}); }
+  finally{ inflight[id]=false; if(pending[id]&&!pending[id]._t) pending[id]._t=setTimeout(()=>flush(id),1500); }
+}
+function status(t){$("#r-status").textContent=t}
+
+function renderRegistrar(){
+  const sel=$("#r-comp"), cur=sel.value||gp("comp");
+  sel.innerHTML=cfg.componentes.length?cfg.componentes.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`).join(""):'<option value="">Sin componentes: configúrelos primero</option>';
+  if(cfg.componentes.some(c=>c.id===cur)) sel.value=cur;
+  const list=$("#r-list");
+  if(!cfg.estudiantes.length){list.innerHTML=`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b> (se pueden pegar los 25 nombres de una vez). Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`;return}
+  const c=clases[clsId()]||{}, ev=c.ev||{};
+  const meta=c.fecha?`Registro de esta clase: ${Object.keys(ev).length} de ${cfg.estudiantes.length} estudiantes con datos.`:"Clase sin registros todavía.";
+  if(!$("#r-status").textContent.startsWith("Guard")&&!$("#r-status").textContent.startsWith("No se")) status(meta);
+  list.innerHTML=cfg.estudiantes.map((s,i)=>{
+    const e=ev[s.id]||{}, open=openCard===s.id;
+    const sum=DIMS.map(d=>`<span class="dot ${e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"")}" title="${esc(d.n)}"></span>`).join("");
+    return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${sum}</span><span class="chev" aria-hidden="true">▾</span></button>
+      ${open?`<div class="stu-body">${DIMS.map(d=>{
+        const val=e[d.k], ex=d.extra&&e[d.extra.k];
+        return `<div class="dim" data-k="${d.k}"><div class="dim-title">${esc(d.n)}</div>
+          <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="${val===l}"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
+          ${d.extra?`<label class="extra"><input type="checkbox" class="ex" data-x="${d.extra.k}" ${ex?"checked":""}> ${esc(d.extra.n)}</label>`:""}
+          <div class="desc">${val?esc(d[val]):ex?"No se tiene en cuenta en el cálculo.":""}</div></div>`}).join("")}
+        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a Natalia que llegaba tarde">${esc(e.obs||"")}</textarea></div>
+      </div>`:""}
+    </div>`}).join("");
+}
+$("#r-list").addEventListener("click",ev=>{
+  const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
+  if(ev.target.closest(".stu-head")){openCard=openCard===sid?null:sid;renderRegistrar();return}
+  const b=ev.target.closest(".lvl"); if(b){const k=b.closest(".dim").dataset.k, cur=((clases[clsId()]||{}).ev||{})[sid]||{};
+    const patch={[k]:cur[k]===b.dataset.l?null:b.dataset.l};
+    if(k==="as"&&patch.as) patch.j=false;
+    if(k==="cu"&&patch.cu) patch.na=false;
+    if(k==="as"&&patch.as==="r"){patch.ac=null;patch.co=null;patch.cu=null}
+    setEval(sid,patch);}
+});
+$("#r-list").addEventListener("change",ev=>{
+  const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
+  if(ev.target.classList.contains("ex")){const x=ev.target.dataset.x, patch={[x]:ev.target.checked};
+    if(ev.target.checked) {if(x==="j"){patch.as=null;patch.ac=null;patch.co=null;patch.cu=null} else patch.cu=null}
+    setEval(sid,patch);}
+  if(ev.target.classList.contains("obs")) setEval(sid,{obs:ev.target.value.trim()});
+});
+$("#r-todos").onclick=()=>{
+  if(!cfg.estudiantes.length||!$("#r-comp").value) return;
+  const ev=((clases[clsId()]||{}).ev)||{};
+  cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(!e.as&&!e.j) setEval(s.id,{as:"v"})});
+  status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
+};
+$("#r-fecha").onchange=()=>{openCard=null;status("");renderRegistrar()};
+$("#r-comp").onchange=()=>{sp("comp",$("#r-comp").value);openCard=null;status("");renderRegistrar()};
+
+// ---------- Semáforo ----------
+function compOptions(sel){const cur=sel.value; sel.innerHTML='<option value="all">Todos</option>'+cfg.componentes.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}</option>`).join(""); if([...sel.options].some(o=>o.value===cur)) sel.value=cur;}
+function renderSemaforo(){
+  compOptions($("#s-comp")); const pv=$("#s-per").value, comp=$("#s-comp").value;
+  const st=stats(pv,comp), order=ranked(st);
+  if(!cfg.estudiantes.length){$("#s-table").innerHTML='<tr><td class="empty">Sin estudiantes cargados.</td></tr>';$("#s-cov").textContent="";return}
+  $("#s-table").innerHTML=`<thead><tr><th>Estudiante</th>${DIMS.map(d=>`<th>${esc(d.n)}</th>`).join("")}<th>Índice</th><th>Registros</th><th>Seguimiento</th></tr></thead><tbody>${
+    order.map(s=>`<tr><td><b>${esc(nameOf(s.id))}</b></td>${s.pct.map((p,i)=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}<small>${s.dims[i].v}/${s.dims[i].a}/${s.dims[i].r}</small></td>`).join("")}
+      <td class="cell ${band(s.idx)}"><b>${s.idx===null?"—":s.idx}</b></td><td class="num">${s.n}</td>
+      <td>${s.alerta?'<span class="pill r">Entrevista</span>':s.amar>=3?'<span class="pill a">Conversar</span>':s.n?'<span class="pill v">En curso</span>':'<span class="pill">Sin datos</span>'}</td></tr>`).join("")}</tbody>`;
+  // cobertura: qué componentes registraron en el período
+  const cov=cfg.componentes.map(c=>{const n=Object.values(clases).filter(x=>x.comp===c.id&&inPeriod(x.fecha,pv)).length;return `${c.nombre}: ${n} clase${n===1?"":"s"}`});
+  $("#s-cov").textContent=cov.length?"Clases registradas en el período · "+cov.join(" · "):"";
+}
+
+// ---------- Ranking ----------
+function renderRanking(){
+  const pv=$("#k-per").value, st=stats(pv), order=ranked(st), w=cfg.pesos;
+  $("#k-formula").textContent=`Índice de empleabilidad = asistencia ${w[0]}% + actitud ${w[1]}% + comunicación ${w[2]}% + cumplimiento ${w[3]}%. Desempate: menos rojos, luego mejor asistencia. Quedan al final quienes tienen menos de ${cfg.min} registros en el período.`;
+  if(!order.length){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya estudiantes y registros de clase.</div>';return}
+  let html=""; order.forEach((s,i)=>{
+    const pos=i+1, few=s.idx===null||s.n<cfg.min;
+    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r">!</span>':""}</span>
+      <span class="bar"><i style="width:${s.idx||0}%;background:var(--${few?"gris-dot":band(s.idx)==="v"?"verde":band(s.idx)==="a"?"amarillo-dot":"rojo"})"></i></span><span class="val">${s.idx===null?"—":s.idx.toFixed(1)}</span></div>`;
+    if(pos===+cfg.cupos) html+=`<div class="cut">Línea de pasantías · ${cfg.cupos} cupos</div>`;
+    if(pos===+cfg.cupos2&&+cfg.cupos2>+cfg.cupos) html+=`<div class="cut amp">Cupos ampliados · ${cfg.cupos2}</div>`;
+  });
+  $("#k-list").innerHTML=html;
+}
+
+// ---------- Ficha ----------
+function renderFicha(){
+  const sel=$("#f-est"), cur=sel.value||gp("est");
+  sel.innerHTML=cfg.estudiantes.map(e=>`<option value="${esc(e.id)}">${esc(e.nombre)}</option>`).join("");
+  if(cfg.estudiantes.some(e=>e.id===cur)) sel.value=cur;
+  const sid=sel.value, body=$("#f-body"); if(!sid){body.innerHTML='<div class="panel empty">Sin estudiantes cargados.</div>';return}
+  const pv=$("#f-per").value, st=stats(pv), s=st[sid], pos=ranked(stats("all")).findIndex(x=>x.id===sid)+1, est=cfg.estudiantes.find(e=>e.id===sid);
+  const byComp=cfg.componentes.map(c=>{const x=stats(pv,c.id)[sid];return {c,x}}).filter(o=>o.x.n);
+  const recs=s.recs.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  body.innerHTML=`<div class="panel"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div>
+    <div class="kpis" style="margin-top:12px">
+      <div class="kpi"><b>${s.idx===null?"—":s.idx}</b><span>Índice del período</span></div>
+      <div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>
+      ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${band(s.pct[i])==="v"?"verde":band(s.pct[i])==="a"?"amarillo":band(s.pct[i])==="r"?"rojo":"muted"})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
+    </div></div>
+    <div class="grid2">
+      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}</div>
+      <div class="panel"><h3 style="margin-bottom:8px">Registro clase a clase</h3><div class="timeline">${recs.length?recs.map(r=>`<div class="tl"><span class="num">${fmt(r.fecha)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(compOf(r.comp))}</span><span style="display:flex;gap:4px">${DIMS.map(d=>`<span class="dot ${r.e[d.k]||(d.k==="as"&&r.e.j?"x":"")}" title="${esc(d.n)}"></span>`).join("")}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin registros en el período.</p>'}</div></div>
+    </div>`;
+}
+$("#f-est").onchange=()=>{sp("est",$("#f-est").value);renderFicha()};
+$("#s-comp").onchange=renderSemaforo;
+
+// ---------- Criterios ----------
+function renderCriterios(){
+  $("#rubric").innerHTML=DIMS.map(d=>`<div><h3>${esc(d.n)}</h3>${["v","a","r"].map(l=>`<p><span class="dot ${l}"></span><span><b>${LV[l].t}.</b> ${esc(d[l])}</span></p>`).join("")}${d.extra?`<p class="muted"><span class="dot x"></span><span>${esc(d.extra.n)}.</span></p>`:""}</div>`).join("")+
+  `<div><h3>Cómo se calcula</h3><p>Verde vale 100, amarillo 50 y rojo 0. Se promedia cada aspecto en el período y se ponderan los cuatro con los pesos de Configuración. Si el estudiante está ausente (rojo en asistencia), los otros tres aspectos de esa clase no se califican, para no castigar dos veces la misma falta.</p><p><b>Entrevista</b> se activa cuando un aspecto queda por debajo del 50 % o cuando los rojos son al menos el 15 % de las calificaciones del período.</p><p>Horario de referencia: entrada ${esc(cfg.hora)} con ${cfg.tol} min de tolerancia; salida 12:30.</p></div>`;
+}
+
+// ---------- Configuración ----------
+let draft=null;
+function renderConfig(){
+  $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin;
+  if(!draft) draft=structuredClone(cfg);
+  $("#c-nombre").value=draft.nombre; $("#c-inicio").value=draft.inicio; $("#c-hora").value=draft.hora; $("#c-tol").value=draft.tol;
+  $("#c-cupos").value=draft.cupos; $("#c-cupos2").value=draft.cupos2; $("#c-min").value=draft.min;
+  draft.pesos.forEach((p,i)=>$("#c-w"+i).value=p);
+  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
+  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
+}
+function bindList(sel,key){
+  $(sel).addEventListener("input",e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value;});
+  $(sel).addEventListener("click",e=>{if(!e.target.closest("[data-del]")) return; const i=+e.target.closest(".cfg-item").dataset.i; draft[key].splice(i,1); renderConfig(); $("#c-status").textContent="Quitado de la lista (los registros previos se conservan). Guarde para confirmar.";});
+}
+bindList("#c-est","estudiantes"); bindList("#c-comp","componentes");
+["nombre","inicio","hora","tol","cupos","cupos2","min"].forEach(k=>$("#c-"+k).addEventListener("input",e=>{draft[k]=e.target.type==="number"?+e.target.value:e.target.value}));
+[0,1,2,3].forEach(i=>$("#c-w"+i).addEventListener("input",e=>{draft.pesos[i]=+e.target.value}));
+$("#c-bulk-add").onclick=()=>{
+  const lines=$("#c-bulk").value.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  lines.forEach(l=>{const [n,nv]=l.split(/\s*[;\t]\s*/); if(n) draft.estudiantes.push({id:uid("e"),nombre:n,nivel:nv||""})});
+  $("#c-bulk").value=""; renderConfig(); $("#c-status").textContent=lines.length+" agregados. Guarde para confirmar.";
+};
+$("#c-comp-add").onclick=()=>{draft.componentes.push({id:uid("c"),nombre:"",docente:"",horas:""});renderConfig();};
+$("#c-save").onclick=async()=>{
+  if(!db||!canAdmin) return;
+  const sum=draft.pesos.reduce((a,b)=>a+(+b||0),0);
+  if(sum!==100){$("#c-status").textContent=`Los pesos suman ${sum} %. Ajústelos para que sumen 100.`;return}
+  if(+draft.cupos2<+draft.cupos){$("#c-status").textContent="Los cupos ampliados no pueden ser menos que los cupos.";return}
+  draft.estudiantes=draft.estudiantes.filter(e=>e.nombre.trim()); draft.componentes=draft.componentes.filter(c=>c.nombre.trim());
+  $("#c-status").textContent="Guardando…";
+  try{await db.doc("config/curso").set(draft); $("#c-status").textContent="Configuración guardada ✓"; }
+  catch(e){$("#c-status").textContent="No se pudo guardar ("+(e.code||"error")+").";}
+};
+
+// ---------- CSV ----------
+async function downloadCsv(kind){
+  const tipo=kind==="ranking"?"#k-per":"#s-per", pv=$(tipo).value, st=stats(pv,kind==="semaforo"?$("#s-comp").value:"all"), order=ranked(st);
+  const rows=[["Puesto","Estudiante","Nivel",...DIMS.map(d=>d.n+" %"),"Índice","Registros","Rojos","Seguimiento"]];
+  order.forEach((s,i)=>{const e=cfg.estudiantes.find(x=>x.id===s.id)||{};rows.push([i+1,e.nombre,e.nivel||"",...s.pct.map(p=>p??""),s.idx??"",s.n,s.rojos,s.alerta?"Entrevista":""])});
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const dl=window.claude&&await claude.use("downloads");
+  if(!dl){alertMsg(kind,"La descarga no está disponible en esta vista.");return}
+  try{await dl.save({filename:`jovenes26-${kind}-${todayStr()}.csv`,data:csv})}catch(e){alertMsg(kind,"Descarga cancelada.")}
+}
+function alertMsg(kind,t){(kind==="ranking"?$("#k-formula"):$("#s-cov")).textContent=t}
+$("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>downloadCsv("semaforo");
+
+// ---------- Render ----------
+function renderAll(){
+  fillPeriodSelectors();
+  const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
+  if(t==="registrar") renderRegistrar(); else if(t==="semaforo") renderSemaforo(); else if(t==="ranking") renderRanking();
+  else if(t==="ficha") renderFicha(); else if(t==="criterios") renderCriterios(); else if(t==="config") renderConfig();
+}
+
+// ---------- Arranque ----------
+$("#r-fecha").value=todayStr();
+const saved=gp("tab"); showTab(saved&&$(`[data-tab="${saved}"]`)?saved:"registrar");
+(async()=>{
+  if(!window.claude||!claude.use){$("#conn").textContent="Esta copia no está conectada al registro compartido. Ábrala desde el enlace de claude.ai.";return}
+  const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
+  user=u; db=d;
+  if(user){ try{myId=await user.id()}catch(e){} try{canAdmin=await user.canEdit()}catch(e){}
+    try{const me=await user.me(); $("#who").textContent=(me.name||"")+(canAdmin?" · coordinación":"");}catch(e){} }
+  if(!db){$("#conn").textContent="No se pudo abrir el registro compartido. Inicie sesión en claude.ai y vuelva a abrir el enlace.";$("#conn").classList.add("warn");return}
+  $("#conn").hidden=true;
+  db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{});cfgLoaded=true;draft=null;
+      renderAll()},
+    e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer la configuración ("+e.code+")."});
+  db.collection("clases").orderBy("fecha","desc").limit(1000).onSnapshot(s=>{
+      const next={}; s.docs.forEach(doc=>next[doc.id]=doc.data());
+      // conservar cambios locales aún no confirmados
+      for(const id in pending){
+        if(!next[id]){ next[id]=clases[id]; continue; }
+        next[id].ev=next[id].ev||{};
+        for(const sid in pending[id]) if(sid!=="_t") next[id].ev[sid]=Object.assign({},next[id].ev[sid],pending[id][sid]);
+      }
+      clases=next;
+      const ae=document.activeElement; if(ae&&ae.classList&&ae.classList.contains("obs")) return; // no interrumpir la escritura
+      renderAll()},
+    e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer los registros ("+e.code+")."});
+})();
+})();
+</script>
