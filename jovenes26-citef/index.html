@@ -1,48 +1,61 @@
 <title>Semáforo Jóvenes 26</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Montserrat:ital,wght@0,700;0,800;1,800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Layout: barra superior con pestañas; cada pestaña es una herramienta de trabajo (registrar en clase, revisar, decidir). Móvil primero. */
+/* Layout: banda azul del afiche con pestañas; debajo, herramientas de trabajo sobre fondo azulado claro. Móvil primero.
+   El lima del afiche es solo de marca (encabezado, pestaña activa, progreso): nunca se usa como "verde" del semáforo. */
 :root{
-  --bg:#f3f5f7; --surface:#ffffff; --surface-2:#e8edf2; --line:#d3dbe3;
-  --fg:#16212c; --muted:#5a6876; --accent:#1d5a86; --accent-ink:#ffffff;
-  --verde:#1f8a4c; --verde-bg:#dcf2e4; --amarillo:#b77d00; --amarillo-bg:#fdf0c8; --amarillo-dot:#f0b400;
-  --rojo:#c23636; --rojo-bg:#fbe0e0; --gris-dot:#c3ccd5;
-  --font-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --bg:#eef3f9; --surface:#ffffff; --surface-2:#e2ebf5; --line:#c8d6e6;
+  --fg:#0e2338; --muted:#4c6178; --accent:#1667ae; --accent-ink:#ffffff;
+  --band:#1667ae; --band-2:#0f4f8a; --band-ink:#ffffff; --band-muted:#cfe0f2; --lima:#c4d92e; --lima-ink:#0d3a63;
+  --verde:#1f8a4c; --verde-bg:#dcf2e4; --amarillo:#a87200; --amarillo-bg:#fdf0c8; --amarillo-dot:#f0b400;
+  --rojo:#c23636; --rojo-bg:#fbe0e0; --gris-dot:#c0cddb;
+  --font-display:"Montserrat", "Segoe UI", system-ui, sans-serif;
   --font-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-data:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
-  --radius:10px;
+  --radius:12px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f161d; --surface:#17212b; --surface-2:#1f2b37; --line:#2c3a48;
-  --fg:#e6edf3; --muted:#9aa9b8; --accent:#6db3e6; --accent-ink:#0b1620;
+  --bg:#0a1622; --surface:#102234; --surface-2:#173049; --line:#24415f;
+  --fg:#e7f0f9; --muted:#9db3c9; --accent:#6db2ec; --accent-ink:#06192b;
+  --band:#0f3f6e; --band-2:#0a2f54; --band-ink:#ffffff; --band-muted:#a9c4de; --lima:#c4d92e; --lima-ink:#0d3a63;
   --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
-  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#3d4c5b; color-scheme:dark}}
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#36506b; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f161d; --surface:#17212b; --surface-2:#1f2b37; --line:#2c3a48;
-  --fg:#e6edf3; --muted:#9aa9b8; --accent:#6db3e6; --accent-ink:#0b1620;
+  --bg:#0a1622; --surface:#102234; --surface-2:#173049; --line:#24415f;
+  --fg:#e7f0f9; --muted:#9db3c9; --accent:#6db2ec; --accent-ink:#06192b;
+  --band:#0f3f6e; --band-2:#0a2f54; --band-ink:#ffffff; --band-muted:#a9c4de; --lima:#c4d92e; --lima-ink:#0d3a63;
   --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
-  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#3d4c5b; color-scheme:dark}
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#36506b; color-scheme:dark}
 html,body{background:var(--bg);color:var(--fg)}
-body{font-family:var(--font-body);font-size:15px;line-height:1.45}
+body{font-family:var(--font-body);font-size:15.5px;line-height:1.45}
 *{box-sizing:border-box}
-h1,h2,h3{font-family:var(--font-display);text-wrap:balance;margin:0;line-height:1.15}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.01em}
 button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .num{font-family:var(--font-data);font-variant-numeric:tabular-nums}
 
-header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:var(--surface);border-bottom:1px solid var(--line)}
-.top-inner{max-width:1100px;margin:0 auto;padding:10px 16px 0;display:flex;flex-direction:column;gap:8px}
-.brand{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
-.brand h1{font-size:1.35rem;font-weight:800;letter-spacing:-.01em}
-.brand h1 .lights{display:inline-flex;gap:3px;vertical-align:middle;margin-right:6px}
-.brand h1 .lights i{width:9px;height:9px;border-radius:50%;display:block}
-.brand small{color:var(--muted)}
-.who{margin-left:auto;font-size:.85rem;color:var(--muted)}
-nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none}
-nav.tabs button{background:none;border:0;border-bottom:3px solid transparent;padding:8px 12px;cursor:pointer;color:var(--muted);font-weight:700;white-space:nowrap}
-nav.tabs button[aria-selected="true"]{color:var(--fg);border-bottom-color:var(--accent)}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:linear-gradient(180deg,var(--band),var(--band-2));color:var(--band-ink)}
+.top-inner{max-width:1100px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.brand h1{font-size:1.45rem;font-style:italic;display:flex;align-items:center;gap:8px}
+.brand h1 .mark{background:var(--lima);color:var(--lima-ink);padding:1px 10px 2px 8px;border-radius:2px}
+.brand h1 .lights{display:inline-flex;gap:3px}
+.brand h1 .lights i{width:9px;height:9px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--band-2)}
+.brand small{color:var(--band-muted);font-size:.82rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.who{margin-left:auto;font-size:.85rem;color:var(--band-muted)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-inline:-6px}
+nav.tabs button{background:none;border:0;border-bottom:4px solid transparent;padding:9px 12px 8px;cursor:pointer;color:var(--band-muted);font-family:var(--font-display);font-weight:700;font-size:.92rem;white-space:nowrap}
+nav.tabs button:hover{color:var(--band-ink)}
+nav.tabs button[aria-selected="true"]{color:var(--band-ink);border-bottom-color:var(--lima)}
+nav.tabs button:focus-visible{outline-color:var(--lima);outline-offset:-3px}
+.progress{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;background:var(--lima);border-radius:99px;transition:width .25s}
+.stu.done .stu-head .name::after{content:" ✓";color:var(--verde)}
+.stu-foot{display:flex;justify-content:flex-end;gap:8px}
+@media (max-width:480px){.who{display:none}.brand h1{font-size:1.3rem}}
+.desc:empty{display:none}
 
 main{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
@@ -149,8 +162,8 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 <header class="top">
   <div class="top-inner">
     <div class="brand">
-      <h1><span class="lights" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span>Jóvenes 26 · CITEF</h1>
-      <small id="subtitle">Seguimiento de empleabilidad · con respaldo de INEFOP</small>
+      <h1><span class="mark">Jóvenes 26</span>CITEF<span class="lights" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span></h1>
+      <small id="subtitle">Seguimiento de empleabilidad · INEFOP</small>
       <span class="who" id="who"></span>
     </div>
     <nav class="tabs" role="tablist" aria-label="Secciones">
@@ -177,6 +190,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       </div>
       <p class="banner warn" id="r-aviso" hidden style="margin:10px 0 0"></p>
       <p class="status" id="r-status"></p>
+      <div class="progress" id="r-prog" aria-hidden="true"><i style="width:0"></i></div>
     </div>
     <div class="students" id="r-list"></div>
   </section>
@@ -504,11 +518,13 @@ function mergePending(coll,next,prev){
 function setHTML(el,html){ if(el._html!==html){ el.innerHTML=html; el._html=html; } }
 
 // ---------- Registrar ----------
+function antesDelInicio(f){return !!(cfg.inicio&&f&&f<cfg.inicio)}
 function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
 function status(t){$("#r-status").textContent=t}
 function setEval(sid,patch){
   if(!db){status("Sin conexión al registro compartido: el cambio no se guardó.");return}
   if(!$("#r-comp").value){status("Elija un componente primero.");return}
+  if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
   const id=clsId();
   const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
   c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
@@ -524,6 +540,8 @@ function compSelect(sel,fecha,allowAll){
   setHTML(sel,(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join("")));
   if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else if(act[0]&&!allowAll) sel.value=act[0].id;
 }
+// Completo: los cuatro aspectos calificados, o ausencia (rojo o justificada), o sin tarea ese día
+const completo=e=>!!(e.j||e.as==="r"||(!blank(e.as)&&!blank(e.ac)&&!blank(e.co)&&(!blank(e.cu)||e.na)));
 const dotCls=(e,d)=>e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"");
 function renderRegistrar(){
   const fecha=$("#r-fecha").value; compSelect($("#r-comp"),fecha,false);
@@ -532,7 +550,8 @@ function renderRegistrar(){
   const msgs=[]; if(fecha&&(w===0||w===6)) msgs.push("La fecha elegida es fin de semana.");
   if(fecha&&enReceso(fecha)) msgs.push("La fecha elegida cae en el receso.");
   if(fecha&&comp&&!moduloActivo(comp,fecha)) msgs.push("Este componente no se dicta en esta fecha según su módulo.");
-  if(cfg.inicio&&fecha&&fecha<cfg.inicio) msgs.push("La fecha es anterior al inicio del curso.");
+  if(antesDelInicio(fecha)) msgs.push("El curso comienza el "+fmt(cfg.inicio)+". Elija una fecha desde ese día.");
+  $("#r-fecha").min=cfg.inicio||""; $("#r-fecha").max=cfg.fin||"";
   av.hidden=!msgs.length; av.textContent=msgs.join(" ");
   const list=$("#r-list");
   if(!cfg.estudiantes.length){setHTML(list,`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`);return}
@@ -546,6 +565,7 @@ function renderRegistrar(){
           ${d.extra?`<label class="extra"><input type="checkbox" class="ex" id="ex-${d.extra.k}-${esc(s.id)}" data-x="${d.extra.k}"> ${esc(d.extra.n)}</label>`:""}
           <div class="desc"></div></div>`).join("")}
         <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde"></textarea></div>
+        <div class="stu-foot"><button type="button" class="btn primary next">${i<cfg.estudiantes.length-1?"Siguiente estudiante →":"Terminar"}</button></div>
       </div>`:""}
     </div>`}).join(""));
   paintRegistrar();
@@ -561,15 +581,22 @@ function paintRegistrar(){
       const cb=dim.querySelector(".ex"); if(cb) cb.checked=!!ex;
       dim.querySelector(".desc").textContent=!blank(val)?d[val]:ex?"No se tiene en cuenta en el cálculo.":"";});
     const ta=card.querySelector(".obs"); if(ta&&document.activeElement!==ta) ta.value=e.obs||"";
+    card.classList.toggle("done",completo(e));
   });
+  const hechos=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
+  $("#r-prog i").style.width=(cfg.estudiantes.length?hechos/cfg.estudiantes.length*100:0)+"%";
   const st=$("#r-status").textContent;
   if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")){
-    const n=Object.values(ev).filter(e=>DIMS.some(d=>!blank(e[d.k]))||e.j).length;
-    status(c.fecha?`Esta clase tiene datos de ${n} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
+    const n=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
+    status(c.fecha?`Evaluación completa: ${n} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
 }
 $("#r-list").addEventListener("click",ev=>{
   const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
   if(ev.target.closest(".stu-head")){openCard=openCard===sid?null:sid;renderRegistrar();return}
+  if(ev.target.closest(".next")){const i=cfg.estudiantes.findIndex(s=>s.id===sid), nx=cfg.estudiantes[i+1];
+    openCard=nx?nx.id:null; renderRegistrar();
+    const el=nx&&document.querySelector(`.stu[data-sid="${CSS.escape(nx.id)}"]`); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-$("header.top").offsetHeight-8,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    return}
   const b=ev.target.closest(".lvl"); if(b){const k=b.closest(".dim").dataset.k, cur=((clases[clsId()]||{}).ev||{})[sid]||{};
     const patch={[k]:cur[k]===b.dataset.l?"":b.dataset.l};
     if(k==="as"&&patch.as) patch.j=false;
@@ -586,6 +613,7 @@ $("#r-list").addEventListener("change",ev=>{
 });
 $("#r-todos").onclick=()=>{
   if(!cfg.estudiantes.length||!$("#r-comp").value) return;
+  if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
   const ev=((clases[clsId()]||{}).ev)||{};
   cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(blank(e.as)&&!e.j) setEval(s.id,{as:"v"})});
   status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
@@ -632,6 +660,7 @@ $("#h-crear").onclick=async()=>{
   const nombre=$("#h-nombre").value.trim(), fecha=$("#h-fecha").value, comp=$("#h-comp").value;
   if(!db) return; if(!comp){$("#h-cstatus").textContent="Elija un componente.";return}
   if(!nombre||!fecha){$("#h-cstatus").textContent="El hito necesita nombre y fecha de entrega.";return}
+  if(antesDelInicio(fecha)){$("#h-cstatus").textContent="La fecha de entrega no puede ser anterior al inicio del curso ("+fmt(cfg.inicio)+").";return}
   const id=fecha+"_"+comp+"_"+uid("h");
   const data={comp,nombre,tipo:$("#h-tipo").value,fecha,ev:{},creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{})};
   $("#h-cstatus").textContent="Creando…";
@@ -793,7 +822,9 @@ const saved=gp("tab"); showTab(saved&&$(`[data-tab="${saved}"]`)?saved:"registra
   if(!db){$("#conn").textContent="No se pudo abrir el registro compartido. Inicie sesión en claude.ai y vuelva a abrir el enlace.";$("#conn").classList.add("warn");return}
   $("#conn").hidden=true;
   const err=e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer el registro compartido ("+e.code+")."};
-  db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{}); if(!typing()){draft=null;renderAll();}},err);
+  let fechaLista=false;
+  db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{});
+      if(!fechaLista){fechaLista=true; if(antesDelInicio($("#r-fecha").value)) $("#r-fecha").value=cfg.inicio;} if(!typing()){draft=null;renderAll();}},err);
   db.collection("clases").orderBy("fecha","desc").limit(1000).onSnapshot(s=>{
       const next={}; s.docs.forEach(doc=>next[doc.id]=doc.data()); mergePending("clases",next,clases); clases=next;
       if(!typing()) renderAll()},err);
