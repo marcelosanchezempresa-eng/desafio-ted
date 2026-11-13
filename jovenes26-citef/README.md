@@ -41,3 +41,10 @@ La app está en una cuenta personal de claude.ai. Para que un docente pueda **gu
 ## Manual
 - `Guia-docentes-Semaforo-Jovenes26.pdf`: guía paso a paso con capturas.
 - `manual/`: fuente HTML y capturas (datos de ejemplo) para regenerarla.
+
+## Versión con Supabase (recomendada)
+- App: `docs/` (GitHub Pages). Conexión: `docs/config.js`.
+- Base de datos: `jovenes26-citef/supabase/esquema.sql` (tablas, reglas RLS, funciones `evaluar_clase` / `evaluar_hito`).
+- Pasos: `jovenes26-citef/PUESTA-EN-MARCHA.md`.
+- Los datos reales del curso (`semilla-privada.sql`) **no** se suben al repositorio.
+- `supabase/pruebas/`: pruebas de RLS y de punta a punta contra un PostgreSQL local. `generar-version-supabase.py` arma `docs/index.html` a partir de `index.html`.

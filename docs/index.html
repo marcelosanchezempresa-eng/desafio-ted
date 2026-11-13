@@ -1,0 +1,1068 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Semáforo Jóvenes 26</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="config.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Montserrat:ital,wght@0,700;0,800;1,800&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+html{color-scheme:light}
+body{margin:0}
+[hidden]{display:none!important}
+/* Layout: banda azul del afiche con pestañas; debajo, herramientas de trabajo sobre fondo azulado claro. Móvil primero.
+   El lima del afiche es solo de marca (encabezado, pestaña activa, progreso): nunca se usa como "verde" del semáforo. */
+:root{
+  --bg:#eef3f9; --surface:#ffffff; --surface-2:#e2ebf5; --line:#c8d6e6;
+  --fg:#0e2338; --muted:#4c6178; --accent:#1667ae; --accent-ink:#ffffff;
+  --band:#1667ae; --band-2:#0f4f8a; --band-ink:#ffffff; --band-muted:#cfe0f2; --lima:#c4d92e; --lima-ink:#0d3a63;
+  --verde:#1f8a4c; --verde-bg:#dcf2e4; --amarillo:#a87200; --amarillo-bg:#fdf0c8; --amarillo-dot:#f0b400;
+  --rojo:#c23636; --rojo-bg:#fbe0e0; --gris-dot:#c0cddb;
+  --font-display:"Montserrat", "Segoe UI", system-ui, sans-serif;
+  --font-body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data:"IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius:12px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0a1622; --surface:#102234; --surface-2:#173049; --line:#24415f;
+  --fg:#e7f0f9; --muted:#9db3c9; --accent:#6db2ec; --accent-ink:#06192b;
+  --band:#0f3f6e; --band-2:#0a2f54; --band-ink:#ffffff; --band-muted:#a9c4de; --lima:#c4d92e; --lima-ink:#0d3a63;
+  --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#36506b; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0a1622; --surface:#102234; --surface-2:#173049; --line:#24415f;
+  --fg:#e7f0f9; --muted:#9db3c9; --accent:#6db2ec; --accent-ink:#06192b;
+  --band:#0f3f6e; --band-2:#0a2f54; --band-ink:#ffffff; --band-muted:#a9c4de; --lima:#c4d92e; --lima-ink:#0d3a63;
+  --verde:#4cc983; --verde-bg:#173826; --amarillo:#f2c14e; --amarillo-bg:#3a3014; --amarillo-dot:#f2c14e;
+  --rojo:#f07171; --rojo-bg:#3d1c1e; --gris-dot:#36506b; color-scheme:dark}
+html,body{background:var(--bg);color:var(--fg)}
+body{font-family:var(--font-body);font-size:15.5px;line-height:1.45}
+*{box-sizing:border-box}
+h1,h2,h3{font-family:var(--font-display);font-weight:800;text-wrap:balance;margin:0;line-height:1.15;letter-spacing:-.01em}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.num{font-family:var(--font-data);font-variant-numeric:tabular-nums}
+
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:linear-gradient(180deg,var(--band),var(--band-2));color:var(--band-ink)}
+.top-inner{max-width:1100px;margin:0 auto;padding:12px 16px 0;display:flex;flex-direction:column;gap:8px}
+.brand{display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.brand h1{font-size:1.45rem;font-style:italic;display:flex;align-items:center;gap:8px}
+.brand h1 .mark{background:var(--lima);color:var(--lima-ink);padding:1px 10px 2px 8px;border-radius:2px}
+.brand h1 .lights{display:inline-flex;gap:3px}
+.brand h1 .lights i{width:9px;height:9px;border-radius:50%;display:block;box-shadow:0 0 0 2px var(--band-2)}
+.brand small{color:var(--band-muted);font-size:.82rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+.who{margin-left:auto;font-size:.85rem;color:var(--band-muted)}
+nav.tabs{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-inline:-6px}
+nav.tabs button{background:none;border:0;border-bottom:4px solid transparent;padding:9px 12px 8px;cursor:pointer;color:var(--band-muted);font-family:var(--font-display);font-weight:700;font-size:.92rem;white-space:nowrap}
+nav.tabs button:hover{color:var(--band-ink)}
+nav.tabs button[aria-selected="true"]{color:var(--band-ink);border-bottom-color:var(--lima)}
+nav.tabs button:focus-visible{outline-color:var(--lima);outline-offset:-3px}
+.progress{height:8px;border-radius:99px;background:var(--surface-2);overflow:hidden;margin-top:6px}
+.progress i{display:block;height:100%;background:var(--lima);border-radius:99px;transition:width .25s}
+.stu.done .stu-head .name::after{content:" ✓";color:var(--verde)}
+.stu-foot{display:flex;justify-content:flex-end;gap:8px}
+@media (max-width:480px){.who{display:none}.brand h1{font-size:1.3rem}}
+.desc:empty{display:none}
+.estado{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--band-2);color:var(--band-muted);white-space:nowrap}
+.estado::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gris-dot)}
+.estado.ok{background:var(--verde-bg);color:var(--verde)} .estado.ok::before{background:var(--verde)}
+.estado.no{background:var(--rojo-bg);color:var(--rojo)} .estado.no::before{background:var(--rojo)}
+.banner.error{background:var(--rojo-bg);border-color:var(--rojo);color:var(--fg)}
+.banner.error b{color:var(--rojo)}
+body.solo-lectura .lvl,body.solo-lectura #r-todos,body.solo-lectura #h-crear,body.solo-lectura .ex{opacity:.45;pointer-events:none}
+.ayuda{display:flex;flex-direction:column;gap:14px;max-width:46rem}
+.ayuda h2{font-size:1.2rem}
+.ayuda h3{font-size:1rem;margin-top:6px}
+.ayuda ol,.ayuda ul{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
+.ayuda p{margin:0}
+
+main{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+.field{display:flex;flex-direction:column;gap:4px;min-width:0}
+.field label{font-size:.75rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:700}
+input[type=text],input[type=date],input[type=number],select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:8px 10px;min-height:40px;max-width:100%}
+textarea{width:100%;min-height:60px;resize:vertical}
+.btn{border:1px solid var(--line);background:var(--surface-2);border-radius:8px;padding:8px 14px;min-height:40px;cursor:pointer;font-weight:700}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.muted{color:var(--muted)}
+.note{font-size:.88rem;color:var(--muted)}
+.banner{border-radius:var(--radius);padding:12px 14px;background:var(--surface-2);border:1px solid var(--line)}
+.banner.warn{background:var(--amarillo-bg);border-color:var(--amarillo-dot)}
+
+/* Semáforo */
+.dot{width:14px;height:14px;border-radius:50%;display:inline-block;background:var(--gris-dot);flex:none}
+.dot.v{background:var(--verde)} .dot.a{background:var(--amarillo-dot)} .dot.r{background:var(--rojo)} .dot.x{background:transparent;border:2px dashed var(--gris-dot)}
+
+/* Lista de registro */
+.status{font-size:.85rem;color:var(--muted);min-height:1.2em}
+.students{display:flex;flex-direction:column;gap:8px}
+.stu{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius)}
+.stu-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;width:100%;background:none;border:0;text-align:left}
+.stu-head .n{font-family:var(--font-data);color:var(--muted);width:1.8em;flex:none}
+.stu-head .name{font-weight:700;flex:1;min-width:0}
+.stu-head .sum{display:flex;gap:5px}
+.stu-head .chev{color:var(--muted);transition:transform .15s}
+.stu[open-card] .chev{transform:rotate(180deg)}
+.stu-body{padding:4px 12px 14px;display:flex;flex-direction:column;gap:12px;border-top:1px solid var(--line)}
+.dim{display:flex;flex-direction:column;gap:6px;padding-top:8px}
+.dim-title{font-weight:700;font-size:.92rem}
+.levels{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.lvl{border:2px solid var(--line);background:var(--bg);border-radius:8px;padding:8px 6px;cursor:pointer;font-weight:700;display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px}
+.lvl[data-l=v][aria-pressed=true]{background:var(--verde-bg);border-color:var(--verde)}
+.lvl[data-l=a][aria-pressed=true]{background:var(--amarillo-bg);border-color:var(--amarillo-dot)}
+.lvl[data-l=r][aria-pressed=true]{background:var(--rojo-bg);border-color:var(--rojo)}
+.extra{font-size:.85rem;display:flex;gap:6px;align-items:center;color:var(--muted)}
+.desc{font-size:.84rem;color:var(--muted);min-height:1.1em}
+@media (max-width:480px){.lvl{padding:8px 4px;font-size:.78rem;gap:4px}}
+
+/* Tablas */
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--radius);background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.9rem}
+th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);background:var(--surface-2);position:sticky;top:0}
+td.cell{text-align:center;font-family:var(--font-data);font-variant-numeric:tabular-nums}
+td.cell.v{background:var(--verde-bg);color:var(--verde)} td.cell.a{background:var(--amarillo-bg);color:var(--amarillo)} td.cell.r{background:var(--rojo-bg);color:var(--rojo)}
+td.cell small{display:block;font-size:.7rem;opacity:.8}
+.pill{display:inline-block;font-size:.72rem;font-weight:700;padding:2px 8px;border-radius:99px;background:var(--surface-2);color:var(--muted)}
+.pill.r{background:var(--rojo-bg);color:var(--rojo)} .pill.a{background:var(--amarillo-bg);color:var(--amarillo)} .pill.v{background:var(--verde-bg);color:var(--verde)}
+
+/* Ranking */
+.rank{display:flex;flex-direction:column;gap:4px}
+.rk{display:grid;grid-template-columns:2.2em minmax(0,11em) 1fr 3.4em;gap:8px;align-items:center;padding:3px 0}
+.rk .pos{font-family:var(--font-data);color:var(--muted);text-align:right}
+.rk .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700}
+.rk .bar{height:18px;background:var(--surface-2);border-radius:4px;position:relative;overflow:hidden}
+.rk .bar i{position:absolute;inset:0 auto 0 0;border-radius:4px}
+.rk .val{font-family:var(--font-data);text-align:right}
+.cut{border-top:2px dashed var(--accent);margin:6px 0 2px;padding-top:2px;font-size:.75rem;color:var(--accent);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.cut.amp{border-top-style:dotted;color:var(--muted);border-color:var(--muted)}
+@media (max-width:520px){.rk{grid-template-columns:1.8em minmax(0,1fr) 3em}.rk .bar{grid-column:2/4;grid-row:2}}
+
+.grid2{display:grid;align-items:start;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:10px}
+.kpi{background:var(--surface-2);border-radius:8px;padding:10px}
+.kpi b{display:block;font-family:var(--font-data);font-size:1.4rem}
+.kpi span{font-size:.78rem;color:var(--muted)}
+.timeline{display:flex;flex-direction:column;gap:6px}
+.tl{display:grid;grid-template-columns:6.5em minmax(0,1fr) auto;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.tl .obs{grid-column:1/-1;font-size:.86rem;color:var(--muted);padding-left:6.5em}
+.cfg-list{display:flex;flex-direction:column;gap:6px}
+.cfg-item{display:grid;grid-template-columns:2em minmax(0,1fr) minmax(0,10em) auto;gap:6px;align-items:center}
+.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 4.5em minmax(0,9em) auto}
+.cfg-item.per{grid-template-columns:minmax(0,1fr) auto auto auto}
+@media (max-width:560px){.cfg-item,.cfg-item.comp,.cfg-item.per{grid-template-columns:1fr 1fr}.cfg-item>.idx{display:none}.cfg-item>input:first-of-type{grid-column:1/-1}}
+.rubric{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
+.rubric div{background:var(--surface-2);border-radius:8px;padding:10px;font-size:.88rem}
+.rubric h3{font-size:1rem;margin-bottom:6px}
+.rubric p{margin:4px 0;display:flex;gap:6px}
+.rubric p .dot{margin-top:3px}
+.empty{padding:28px 16px;text-align:center;color:var(--muted)}
+/* Hitos */
+.hitos{display:flex;flex-direction:column;gap:6px}
+.hito{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);cursor:pointer;text-align:left;width:100%}
+.hito[aria-current="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.hito .hn{font-weight:700;min-width:0}
+.hito .hm{font-size:.8rem;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1px dashed var(--line);background:none;border-radius:99px;padding:5px 10px;cursor:pointer;font-size:.85rem}
+.chip:hover{border-color:var(--accent);color:var(--accent)}
+.hrow{display:grid;grid-template-columns:minmax(0,1fr) repeat(4,auto);gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--line)}
+.hrow .nm{font-weight:700;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hrow .lvl{min-height:40px;padding:6px 10px}
+.hrow .lvl[data-l=x][aria-pressed=true]{background:var(--surface-2);border-color:var(--muted)}
+.hrow .obs-in{grid-column:1/-1;min-height:34px;padding:6px 8px;font-size:.88rem}
+@media (max-width:520px){.hrow{grid-template-columns:repeat(4,1fr)}.hrow .nm{grid-column:1/-1}}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+.login{max-width:26rem;margin:6vh auto 0;display:flex;flex-direction:column;gap:12px}
+.login .field input{width:100%}
+.login .acciones{display:flex;gap:8px;flex-wrap:wrap}
+.linklike{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:700}
+.salir{background:none;border:1px solid var(--band-muted);color:var(--band-ink);border-radius:99px;padding:2px 10px;font-size:.8rem;cursor:pointer}
+.doc-item{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr) auto auto;gap:6px;align-items:center}
+@media (max-width:560px){.doc-item{grid-template-columns:1fr 1fr}}
+.doc-item .baja{opacity:.55}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <h1><span class="mark">Jóvenes 26</span>CITEF<span class="lights" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span></h1>
+      <small id="subtitle">Seguimiento de empleabilidad · INEFOP</small>
+      <span class="who" id="who"></span><span class="estado" id="estado" role="status">Conectando…</span><button class="salir" id="salir" type="button" hidden>Salir</button>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Secciones">
+      <button role="tab" data-tab="registrar" aria-selected="true">Registrar clase</button>
+      <button role="tab" data-tab="hitos" aria-selected="false">Hitos</button>
+      <button role="tab" data-tab="semaforo" aria-selected="false">Semáforo</button>
+      <button role="tab" data-tab="ranking" aria-selected="false">Ranking</button>
+      <button role="tab" data-tab="ficha" aria-selected="false">Ficha</button>
+      <button role="tab" data-tab="criterios" aria-selected="false">Criterios</button>
+      <button role="tab" data-tab="config" aria-selected="false">Configuración</button>
+      <button role="tab" data-tab="ayuda" aria-selected="false">Ayuda</button>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+  <div id="conn" class="banner">Conectando con el registro compartido…</div>
+  <div id="ro" class="banner error" hidden></div>
+
+  <section id="login" class="panel login" hidden>
+    <h2 style="font-size:1.3rem">Entrar</h2>
+    <p class="note" id="l-ayuda">Use el correo que la coordinación autorizó. La primera vez, toque «Crear mi contraseña».</p>
+    <form id="l-form" class="login" style="margin:0">
+      <div class="field"><label for="l-email">Correo electrónico</label><input type="email" id="l-email" autocomplete="email" required></div>
+      <div class="field" id="l-pass-f"><label for="l-pass">Contraseña</label><input type="password" id="l-pass" autocomplete="current-password" minlength="8"></div>
+      <div class="acciones">
+        <button class="btn primary" id="l-entrar" type="submit">Entrar</button>
+        <button class="btn" id="l-crear" type="button">Crear mi contraseña</button>
+      </div>
+      <button class="linklike" id="l-olvido" type="button">Olvidé mi contraseña</button>
+      <p class="status" id="l-status" role="status"></p>
+    </form>
+    <form id="l-nueva" class="login" style="margin:0" hidden>
+      <div class="field"><label for="l-pass2">Nueva contraseña (mínimo 8 caracteres)</label><input type="password" id="l-pass2" autocomplete="new-password" minlength="8" required></div>
+      <button class="btn primary" type="submit">Guardar contraseña</button>
+      <p class="status" id="l-status2" role="status"></p>
+    </form>
+  </section>
+
+  <section data-view="registrar" class="view">
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="r-fecha">Fecha</label><input type="date" id="r-fecha"></div>
+        <div class="field" style="flex:1;min-width:200px"><label for="r-comp">Componente</label><select id="r-comp"></select></div>
+        <button class="btn" id="r-todos" type="button">Todos presentes y puntuales</button>
+      </div>
+      <p class="banner warn" id="r-aviso" hidden style="margin:10px 0 0"></p>
+      <p class="status" id="r-status"></p>
+      <div class="progress" id="r-prog" aria-hidden="true"><i style="width:0"></i></div>
+    </div>
+    <div class="students" id="r-list"></div>
+  </section>
+
+  <section data-view="hitos" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field" style="flex:1;min-width:220px"><label for="h-comp">Componente</label><select id="h-comp"></select></div>
+      </div>
+      <p class="note">Un hito es una entrega o instancia con fecha: un trabajo práctico, una presentación oral, una prueba. Cada hito pesa en el aspecto <b>Cumplimiento</b> más que una tarea de clase.</p>
+    </div>
+    <div class="grid2">
+      <div class="panel">
+        <h2 style="font-size:1.1rem;margin-bottom:8px">Hitos del componente</h2>
+        <div class="hitos" id="h-list"></div>
+        <h3 style="font-size:.95rem;margin:16px 0 6px">Nuevo hito</h3>
+        <div class="row">
+          <div class="field" style="flex:1;min-width:180px"><label for="h-nombre">Nombre</label><input type="text" id="h-nombre" placeholder="Ej.: Currículum en Word"></div>
+          <div class="field"><label for="h-tipo">Tipo</label><select id="h-tipo"><option value="trabajo">Trabajo práctico</option><option value="oral">Presentación oral</option><option value="prueba">Prueba o ejercicio</option><option value="otro">Otro</option></select></div>
+          <div class="field"><label for="h-fecha">Fecha de entrega</label><input type="date" id="h-fecha"></div>
+          <button class="btn primary" id="h-crear" type="button">Crear hito</button>
+        </div>
+        <p class="status" id="h-cstatus"></p>
+        <div id="h-sug"></div>
+      </div>
+      <div class="panel" id="h-eval"></div>
+    </div>
+  </section>
+
+  <section data-view="semaforo" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="s-tipo">Período</label><select id="s-tipo" class="per-tipo"></select></div>
+        <div class="field" style="flex:1;min-width:220px"><label for="s-per">Corte</label><select id="s-per" class="per-sel"></select></div>
+        <div class="field"><label for="s-comp">Componente</label><select id="s-comp"></select></div>
+        <button class="btn" id="s-csv" type="button">Descargar CSV</button>
+      </div>
+      <p class="note" id="s-cov"></p>
+    </div>
+    <div class="tablewrap"><table id="s-table"></table></div>
+    <p class="note">Cada celda muestra el porcentaje de logro del período (verde = 100, amarillo = 50, rojo = 0) y debajo la cantidad de calificaciones verde/amarillo/rojo; en Cumplimiento, la línea «H» cuenta los hitos. Color de la celda: verde desde 80 %, amarillo de 50 a 79 %, rojo por debajo de 50 %.</p>
+  </section>
+
+  <section data-view="ranking" class="view" hidden>
+    <div class="panel">
+      <div class="row">
+        <div class="field"><label for="k-tipo">Período</label><select id="k-tipo" class="per-tipo"></select></div>
+        <div class="field" style="flex:1;min-width:220px"><label for="k-per">Corte</label><select id="k-per" class="per-sel"></select></div>
+        <button class="btn" id="k-csv" type="button">Descargar CSV</button>
+      </div>
+      <p class="note" id="k-formula"></p>
+    </div>
+    <div class="panel"><div class="rank" id="k-list"></div></div>
+  </section>
+
+  <section data-view="ficha" class="view" hidden>
+    <div class="panel"><div class="row">
+      <div class="field" style="flex:1;min-width:220px"><label for="f-est">Estudiante</label><select id="f-est"></select></div>
+      <div class="field"><label for="f-tipo">Período</label><select id="f-tipo" class="per-tipo"></select></div>
+      <div class="field" style="min-width:200px"><label for="f-per">Corte</label><select id="f-per" class="per-sel"></select></div>
+    </div></div>
+    <div id="f-body"></div>
+  </section>
+
+  <section data-view="criterios" class="view" hidden>
+    <div class="panel">
+      <h2 style="font-size:1.2rem;margin-bottom:6px">Qué significa cada color</h2>
+      <p class="note">Se evalúan conductas observables en la clase, no el nivel educativo previo: así un joven con primaria y uno con bachillerato compiten en igualdad de condiciones.</p>
+      <div class="rubric" id="rubric"></div>
+    </div>
+  </section>
+
+  <section data-view="ayuda" class="view" hidden>
+    <div class="panel ayuda">
+      <h2>Cómo usar la aplicación</h2>
+      <p class="note">Hay una guía completa con capturas de pantalla en PDF. Esta es la versión corta.</p>
+      <p class="note" id="ayuda-login" hidden>Para empezar, entre con su correo en la pantalla de ingreso.</p>
+      <h3>Antes de empezar (una sola vez)</h3>
+      <ol>
+        <li>La coordinación le da <b>la dirección de la aplicación</b>, su <b>correo de usuario</b> y una <b>contraseña</b>.</li>
+        <li>Abra la dirección, escriba su correo y la contraseña, y toque <b>«Entrar»</b>. El celular la recuerda: no hace falta escribirla cada vez.</li>
+        <li>Arriba tiene que decir <b>«Puede guardar»</b> en verde. Si dice <b>«No autorizado»</b>, avise a la coordinación.</li>
+      </ol>
+      <h3>Registrar una clase</h3>
+      <ol>
+        <li>Entre a la pestaña <b>Registrar clase</b>.</li>
+        <li>Revise la <b>fecha</b> (sale la de hoy) y elija su <b>componente</b>.</li>
+        <li>Toque <b>«Todos presentes y puntuales»</b>. Todos quedan con asistencia en verde.</li>
+        <li>Toque el <b>nombre</b> de un estudiante: se abren los cuatro aspectos.</li>
+        <li>En cada aspecto toque <b>Logrado</b> (verde), <b>En proceso</b> (amarillo) o <b>No logrado</b> (rojo).</li>
+        <li>Si faltó, toque <b>No logrado</b> en asistencia: los otros tres aspectos se borran solos. Si la falta es justificada, marque la casilla.</li>
+        <li>Toque <b>«Siguiente estudiante»</b> y repita. Cuando un estudiante está completo aparece una ✓ junto a su nombre.</li>
+        <li>Cada toque se guarda solo. Debajo de la fecha debe decir <b>«Guardado ✓»</b>.</li>
+      </ol>
+      <h3>Si se equivoca</h3>
+      <ul>
+        <li>Toque el botón correcto: el anterior se reemplaza.</li>
+        <li>Toque de nuevo el mismo botón para dejarlo vacío.</li>
+        <li>Puede volver a la misma fecha y componente otro día y corregir.</li>
+      </ul>
+      <h3>Hitos (trabajos, presentaciones, pruebas)</h3>
+      <ol>
+        <li>Entre a la pestaña <b>Hitos</b> y elija su componente.</li>
+        <li>Escriba el nombre, elija el tipo y la fecha de entrega, y toque <b>Crear hito</b>. También puede tocar un hito sugerido.</li>
+        <li>Toque el hito en la lista y califique a cada estudiante. <b>N/C</b> es «no corresponde».</li>
+      </ol>
+      <h3>Consultar</h3>
+      <ul>
+        <li><b>Semáforo</b>: el resumen de cada estudiante por semana, quincena o módulo.</li>
+        <li><b>Ranking</b>: el orden para las pasantías.</li>
+        <li><b>Ficha</b>: la historia de un estudiante, clase por clase.</li>
+        <li><b>Criterios</b>: qué significa cada color.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section data-view="config" class="view" hidden>
+    <div id="cfg-lock" class="banner warn" hidden>Solo la coordinación puede cambiar la configuración. Usted puede consultarla.</div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:10px">Curso</h2>
+      <div class="row">
+        <div class="field" style="flex:1;min-width:200px"><label for="c-nombre">Nombre</label><input type="text" id="c-nombre"></div>
+        <div class="field"><label for="c-inicio">Inicio del curso</label><input type="date" id="c-inicio"></div>
+        <div class="field"><label for="c-fin">Fin del curso</label><input type="date" id="c-fin"></div>
+        <div class="field"><label for="c-hora">Hora de entrada</label><input type="text" id="c-hora" size="6"></div>
+        <div class="field"><label for="c-tol">Tolerancia (min)</label><input type="number" id="c-tol" min="0" max="30" style="width:6em"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="c-cupos">Cupos de pasantía</label><input type="number" id="c-cupos" min="1" max="25" style="width:6em"></div>
+        <div class="field"><label for="c-cupos2">Cupos ampliados</label><input type="number" id="c-cupos2" min="1" max="25" style="width:6em"></div>
+        <div class="field"><label for="c-min">Mín. registros para rankear</label><input type="number" id="c-min" min="0" max="50" style="width:6em"></div>
+        <div class="field"><label for="c-pesoHito">Un hito equivale a … tareas de clase</label><input type="number" id="c-pesoHito" min="1" max="10" style="width:6em"></div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div class="field"><label for="c-w0">Peso asistencia %</label><input type="number" id="c-w0" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w1">Peso actitud %</label><input type="number" id="c-w1" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w2">Peso comunicación %</label><input type="number" id="c-w2" min="0" max="100" style="width:6em"></div>
+        <div class="field"><label for="c-w3">Peso cumplimiento %</label><input type="number" id="c-w3" min="0" max="100" style="width:6em"></div>
+      </div>
+    </div>
+    <div class="grid2">
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Módulos</h2>
+        <p class="note">Tramos del curso. Cada componente se asigna a un módulo o a «Todo el curso» (transversal).</p>
+        <div class="cfg-list" id="c-mod"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="c-mod-add" type="button">Agregar módulo</button></div>
+      </div>
+      <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Recesos</h2>
+        <p class="note">Las semanas y quincenas que caen enteras en un receso no se cuentan.</p>
+        <div class="cfg-list" id="c-rec"></div>
+        <div class="row" style="margin-top:10px"><button class="btn" id="c-rec-add" type="button">Agregar receso</button></div>
+      </div>
+    </div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Componentes</h2>
+      <p class="note">Nombre, docente a cargo, horas semanales y módulo en que se dicta.</p>
+      <div class="cfg-list" id="c-comp"></div>
+      <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
+    </div>
+    <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
+      <p class="note">Nombre y nivel educativo alcanzado (dato de contexto, no puntúa).</p>
+      <div class="cfg-list" id="c-est"></div>
+      <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
+      <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
+    </div>
+    <div class="panel" id="c-docentes-panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Docentes autorizados</h2>
+      <p class="note">Solo estos correos pueden entrar y calificar. Cada cambio se guarda al instante.</p>
+      <div class="cfg-list" id="c-docentes"></div>
+      <div class="row" style="margin-top:10px">
+        <div class="field" style="flex:1;min-width:200px"><label for="d-email">Correo</label><input type="text" id="d-email" inputmode="email" placeholder="nombre@ejemplo.com"></div>
+        <div class="field" style="flex:1;min-width:160px"><label for="d-nombre">Nombre</label><input type="text" id="d-nombre"></div>
+        <div class="field"><label for="d-rol">Rol</label><select id="d-rol"><option value="docente">Docente</option><option value="coordinacion">Coordinación</option></select></div>
+        <button class="btn" id="d-add" type="button">Autorizar</button>
+      </div>
+      <p class="status" id="d-status"></p>
+    </div>
+    <div class="panel row" style="justify-content:space-between">
+      <p class="status" id="c-status" style="margin:0"></p>
+      <button class="btn primary" id="c-save" type="button">Guardar configuración</button>
+    </div>
+  </section>
+</main>
+
+<script>
+(function(){
+"use strict";
+// ---------- Modelo ----------
+const DIMS=[
+ {k:"as",n:"Asistencia y puntualidad",
+  v:"Llegó en hora (dentro de la tolerancia) y permaneció toda la clase.",
+  a:"Llegó tarde o se retiró antes; o faltó avisando sin justificativo.",
+  r:"Ausente sin aviso, o llegó con un retraso que le hizo perder buena parte de la clase.",
+  extra:{k:"j",n:"Falta justificada (no computa)"}},
+ {k:"ac",n:"Actitud frente al aprendizaje",
+  v:"Se involucra, pregunta, sostiene la tarea y recibe las devoluciones para mejorar.",
+  a:"Participa solo si se le pide, se dispersa (celular, charla) o necesita recordatorios frecuentes.",
+  r:"No se involucra, rechaza la tarea o dificulta el trabajo del grupo."},
+ {k:"co",n:"Comunicación",
+  v:"Se expresa con claridad y respeto; escucha; avisa a tiempo a docentes, coordinación y CITEF.",
+  a:"Comunica de forma incompleta o tardía, o con un registro poco adecuado al contexto.",
+  r:"No avisa ni responde, o mantiene un trato irrespetuoso con compañeros, docentes o coordinación."},
+ {k:"cu",n:"Cumplimiento de trabajos",
+  v:"Realiza la tarea de la clase siguiendo la consigna.",
+  a:"La realiza a medias o necesita que se la recuerden varias veces.",
+  r:"No realiza la tarea de la clase.",
+  extra:{k:"na",n:"Hoy no había tarea"}}
+];
+const HITO_LV={v:"Entregó o presentó en tiempo y forma, según la consigna.",
+  a:"Entregó fuera de plazo o incompleto; presentación con preparación insuficiente.",
+  r:"No entregó o no presentó.", x:"No corresponde (exonerado o ausencia justificada): no computa."};
+const TIPOS={trabajo:"Trabajo práctico",oral:"Presentación oral",prueba:"Prueba o ejercicio",otro:"Otro"};
+const LV={v:{t:"Logrado",p:100},a:{t:"En proceso",p:50},r:{t:"No logrado",p:0}};
+// Hitos sugeridos a partir del programa de cada componente (se agregan con un toque y se les pone fecha)
+const SUGERIDOS={
+ informatica:[["Prueba de velocidad de digitación","prueba"],["Currículum en Word con formato","trabajo"],["Planilla Excel: boleta de venta o sueldos","trabajo"],["Presentación visual en PowerPoint o Canva","oral"],["Práctica en plataforma de certificación Microsoft","prueba"],["Correo electrónico con asunto, adjunto y CC","trabajo"]],
+ contabilidad:[["Facturación y registro de ventas","trabajo"],["Cálculo de IVA, descuentos y moras","prueba"],["Liquidación simple de sueldo","trabajo"],["Flujo de caja en planilla","trabajo"]],
+ administracion:[["FODA de una empresa del medio","trabajo"],["Plan de acción con diagrama de Gantt","trabajo"],["Organigrama de una organización","trabajo"]],
+ ventas:[["Simulación de venta con técnica AIDA","oral"],["Manejo de una queja o reclamo (simulación)","oral"],["Producto digital: tienda online o catálogo","trabajo"]],
+ marketing:[["Marketing mix (4P) de un producto","trabajo"],["Anuncio o campaña para redes sociales","trabajo"],["Video de venta o venta en vivo","oral"]],
+ lectoescritura:[["Currículum vitae revisado","trabajo"],["Carta de presentación y solicitud de empleo","trabajo"],["Correspondencia empresarial (correo o nota formal)","trabajo"],["Texto argumentativo breve","trabajo"]],
+ comunicacion:[["Presentación oral planificada","oral"],["Redacción comercial: correo o propuesta","trabajo"],["Simulación de atención al cliente con escucha activa","oral"]],
+ emprendimiento:[["Idea de negocio identificada y fundamentada","trabajo"],["Plan de negocio con FODA","trabajo"],["Pitch de emprendimiento","oral"]],
+ proyecto:[["Metas a corto, mediano y largo plazo","trabajo"],["Currículum entregado a una empresa","trabajo"],["Entrevista laboral simulada","oral"],["Visita a empresa del medio","otro"]],
+ acompanamiento:[["Entrevista individual de seguimiento","otro"]]
+};
+const DEFAULT_CFG={nombre:"Jóvenes 26 · CITEF",inicio:"",fin:"",hora:"08:15",tol:10,cupos:12,cupos2:15,min:4,pesoHito:2,
+  pesos:[25,25,25,25],modulos:[],recesos:[],estudiantes:[],componentes:[]};
+
+let cfg=structuredClone(DEFAULT_CFG);
+let clases={}, hitos={};
+let sb=null, perfil=null, myId=null, canAdmin=false, docentes=[];
+let openCard=null, selHito=null, delAsk=false;
+let soloLectura=false;
+const MSG_RO="<b>Su correo no está autorizado para guardar calificaciones.</b> Pida a la coordinación que lo agregue en <b>Configuración → Docentes autorizados</b>. Después toque «Salir» y vuelva a entrar.";
+function marcarEstado(tipo,texto){const el=$("#estado"); el.className="estado "+(tipo||""); el.textContent=texto;}
+function pasarASoloLectura(){
+  if(soloLectura) return; soloLectura=true;
+  document.body.classList.add("solo-lectura"); marcarEstado("no","No autorizado");
+  const ro=$("#ro"); ro.innerHTML=MSG_RO; ro.hidden=false;
+  // Lo que no se pudo guardar no debe seguir en pantalla como si estuviera guardado
+  for(const k in queue) delete queue[k]; for(const k in timers) clearTimeout(timers[k]);
+  for(const path in overlay){const [coll,id]=path.split("/"); const src=coll==="clases"?clases:hitos;
+    if(src[id]&&src[id].ev) for(const sid in overlay[path]) for(const f in overlay[path][sid]) delete src[id].ev[sid][f];
+    delete overlay[path];}
+  status("No se guardó: su correo no está autorizado."); hStatus("No se guardó: su correo no está autorizado.");
+  renderAll();
+}
+
+const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=p=>p+Math.random().toString(36).slice(2,8);
+function todayStr(){const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
+const dayNum=s=>Math.floor(Date.UTC(+s.slice(0,4),+s.slice(5,7)-1,+s.slice(8,10))/864e5);
+const fromDay=n=>new Date(n*864e5).toISOString().slice(0,10);
+const wday=n=>new Date(n*864e5).getUTCDay(); // 0 domingo
+const fmt=s=>{const [y,m,d]=s.split("-");return d+"/"+m};
+const sp=(k,v)=>{try{localStorage.setItem("j26."+k,v)}catch(e){}};
+const gp=k=>{try{return localStorage.getItem("j26."+k)}catch(e){return null}};
+
+// ---------- Pestañas ----------
+function showTab(t){
+  $$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));
+  $$(".view").forEach(v=>v.hidden=v.dataset.view!==t);
+  sp("tab",t); renderAll();
+}
+$$("nav.tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+
+// ---------- Calendario ----------
+function enReceso(fecha){const d=dayNum(fecha);return (cfg.recesos||[]).some(r=>r.desde&&r.hasta&&d>=dayNum(r.desde)&&d<=dayNum(r.hasta))}
+function rangoEnReceso(a,b){ // todos los días hábiles del rango caen en receso
+  for(let d=a;d<=b;d++){const w=wday(d); if(w===0||w===6) continue; if(!enReceso(fromDay(d))) return false;} return true;}
+function moduloActivo(comp,fecha){
+  if(!comp.modulo||comp.modulo==="t") return true;
+  const m=(cfg.modulos||[]).find(x=>x.id===comp.modulo); if(!m||!m.desde||!m.hasta) return true;
+  const d=dayNum(fecha); return d>=dayNum(m.desde)&&d<=dayNum(m.hasta);
+}
+function startDay(){
+  let s;
+  if(cfg.inicio) s=dayNum(cfg.inicio);
+  else {const ds=Object.values(clases).map(c=>c.fecha).filter(Boolean).sort(); s=dayNum(ds[0]||todayStr());}
+  return s-((wday(s)+6)%7); // lunes de esa semana
+}
+function periodOptions(tipo){
+  if(tipo==="curso") return [{v:"all",t:"Todo el curso (acumulado)"}];
+  if(tipo==="modulo") return (cfg.modulos||[]).filter(m=>m.desde&&m.hasta).map(m=>({v:dayNum(m.desde)+":"+dayNum(m.hasta),t:m.nombre+" · "+fmt(m.desde)+" al "+fmt(m.hasta)})).reverse();
+  const len=tipo==="semana"?7:14, s=startDay();
+  let last=dayNum(todayStr()); if(cfg.fin) last=Math.min(last,dayNum(cfg.fin));
+  Object.values(clases).forEach(c=>{if(c.fecha) last=Math.max(last,dayNum(c.fecha))});
+  const out=[]; let k=0;
+  for(let i=0;s+i*len<=last;i++){const a=s+i*len,b=a+len-1; if(rangoEnReceso(a,b)) continue; k++;
+    out.push({v:a+":"+b,t:(tipo==="semana"?"Semana ":"Quincena ")+k+" · "+fmt(fromDay(a))+" al "+fmt(fromDay(b-2))});}
+  return out.reverse();
+}
+function fillPeriodSelectors(){
+  $$(".per-tipo").forEach(sel=>{
+    if(!sel.options.length){sel.innerHTML='<option value="quincena">Quincenal</option><option value="semana">Semanal</option><option value="modulo">Por módulo</option><option value="curso">Todo el curso</option>';
+      sel.value=gp(sel.id)||(sel.id==="k-tipo"?"curso":"quincena");
+      sel.onchange=()=>{sp(sel.id,sel.value);fillPeriodSelectors();renderAll()};}
+    const per=sel.closest(".row").querySelector(".per-sel"), prev=per.value;
+    const opts=periodOptions(sel.value);
+    per.innerHTML=opts.length?opts.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join(""):'<option value="none">Sin períodos todavía</option>';
+    if(opts.some(o=>o.v===prev)) per.value=prev;
+    per.onchange=renderAll;
+  });
+}
+function inPeriod(fecha,pv){ if(!pv||pv==="all") return true; if(pv==="none") return false; const [a,b]=pv.split(":").map(Number), d=dayNum(fecha); return d>=a&&d<=b; }
+
+// ---------- Cálculo ----------
+function stats(pv,compId){
+  const res={}, wh=+cfg.pesoHito||1;
+  cfg.estudiantes.forEach(e=>res[e.id]={id:e.id,dims:DIMS.map(()=>({v:0,a:0,r:0})),h:{v:0,a:0,r:0},n:0,recs:[],hrecs:[]});
+  Object.values(clases).forEach(c=>{
+    if(!c.fecha||!inPeriod(c.fecha,pv)) return;
+    if(compId&&compId!=="all"&&c.comp!==compId) return;
+    const ev=c.ev||{};
+    for(const sid in ev){ const s=res[sid]; if(!s) continue; const e=ev[sid]; let any=false;
+      DIMS.forEach((d,i)=>{const l=e[d.k]; if(l==="v"||l==="a"||l==="r"){s.dims[i][l]++;any=true}});
+      if(any||e.j) {s.n++; s.recs.push({fecha:c.fecha,comp:c.comp,e});}
+    }
+  });
+  Object.entries(hitos).forEach(([hid,h])=>{
+    if(!h.fecha||!inPeriod(h.fecha,pv)) return;
+    if(compId&&compId!=="all"&&h.comp!==compId) return;
+    const ev=h.ev||{};
+    for(const sid in ev){const s=res[sid]; if(!s) continue; const l=ev[sid]&&ev[sid].l;
+      if(l==="v"||l==="a"||l==="r"){s.h[l]++;} if(l) s.hrecs.push({id:hid,h,e:ev[sid]});}
+  });
+  const w=cfg.pesos.map(Number);
+  Object.values(res).forEach(s=>{
+    s.pct=s.dims.map((d,i)=>{
+      let num=d.v*100+d.a*50, den=d.v+d.a+d.r;
+      if(i===3){num+=wh*(s.h.v*100+s.h.a*50); den+=wh*(s.h.v+s.h.a+s.h.r);}
+      return den?Math.round(num/den):null});
+    let sw=0,acc=0; s.pct.forEach((p,i)=>{if(p!==null){acc+=p*w[i];sw+=w[i]}});
+    s.idx=sw?Math.round(acc/sw*10)/10:null;
+    s.rojos=s.dims.reduce((a,d)=>a+d.r,0)+s.h.r; s.amar=s.dims.reduce((a,d)=>a+d.a,0)+s.h.a;
+    const tot=s.dims.reduce((a,d)=>a+d.v+d.a+d.r,0)+s.h.v+s.h.a+s.h.r;
+    s.n+=s.h.v+s.h.a+s.h.r;
+    s.alerta=s.pct.some(p=>p!==null&&p<50)||(tot>0&&s.rojos/tot>=0.15);
+  });
+  return res;
+}
+const band=p=>p===null||p===undefined?"":p>=80?"v":p>=50?"a":"r";
+const bandVar=p=>({v:"verde",a:"amarillo",r:"rojo"}[band(p)]||"muted");
+function ranked(st){
+  return Object.values(st).sort((x,y)=>{
+    const ex=x.idx===null||x.n<cfg.min, ey=y.idx===null||y.n<cfg.min;
+    if(ex!==ey) return ex?1:-1;
+    return (y.idx??-1)-(x.idx??-1)||x.rojos-y.rojos||(y.pct[0]??-1)-(x.pct[0]??-1)||nameOf(x.id).localeCompare(nameOf(y.id));
+  });
+}
+const nameOf=id=>(cfg.estudiantes.find(e=>e.id===id)||{}).nombre||"(sin nombre)";
+const compOf=id=>(cfg.componentes.find(c=>c.id===id)||{}).nombre||"(componente eliminado)";
+
+// ---------- Escritura compartida ----------
+// overlay: lo que este docente marcó y la base todavía no confirmó; se aplica sobre cada aviso de la base
+// para que la pantalla nunca "vuelva atrás". queue: lo que falta enviar. Una escritura a la vez por documento.
+const overlay={}, queue={}, busy={}, timers={}, makers={}, sayers={};
+const blank=v=>v===undefined||v===null||v==="";
+function queueWrite(path,sid,patch,makeDoc,statusFn){
+  if(soloLectura){statusFn("No se guardó: su correo no está autorizado.");return}
+  const o=((overlay[path]=overlay[path]||{})[sid]=overlay[path][sid]||{});
+  const q=((queue[path]=queue[path]||{})[sid]=queue[path][sid]||{});
+  for(const f in patch){o[f]=patch[f]; q[f]=patch[f];}
+  makers[path]=makeDoc; sayers[path]=statusFn; statusFn("Guardando…");
+  clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),350);
+}
+async function flush(path){
+  const say=sayers[path]||(()=>{});
+  if(busy[path]){clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),300); return}
+  const body=queue[path]; if(!body) return; delete queue[path];
+  busy[path]=true; const [coll,id]=path.split("/");
+  try{
+    const {error}=coll==="clases"
+      ? await sb.rpc("evaluar_clase",{p_id:id,p_fecha:id.slice(0,10),p_comp:id.slice(11),p_cambios:body})
+      : await sb.rpc("evaluar_hito",{p_id:id,p_cambios:body});
+    if(error){ if(esSinPermiso(error)){pasarASoloLectura();return} throw error; }
+    if(!soloLectura) marcarEstado("ok","Puede guardar");
+    say("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
+    // pasado un momento, la base ya refleja lo escrito: se retira del overlay lo que no cambió desde entonces
+    setTimeout(()=>{const o=overlay[path]; if(!o) return;
+      for(const sid in body){ for(const f in body[sid]) if(o[sid]&&o[sid][f]===body[sid][f]) delete o[sid][f];
+        if(o[sid]&&!Object.keys(o[sid]).length) delete o[sid]; }
+      if(!Object.keys(o).length) delete overlay[path];},4000);
+  }catch(e){
+    say("No se pudo guardar (sin conexión o error del servidor). Se reintentará en unos segundos; no cierre la página.");
+    const q=queue[path]=queue[path]||{};   // devolver a la cola sin pisar cambios más nuevos
+    for(const sid in body){q[sid]=Object.assign({},body[sid],q[sid]);}
+    clearTimeout(timers[path]); timers[path]=setTimeout(()=>flush(path),3000);
+  }finally{ busy[path]=false; }
+}
+// Error de permisos de la base (correo no autorizado o dado de baja)
+const esSinPermiso=e=>!!e&&(e.code==="42501"||/sin_permiso|row-level security|permission denied/i.test(e.message||""));
+function mergePending(coll,next,prev){
+  for(const path in overlay){ if(!path.startsWith(coll+"/")) continue; const id=path.slice(coll.length+1);
+    if(!next[id]) next[id]=prev[id]?structuredClone(prev[id]):null;
+    if(!next[id]) continue;
+    next[id].ev=next[id].ev||{};
+    for(const sid in overlay[path]) next[id].ev[sid]=Object.assign({},next[id].ev[sid],overlay[path][sid]);
+  }
+}
+// Cambia el contenido solo si de verdad cambió: así un aviso de la base no reemplaza botones que se están tocando
+function setHTML(el,html){ if(el._html!==html){ el.innerHTML=html; el._html=html; } }
+
+// ---------- Registrar ----------
+function antesDelInicio(f){return !!(cfg.inicio&&f&&f<cfg.inicio)}
+function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
+function status(t){$("#r-status").textContent=t}
+function setEval(sid,patch){
+  if(!sb||!perfil){status("Sin conexión: el cambio no se guardó.");return}
+  if(soloLectura){status("No se guardó: su correo no está autorizado.");return}
+  if(!$("#r-comp").value){status("Elija un componente primero.");return}
+  if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
+  const id=clsId();
+  const c=clases[id]||(clases[id]={fecha:$("#r-fecha").value,comp:$("#r-comp").value,ev:{}});
+  c.ev=c.ev||{}; c.ev[sid]=Object.assign({},c.ev[sid],patch);
+  const base={fecha:c.fecha,comp:c.comp};
+  queueWrite("clases/"+id,sid,patch,()=>({...base,creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{}),ev:structuredClone(clases[id].ev)}),status);
+  paintRegistrar();
+}
+function compSelect(sel,fecha,allowAll){
+  const cur=sel.value||gp(sel.id);
+  if(!cfg.componentes.length){setHTML(sel,'<option value="">Sin componentes: configúrelos primero</option>');return}
+  const act=cfg.componentes.filter(c=>!fecha||moduloActivo(c,fecha)), otros=cfg.componentes.filter(c=>fecha&&!moduloActivo(c,fecha));
+  const opt=c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`;
+  setHTML(sel,(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join("")));
+  if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else if(act[0]&&!allowAll) sel.value=act[0].id;
+}
+// Completo: los cuatro aspectos calificados, o ausencia (rojo o justificada), o sin tarea ese día
+const completo=e=>!!(e.j||e.as==="r"||(!blank(e.as)&&!blank(e.ac)&&!blank(e.co)&&(!blank(e.cu)||e.na)));
+const dotCls=(e,d)=>e[d.k]||(d.k==="as"&&e.j?"x":d.k==="cu"&&e.na?"x":"");
+function renderRegistrar(){
+  const fecha=$("#r-fecha").value; compSelect($("#r-comp"),fecha,false);
+  const w=fecha?wday(dayNum(fecha)):1, av=$("#r-aviso");
+  const comp=cfg.componentes.find(c=>c.id===$("#r-comp").value);
+  const msgs=[]; if(fecha&&(w===0||w===6)) msgs.push("La fecha elegida es fin de semana.");
+  if(fecha&&enReceso(fecha)) msgs.push("La fecha elegida cae en el receso.");
+  if(fecha&&comp&&!moduloActivo(comp,fecha)) msgs.push("Este componente no se dicta en esta fecha según su módulo.");
+  if(antesDelInicio(fecha)) msgs.push("El curso comienza el "+fmt(cfg.inicio)+". Elija una fecha desde ese día.");
+  $("#r-fecha").min=cfg.inicio||""; $("#r-fecha").max=cfg.fin||"";
+  av.hidden=!msgs.length; av.textContent=msgs.join(" ");
+  const list=$("#r-list");
+  if(!cfg.estudiantes.length){setHTML(list,`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`);return}
+  // La estructura (tarjetas y botones) solo se arma cuando cambia la clase, la lista o la tarjeta abierta.
+  setHTML(list,cfg.estudiantes.map((s,i)=>{
+    const open=openCard===s.id;
+    return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${DIMS.map(d=>`<span class="dot" data-k="${d.k}" title="${esc(d.n)}"></span>`).join("")}</span><span class="chev" aria-hidden="true">▾</span></button>
+      ${open?`<div class="stu-body">${DIMS.map(d=>`<div class="dim" data-k="${d.k}"><div class="dim-title">${esc(d.n)}</div>
+          <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
+          ${d.extra?`<label class="extra"><input type="checkbox" class="ex" id="ex-${d.extra.k}-${esc(s.id)}" data-x="${d.extra.k}"> ${esc(d.extra.n)}</label>`:""}
+          <div class="desc"></div></div>`).join("")}
+        <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde"></textarea></div>
+        <div class="stu-foot"><button type="button" class="btn primary next">${i<cfg.estudiantes.length-1?"Siguiente estudiante →":"Terminar"}</button></div>
+      </div>`:""}
+    </div>`}).join(""));
+  paintRegistrar();
+}
+// Pinta el estado (colores, botones apretados, textos) sobre la estructura existente, sin reemplazarla.
+function paintRegistrar(){
+  const c=clases[clsId()]||{}, ev=c.ev||{};
+  $$("#r-list .stu").forEach(card=>{
+    const e=ev[card.dataset.sid]||{};
+    card.querySelectorAll(".sum .dot").forEach(dt=>{const d=DIMS.find(x=>x.k===dt.dataset.k); dt.className="dot "+dotCls(e,d);});
+    card.querySelectorAll(".dim").forEach(dim=>{const d=DIMS.find(x=>x.k===dim.dataset.k), val=e[d.k], ex=d.extra&&e[d.extra.k];
+      dim.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(val===b.dataset.l)));
+      const cb=dim.querySelector(".ex"); if(cb) cb.checked=!!ex;
+      dim.querySelector(".desc").textContent=!blank(val)?d[val]:ex?"No se tiene en cuenta en el cálculo.":"";});
+    const ta=card.querySelector(".obs"); if(ta&&document.activeElement!==ta) ta.value=e.obs||"";
+    card.classList.toggle("done",completo(e));
+  });
+  const hechos=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
+  $("#r-prog i").style.width=(cfg.estudiantes.length?hechos/cfg.estudiantes.length*100:0)+"%";
+  const st=$("#r-status").textContent;
+  if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")){
+    const n=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
+    status(c.fecha?`Evaluación completa: ${n} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
+}
+$("#r-list").addEventListener("click",ev=>{
+  const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
+  if(ev.target.closest(".stu-head")){openCard=openCard===sid?null:sid;renderRegistrar();return}
+  if(ev.target.closest(".next")){const i=cfg.estudiantes.findIndex(s=>s.id===sid), nx=cfg.estudiantes[i+1];
+    openCard=nx?nx.id:null; renderRegistrar();
+    const el=nx&&document.querySelector(`.stu[data-sid="${CSS.escape(nx.id)}"]`); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-$("header.top").offsetHeight-8,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
+    return}
+  const b=ev.target.closest(".lvl"); if(b){const k=b.closest(".dim").dataset.k, cur=((clases[clsId()]||{}).ev||{})[sid]||{};
+    const patch={[k]:cur[k]===b.dataset.l?"":b.dataset.l};
+    if(k==="as"&&patch.as) patch.j=false;
+    if(k==="cu"&&patch.cu) patch.na=false;
+    if(k==="as"&&patch.as==="r"){patch.ac="";patch.co="";patch.cu=""}
+    setEval(sid,patch);}
+});
+$("#r-list").addEventListener("change",ev=>{
+  const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
+  if(ev.target.classList.contains("ex")){const x=ev.target.dataset.x, patch={[x]:ev.target.checked};
+    if(ev.target.checked) {if(x==="j"){patch.as="";patch.ac="";patch.co="";patch.cu=""} else patch.cu=""}
+    setEval(sid,patch);}
+  if(ev.target.classList.contains("obs")) setEval(sid,{obs:ev.target.value.trim()});
+});
+$("#r-todos").onclick=()=>{
+  if(!cfg.estudiantes.length||!$("#r-comp").value) return;
+  if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
+  const ev=((clases[clsId()]||{}).ev)||{};
+  cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(blank(e.as)&&!e.j) setEval(s.id,{as:"v"})});
+  status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
+};
+$("#r-fecha").onchange=()=>{openCard=null;status("");renderRegistrar()};
+$("#r-comp").onchange=()=>{sp("r-comp",$("#r-comp").value);openCard=null;status("");renderRegistrar()};
+
+// ---------- Hitos ----------
+function hStatus(t){const el=$("#h-estatus"); if(el) el.textContent=t}
+function renderHitos(){
+  compSelect($("#h-comp"),todayStr(),false);
+  const comp=$("#h-comp").value, list=$("#h-list");
+  const hs=Object.entries(hitos).filter(([id,h])=>h.comp===comp).sort((a,b)=>(a[1].fecha||"").localeCompare(b[1].fecha||""));
+  if(selHito&&!hitos[selHito]) selHito=null;
+  if(selHito&&hitos[selHito].comp!==comp) selHito=null;
+  const total=cfg.estudiantes.length, hoy=todayStr();
+  setHTML(list,hs.length?hs.map(([id,h])=>{const n=Object.values(h.ev||{}).filter(e=>e&&!blank(e.l)).length, venc=h.fecha&&h.fecha<hoy&&n<total;
+    return `<button type="button" class="hito" data-id="${esc(id)}" aria-current="${selHito===id}"><span class="hn">${esc(h.nombre)}<br><span class="hm">${esc(TIPOS[h.tipo]||"")}</span></span><span class="hm num">${h.fecha?fmt(h.fecha):"sin fecha"}</span><span class="pill ${n>=total?"v":venc?"r":""}">${n}/${total}</span></button>`}).join("")
+    :'<p class="muted">Este componente todavía no tiene hitos. Cree uno abajo o elija uno sugerido.</p>');
+  const sug=(SUGERIDOS[comp]||[]).filter(([n])=>!hs.some(([,h])=>h.nombre===n));
+  setHTML($("#h-sug"),sug.length?`<p class="note" style="margin:12px 0 6px">Sugeridos a partir del programa (toque para completar el formulario):</p><div class="chips">${sug.map(([n,t])=>`<button type="button" class="chip" data-n="${esc(n)}" data-t="${t}">${esc(n)}</button>`).join("")}</div>`:"");
+  renderHitoEval();
+}
+function renderHitoEval(){
+  const box=$("#h-eval");
+  if(!selHito){setHTML(box,'<div class="empty">Elija un hito de la lista para evaluar a cada estudiante.</div>');return}
+  const h=hitos[selHito], ev=h.ev||{};
+  setHTML(box,`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
+    <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
+    <p class="status" id="h-estatus"></p>
+    <div>${cfg.estudiantes.map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
+      ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
+      <button type="button" class="lvl" data-l="x" aria-pressed="false" title="${esc(HITO_LV.x)}">N/C</button>
+      <input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" placeholder="Observación (opcional)" hidden></div>`).join("")}</div>
+    <div class="confirm" style="margin-top:14px">${delAsk?`<span>¿Eliminar este hito y todas sus evaluaciones?</span><button class="btn" id="h-del-si" type="button">Sí, eliminar</button><button class="btn" id="h-del-no" type="button">Cancelar</button>`:`<button class="btn" id="h-del" type="button">Eliminar hito</button>`}</div>`);
+  $$("#h-eval .hrow").forEach(row=>{const e=ev[row.dataset.sid]||{};
+    row.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(e.l===b.dataset.l)));
+    const inp=row.querySelector(".obs-in"); inp.hidden=blank(e.l); if(document.activeElement!==inp) inp.value=e.obs||"";});
+}
+$("#h-comp").onchange=()=>{sp("h-comp",$("#h-comp").value);selHito=null;delAsk=false;renderHitos()};
+$("#h-list").addEventListener("click",e=>{const b=e.target.closest(".hito"); if(!b) return; selHito=b.dataset.id; delAsk=false; renderHitos();});
+$("#h-sug").addEventListener("click",e=>{const b=e.target.closest(".chip"); if(!b) return; $("#h-nombre").value=b.dataset.n; $("#h-tipo").value=b.dataset.t; $("#h-fecha").focus(); $("#h-cstatus").textContent="Ponga la fecha de entrega y toque «Crear hito».";});
+$("#h-crear").onclick=async()=>{
+  const nombre=$("#h-nombre").value.trim(), fecha=$("#h-fecha").value, comp=$("#h-comp").value;
+  if(!sb) return; if(!comp){$("#h-cstatus").textContent="Elija un componente.";return}
+  if(!nombre||!fecha){$("#h-cstatus").textContent="El hito necesita nombre y fecha de entrega.";return}
+  if(antesDelInicio(fecha)){$("#h-cstatus").textContent="La fecha de entrega no puede ser anterior al inicio del curso ("+fmt(cfg.inicio)+").";return}
+  const id=fecha+"_"+comp+"_"+uid("h");
+  const data={id,comp,nombre,tipo:$("#h-tipo").value,fecha,ev:{},autor:myId,editado_por:myId};
+  $("#h-cstatus").textContent="Creando…";
+  const {error}=await sb.from("hitos").insert(data);
+  if(!error){hitos[id]=data; selHito=id; $("#h-nombre").value=""; $("#h-cstatus").textContent="Hito creado ✓"; renderHitos();}
+  else if(esSinPermiso(error)){pasarASoloLectura(); $("#h-cstatus").textContent="No se pudo crear: su correo no está autorizado.";}
+  else $("#h-cstatus").textContent="No se pudo crear. Revise la conexión y vuelva a intentar.";
+};
+$("#h-eval").addEventListener("click",async e=>{
+  if(e.target.id==="h-del"){delAsk=true;renderHitoEval();return}
+  if(e.target.id==="h-del-no"){delAsk=false;renderHitoEval();return}
+  if(e.target.id==="h-del-si"){const id=selHito; const {error}=await sb.from("hitos").delete().eq("id",id);
+    if(error){hStatus("No se pudo eliminar. Revise la conexión y vuelva a intentar.");return}
+    delete hitos[id]; delete overlay["hitos/"+id]; selHito=null; delAsk=false; renderHitos(); return}
+  const b=e.target.closest(".lvl"); if(!b||!selHito) return; if(soloLectura){hStatus("No se guardó: su correo no está autorizado.");return} const sid=b.closest(".hrow").dataset.sid;
+  const h=hitos[selHito]; h.ev=h.ev||{}; const cur=(h.ev[sid]||{}).l; const patch={l:cur===b.dataset.l?"":b.dataset.l};
+  h.ev[sid]=Object.assign({},h.ev[sid],patch);
+  queueWrite("hitos/"+selHito,sid,patch,null,hStatus); renderHitos();
+});
+$("#h-eval").addEventListener("change",e=>{
+  if(!e.target.classList.contains("obs-in")||!selHito) return; const sid=e.target.closest(".hrow").dataset.sid;
+  const h=hitos[selHito]; const patch={obs:e.target.value.trim()}; h.ev[sid]=Object.assign({},h.ev[sid],patch);
+  queueWrite("hitos/"+selHito,sid,patch,null,hStatus);
+});
+
+// ---------- Semáforo ----------
+function renderSemaforo(){
+  compSelect($("#s-comp"),null,true); const pv=$("#s-per").value, comp=$("#s-comp").value;
+  const st=stats(pv,comp), order=ranked(st);
+  if(!cfg.estudiantes.length){$("#s-table").innerHTML='<tr><td class="empty">Sin estudiantes cargados.</td></tr>';$("#s-cov").textContent="";return}
+  $("#s-table").innerHTML=`<thead><tr><th>Estudiante</th>${DIMS.map(d=>`<th>${esc(d.n)}</th>`).join("")}<th>Índice</th><th>Registros</th><th>Seguimiento</th></tr></thead><tbody>${
+    order.map(s=>`<tr><td><b>${esc(nameOf(s.id))}</b></td>${s.pct.map((p,i)=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}<small>${s.dims[i].v}/${s.dims[i].a}/${s.dims[i].r}${i===3&&(s.h.v+s.h.a+s.h.r)?` · H ${s.h.v}/${s.h.a}/${s.h.r}`:""}</small></td>`).join("")}
+      <td class="cell ${band(s.idx)}"><b>${s.idx===null?"—":s.idx}</b></td><td class="num">${s.n}</td>
+      <td>${s.alerta?'<span class="pill r">Entrevista</span>':s.amar>=3?'<span class="pill a">Conversar</span>':s.n?'<span class="pill v">En curso</span>':'<span class="pill">Sin datos</span>'}</td></tr>`).join("")}</tbody>`;
+  const hoy=todayStr();
+  const cov=cfg.componentes.filter(c=>comp==="all"||c.id===comp).map(c=>{
+    const n=Object.values(clases).filter(x=>x.comp===c.id&&inPeriod(x.fecha,pv)).length;
+    const hv=Object.values(hitos).filter(h=>h.comp===c.id&&inPeriod(h.fecha,pv)), pend=hv.filter(h=>h.fecha<hoy&&Object.values(h.ev||{}).filter(e=>e&&e.l).length<cfg.estudiantes.length).length;
+    return `${c.nombre}: ${n} clase${n===1?"":"s"}${hv.length?`, ${hv.length} hito${hv.length===1?"":"s"}${pend?` (${pend} sin completar)`:""}`:""}`});
+  $("#s-cov").textContent=cov.length?"Registros del período · "+cov.join(" · "):"";
+}
+
+// ---------- Ranking ----------
+function renderRanking(){
+  const pv=$("#k-per").value, st=stats(pv), order=ranked(st), w=cfg.pesos;
+  $("#k-formula").textContent=`Índice de empleabilidad = asistencia ${w[0]}% + actitud ${w[1]}% + comunicación ${w[2]}% + cumplimiento ${w[3]}% (cada hito vale como ${cfg.pesoHito} tareas de clase). Desempate: menos rojos, luego mejor asistencia. Quedan al final quienes tienen menos de ${cfg.min} registros en el período.`;
+  if(!order.length||order.every(s=>!s.n)){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya registros de clase o hitos evaluados en el período.</div>';return}
+  let html=""; order.forEach((s,i)=>{
+    const pos=i+1, few=s.idx===null||s.n<cfg.min;
+    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r" title="Requiere entrevista">!</span>':""}</span>
+      <span class="bar"><i style="width:${s.idx||0}%;background:var(--${few?"gris-dot":band(s.idx)==="v"?"verde":band(s.idx)==="a"?"amarillo-dot":"rojo"})"></i></span><span class="val">${s.idx===null?"—":s.idx.toFixed(1)}</span></div>`;
+    if(pos===+cfg.cupos) html+=`<div class="cut">Línea de pasantías · ${cfg.cupos} cupos</div>`;
+    if(pos===+cfg.cupos2&&+cfg.cupos2>+cfg.cupos) html+=`<div class="cut amp">Cupos ampliados · ${cfg.cupos2}</div>`;
+  });
+  $("#k-list").innerHTML=html;
+}
+
+// ---------- Ficha ----------
+function renderFicha(){
+  const sel=$("#f-est"), cur=sel.value||gp("est");
+  sel.innerHTML=cfg.estudiantes.map(e=>`<option value="${esc(e.id)}">${esc(e.nombre)}</option>`).join("");
+  if(cfg.estudiantes.some(e=>e.id===cur)) sel.value=cur;
+  const sid=sel.value, body=$("#f-body"); if(!sid){body.innerHTML='<div class="panel empty">Sin estudiantes cargados.</div>';return}
+  const pv=$("#f-per").value, st=stats(pv), s=st[sid], pos=ranked(stats("all")).findIndex(x=>x.id===sid)+1, est=cfg.estudiantes.find(e=>e.id===sid);
+  const byComp=cfg.componentes.map(c=>({c,x:stats(pv,c.id)[sid]})).filter(o=>o.x.n);
+  const recs=s.recs.sort((a,b)=>b.fecha.localeCompare(a.fecha));
+  const hrecs=s.hrecs.sort((a,b)=>(b.h.fecha||"").localeCompare(a.h.fecha||""));
+  body.innerHTML=`<div class="panel"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div>
+    <div class="kpis" style="margin-top:12px">
+      <div class="kpi"><b>${s.idx===null?"—":s.idx}</b><span>Índice del período</span></div>
+      <div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>
+      ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${bandVar(s.pct[i])})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
+    </div></div>
+    <div class="grid2">
+      <div class="panel"><h3 style="margin-bottom:8px">Por componente</h3>${byComp.length?`<div class="tablewrap"><table><thead><tr><th>Componente</th>${DIMS.map(d=>`<th>${esc(d.n.split(" ")[0])}</th>`).join("")}</tr></thead><tbody>${byComp.map(o=>`<tr><td>${esc(o.c.nombre)}${o.c.docente?`<br><span class="muted" style="font-size:.8rem">${esc(o.c.docente)}</span>`:""}</td>${o.x.pct.map(p=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}</td>`).join("")}</tr>`).join("")}</tbody></table></div>`:'<p class="muted">Sin registros en el período.</p>'}
+        <h3 style="margin:16px 0 8px">Hitos</h3><div class="timeline">${hrecs.length?hrecs.map(r=>`<div class="tl"><span class="num">${r.h.fecha?fmt(r.h.fecha):""}</span><span style="min-width:0">${esc(r.h.nombre)} <span class="muted">· ${esc(compOf(r.h.comp))}</span></span><span>${r.e.l==="x"?'<span class="pill">N/C</span>':`<span class="dot ${r.e.l}"></span>`}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin hitos evaluados en el período.</p>'}</div></div>
+      <div class="panel"><h3 style="margin-bottom:8px">Registro clase a clase</h3><div class="timeline">${recs.length?recs.map(r=>`<div class="tl"><span class="num">${fmt(r.fecha)}</span><span style="min-width:0;overflow:hidden;text-overflow:ellipsis">${esc(compOf(r.comp))}</span><span style="display:flex;gap:4px">${DIMS.map(d=>`<span class="dot ${r.e[d.k]||(d.k==="as"&&r.e.j?"x":"")}" title="${esc(d.n)}"></span>`).join("")}</span>${r.e.obs?`<div class="obs">${esc(r.e.obs)}</div>`:""}</div>`).join(""):'<p class="muted">Sin registros en el período.</p>'}</div></div>
+    </div>`;
+}
+$("#f-est").onchange=()=>{sp("est",$("#f-est").value);renderFicha()};
+$("#s-comp").onchange=renderSemaforo;
+
+// ---------- Criterios ----------
+function renderCriterios(){
+  $("#rubric").innerHTML=DIMS.map(d=>`<div><h3>${esc(d.n)}</h3>${["v","a","r"].map(l=>`<p><span class="dot ${l}"></span><span><b>${LV[l].t}.</b> ${esc(d[l])}</span></p>`).join("")}${d.extra?`<p class="muted"><span class="dot x"></span><span>${esc(d.extra.n)}.</span></p>`:""}</div>`).join("")+
+  `<div><h3>Hitos de cumplimiento</h3>${["v","a","r"].map(l=>`<p><span class="dot ${l}"></span><span><b>${LV[l].t}.</b> ${esc(HITO_LV[l])}</span></p>`).join("")}<p class="muted"><span class="dot x"></span><span>${esc(HITO_LV.x)}</span></p><p>Cada hito vale como ${cfg.pesoHito} tareas de clase dentro de Cumplimiento.</p></div>`+
+  `<div><h3>Cómo se calcula</h3><p>Verde vale 100, amarillo 50 y rojo 0. Se promedia cada aspecto en el período y se ponderan los cuatro con los pesos de Configuración. Si el estudiante está ausente (rojo en asistencia), los otros tres aspectos de esa clase no se califican, para no castigar dos veces la misma falta.</p><p><b>Entrevista</b> se activa cuando un aspecto queda por debajo del 50 % o cuando los rojos son al menos el 15 % de las calificaciones del período.</p><p>Horario de referencia: entrada ${esc(cfg.hora)} con ${cfg.tol} min de tolerancia; salida 12:30.</p></div>`;
+}
+
+// ---------- Configuración ----------
+let draft=null;
+const modName=id=>id==="t"||!id?"Todo el curso":((cfg.modulos||[]).find(m=>m.id===id)||{}).nombre||"—";
+function renderDocentes(){
+  $("#c-docentes-panel").hidden=!canAdmin; if(!canAdmin) return;
+  const rol=r=>r==="coordinacion"?"Coordinación":"Docente";
+  setHTML($("#c-docentes"),docentes.length?docentes.map(d=>`<div class="doc-item" data-email="${esc(d.email)}"><span class="${d.activo?"":"baja"}" style="min-width:0;overflow:hidden;text-overflow:ellipsis"><b>${esc(d.nombre||"(sin nombre)")}</b><br><span class="muted" style="font-size:.85rem">${esc(d.email)}</span></span><span class="muted">${rol(d.rol)}${d.activo?"":" · dado de baja"}</span>${d.email===myId?'<span class="muted" style="font-size:.85rem">(usted)</span>':`<button class="btn" type="button" data-act="${d.activo?"baja":"alta"}">${d.activo?"Dar de baja":"Reactivar"}</button>`}<span></span></div>`).join(""):'<p class="muted">Todavía no hay docentes autorizados.</p>');
+}
+async function cargarDocentes(){
+  if(!canAdmin) return; const {data,error}=await sb.from("docentes").select("*").order("nombre");
+  if(!error){docentes=data||[]; renderDocentes();}
+}
+$("#d-add").onclick=async()=>{
+  const email=$("#d-email").value.trim().toLowerCase(), nombre=$("#d-nombre").value.trim(), rol=$("#d-rol").value;
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)){$("#d-status").textContent="Escriba un correo válido.";return}
+  $("#d-status").textContent="Guardando…";
+  const {error}=await sb.from("docentes").upsert({email,nombre,rol,activo:true});
+  if(error){$("#d-status").textContent="No se pudo autorizar. Revise la conexión y vuelva a intentar.";return}
+  $("#d-email").value=""; $("#d-nombre").value=""; $("#d-status").textContent="Autorizado ✓ Ya puede crear su contraseña en la pantalla de ingreso."; cargarDocentes();
+};
+$("#c-docentes").addEventListener("click",async e=>{
+  const b=e.target.closest("[data-act]"); if(!b) return; const email=b.closest(".doc-item").dataset.email;
+  const {error}=await sb.from("docentes").update({activo:b.dataset.act==="alta"}).eq("email",email);
+  $("#d-status").textContent=error?"No se pudo cambiar. Vuelva a intentar.":"Cambio guardado ✓"; cargarDocentes();
+});
+function renderConfig(){
+  $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin; renderDocentes();
+  if(!draft) draft=structuredClone(cfg);
+  ["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).value=draft[k]??"");
+  draft.pesos.forEach((p,i)=>$("#c-w"+i).value=p);
+  $("#c-mod").innerHTML=draft.modulos.length?draft.modulos.map((m,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cm-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" aria-label="Nombre del módulo"><input type="date" id="cm-d-${esc(m.id)}" data-f="desde" value="${esc(m.desde)}" aria-label="Desde"><input type="date" id="cm-h-${esc(m.id)}" data-f="hasta" value="${esc(m.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin módulos.</p>';
+  $("#c-rec").innerHTML=draft.recesos.length?draft.recesos.map((r,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cr-n-${i}" data-f="nombre" value="${esc(r.nombre||"")}" placeholder="Receso" aria-label="Nombre del receso"><input type="date" id="cr-d-${i}" data-f="desde" value="${esc(r.desde)}" aria-label="Desde"><input type="date" id="cr-h-${i}" data-f="hasta" value="${esc(r.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin recesos.</p>';
+  const modOpts=v=>`<option value="t"${!v||v==="t"?" selected":""}>Todo el curso</option>`+draft.modulos.map(m=>`<option value="${esc(m.id)}"${v===m.id?" selected":""}>${esc(m.nombre)}</option>`).join("");
+  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
+  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
+}
+function bindList(sel,key){
+  const h=e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value;};
+  $(sel).addEventListener("input",h); $(sel).addEventListener("change",h);
+  $(sel).addEventListener("click",e=>{if(!e.target.closest("[data-del]")) return; const i=+e.target.closest(".cfg-item").dataset.i; draft[key].splice(i,1); renderConfig(); $("#c-status").textContent="Quitado de la lista (los registros previos se conservan). Guarde para confirmar.";});
+}
+bindList("#c-est","estudiantes"); bindList("#c-comp","componentes"); bindList("#c-mod","modulos"); bindList("#c-rec","recesos");
+["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).addEventListener("input",e=>{draft[k]=e.target.type==="number"?+e.target.value:e.target.value}));
+[0,1,2,3].forEach(i=>$("#c-w"+i).addEventListener("input",e=>{draft.pesos[i]=+e.target.value}));
+$("#c-bulk-add").onclick=()=>{
+  const lines=$("#c-bulk").value.split(/\n/).map(l=>l.trim()).filter(Boolean);
+  lines.forEach(l=>{const [n,nv]=l.split(/\s*[;\t]\s*/); if(n) draft.estudiantes.push({id:uid("e"),nombre:n,nivel:nv||""})});
+  $("#c-bulk").value=""; renderConfig(); $("#c-status").textContent=lines.length+" agregados. Guarde para confirmar.";
+};
+$("#c-comp-add").onclick=()=>{draft.componentes.push({id:uid("c"),nombre:"",docente:"",horas:"",modulo:"t"});renderConfig();};
+$("#c-mod-add").onclick=()=>{draft.modulos.push({id:uid("m"),nombre:"Módulo "+(draft.modulos.length+1),desde:"",hasta:""});renderConfig();};
+$("#c-rec-add").onclick=()=>{draft.recesos.push({nombre:"",desde:"",hasta:""});renderConfig();};
+$("#c-save").onclick=async()=>{
+  if(!sb||!canAdmin) return;
+  const sum=draft.pesos.reduce((a,b)=>a+(+b||0),0);
+  if(sum!==100){$("#c-status").textContent=`Los pesos suman ${sum} %. Ajústelos para que sumen 100.`;return}
+  if(+draft.cupos2<+draft.cupos){$("#c-status").textContent="Los cupos ampliados no pueden ser menos que los cupos.";return}
+  const bad=[...draft.modulos,...draft.recesos].find(r=>r.desde&&r.hasta&&r.hasta<r.desde);
+  if(bad){$("#c-status").textContent=`En «${bad.nombre||"un receso"}» la fecha final es anterior a la inicial.`;return}
+  draft.estudiantes=draft.estudiantes.filter(e=>e.nombre.trim()); draft.componentes=draft.componentes.filter(c=>c.nombre.trim());
+  $("#c-status").textContent="Guardando…";
+  const {error}=await sb.from("config").upsert({id:1,data:draft,editado_en:new Date().toISOString(),editado_por:myId});
+  if(!error){cfg=Object.assign(structuredClone(DEFAULT_CFG),draft); $("#c-status").textContent="Configuración guardada ✓"; renderAll();}
+  else $("#c-status").textContent=esSinPermiso(error)?"No se pudo guardar: solo la coordinación puede cambiar la configuración.":"No se pudo guardar. Revise la conexión y vuelva a intentar.";
+};
+
+// ---------- CSV ----------
+async function downloadCsv(kind){
+  const pv=$(kind==="ranking"?"#k-per":"#s-per").value, st=stats(pv,kind==="semaforo"?$("#s-comp").value:"all"), order=ranked(st);
+  const rows=[["Puesto","Estudiante","Nivel",...DIMS.map(d=>d.n+" %"),"Índice","Registros","Rojos","Seguimiento"]];
+  order.forEach((s,i)=>{const e=cfg.estudiantes.find(x=>x.id===s.id)||{};rows.push([i+1,e.nombre,e.nivel||"",...s.pct.map(p=>p??""),s.idx??"",s.n,s.rojos,s.alerta?"Entrevista":""])});
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"}));
+  a.download=`jovenes26-${kind}-${todayStr()}.csv`; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1000);
+}
+$("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>downloadCsv("semaforo");
+
+// ---------- Render ----------
+function renderAll(){
+  fillPeriodSelectors();
+  const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
+  ({registrar:renderRegistrar,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{}}[t]||(()=>{}))();
+}
+function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, input.obs-in, #c-bulk, .cfg-item input, #h-nombre")}
+
+// ---------- Arranque ----------
+$("#r-fecha").value=todayStr();
+$$(".view").forEach(x=>x.hidden=true); $("nav.tabs").hidden=true;
+const filas=rows=>Object.fromEntries((rows||[]).map(r=>[r.id,r]));
+function mostrarApp(v){ $$(".view").forEach(x=>{ if(!v) x.hidden=true; }); $("nav.tabs").hidden=!v; $("#login").hidden=v; $("#salir").hidden=!v;
+  if(v){ const t=gp("tab"); showTab(t&&$(`[data-tab="${t}"]`)?t:"registrar"); } }
+async function cargarTodo(){
+  const [c,k,h]=await Promise.all([
+    sb.from("config").select("data").eq("id",1).maybeSingle(),
+    sb.from("clases").select("*").order("fecha",{ascending:false}).limit(5000),
+    sb.from("hitos").select("*").order("fecha",{ascending:false}).limit(2000)]);
+  if(c.error||k.error||h.error) throw (c.error||k.error||h.error);
+  cfg=Object.assign(structuredClone(DEFAULT_CFG),(c.data&&c.data.data)||{});
+  const nk=filas(k.data); mergePending("clases",nk,clases); clases=nk;
+  const nh=filas(h.data); mergePending("hitos",nh,hitos); hitos=nh;
+  if(!fechaLista){fechaLista=true; if(antesDelInicio($("#r-fecha").value)) $("#r-fecha").value=cfg.inicio;}
+  if(!typing()){draft=null; renderAll();}
+}
+let fechaLista=false, canal=null;
+function escuchar(){
+  if(canal) return;
+  const cambio=(tabla,mapa)=>p=>{
+    if(p.eventType==="DELETE"){ if(p.old&&p.old.id) delete mapa()[p.old.id]; }
+    else if(p.new&&p.new.id){ const n={[p.new.id]:p.new}; mergePending(tabla,n,{}); mapa()[p.new.id]=n[p.new.id]; }
+    if(!typing()) renderAll();
+  };
+  canal=sb.channel("j26")
+    .on("postgres_changes",{event:"*",schema:"public",table:"clases"},cambio("clases",()=>clases))
+    .on("postgres_changes",{event:"*",schema:"public",table:"hitos"},cambio("hitos",()=>hitos))
+    .on("postgres_changes",{event:"*",schema:"public",table:"config"},p=>{ if(p.new&&p.new.data){cfg=Object.assign(structuredClone(DEFAULT_CFG),p.new.data); if(!typing()){draft=null;renderAll();}} })
+    .subscribe(st=>{ if(st==="SUBSCRIBED") cargarTodo().catch(()=>{}); });
+}
+// Al volver a la pestaña (por ejemplo, después de bloquear el celular) se recargan los datos por si se perdió algún aviso
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="visible"&&perfil&&perfil.autorizado) cargarTodo().catch(()=>{}); });
+
+async function entrar(session){
+  if(!session){ perfil=null; mostrarApp(false); marcarEstado("","Sin sesión"); $("#conn").hidden=true; $("#who").textContent=""; return; }
+  $("#conn").hidden=false; $("#conn").className="banner"; $("#conn").textContent="Conectando con la base de datos…";
+  const {data,error}=await sb.rpc("mi_perfil");
+  if(error){ $("#conn").className="banner error"; $("#conn").textContent="No se pudo conectar con la base de datos. Revise la conexión a internet y recargue la página."; marcarEstado("no","Sin conexión"); return; }
+  perfil=data; myId=perfil.email; canAdmin=perfil.rol==="coordinacion";
+  $("#who").textContent=(perfil.nombre||perfil.email)+(canAdmin?" · coordinación":"");
+  mostrarApp(true);
+  if(!perfil.autorizado){ $("#conn").hidden=true; pasarASoloLectura();
+    $$(".view").forEach(x=>x.hidden=true); $("nav.tabs").hidden=true;
+    $("#ro").innerHTML+="<br><br>Usted entró como <b>"+esc(perfil.email)+"</b>. Si ese no es el correo que le dio la coordinación, toque «Salir» y entre con el correcto."; return; }
+  try{ await cargarTodo(); }catch(e){ $("#conn").className="banner error"; $("#conn").textContent="No se pudieron leer los datos. Recargue la página."; return; }
+  $("#conn").hidden=true; marcarEstado("ok","Puede guardar"); escuchar(); cargarDocentes();
+}
+
+// ---------- Ingreso ----------
+const lst=t=>$("#l-status").textContent=t;
+const tradErr=e=>{const m=(e&&e.message)||"";
+  if(/Invalid login credentials/i.test(m)) return (window.J26_SUPABASE||{}).autoRegistro?"Correo o contraseña incorrectos. Si es la primera vez, toque «Crear mi contraseña».":"Correo o contraseña incorrectos. Revise que sean los que le dio la coordinación (respetando mayúsculas y minúsculas).";
+  if(/Email not confirmed/i.test(m)) return "Todavía no confirmó su correo. Busque el mensaje de confirmación (revise también Spam) y toque el enlace.";
+  if(/already registered|already been registered/i.test(m)) return "Ese correo ya tiene contraseña. Toque «Entrar», o «Olvidé mi contraseña».";
+  if(/at least|Password should/i.test(m)) return "La contraseña tiene que tener al menos 8 caracteres.";
+  if(/rate limit|too many/i.test(m)) return "Demasiados intentos seguidos. Espere unos minutos y vuelva a intentar.";
+  return "No se pudo completar. Revise la conexión y vuelva a intentar.";};
+$("#l-form").addEventListener("submit",async e=>{ e.preventDefault();
+  const email=$("#l-email").value.trim().toLowerCase(), password=$("#l-pass").value;
+  if(!password){lst("Escriba su contraseña.");return}
+  lst("Entrando…"); const {error}=await sb.auth.signInWithPassword({email,password}); if(error) lst(tradErr(error)); else lst("");
+});
+$("#l-crear").onclick=async()=>{
+  const email=$("#l-email").value.trim().toLowerCase(), password=$("#l-pass").value;
+  if(!email||!password||password.length<8){lst("Escriba su correo y una contraseña nueva de al menos 8 caracteres.");return}
+  lst("Creando…"); const {data,error}=await sb.auth.signUp({email,password,options:{emailRedirectTo:location.origin+location.pathname}});
+  if(error){lst(tradErr(error));return}
+  lst(data.session?"":"Listo. Le enviamos un correo a "+email+": ábralo y toque el enlace para confirmar. Después vuelva acá y toque «Entrar».");
+};
+$("#l-olvido").onclick=async()=>{
+  const email=$("#l-email").value.trim().toLowerCase(); if(!email){lst("Escriba su correo y vuelva a tocar «Olvidé mi contraseña».");return}
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  lst(error?tradErr(error):"Le enviamos un correo a "+email+" con un enlace para crear una contraseña nueva.");
+};
+$("#l-nueva").addEventListener("submit",async e=>{ e.preventDefault();
+  const {error}=await sb.auth.updateUser({password:$("#l-pass2").value});
+  $("#l-status2").textContent=error?tradErr(error):"Contraseña guardada ✓"; if(!error){$("#l-nueva").hidden=true;$("#l-form").hidden=false;}
+});
+$("#salir").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
+
+(async()=>{
+  const C=window.J26_SUPABASE||{};
+  if(!window.supabase||!C.url||!C.anonKey){ mostrarApp(false); $("#login").hidden=true; $("#conn").hidden=false; $("#conn").className="banner error";
+    $("#conn").innerHTML=!window.supabase?"No se pudo cargar la conexión con la base de datos. Revise la conexión a internet y recargue la página.":"Falta configurar la base de datos: complete <b>config.js</b> con la dirección y la clave pública del proyecto de Supabase."; marcarEstado("no","Sin configurar"); return; }
+  // Sin auto-registro (lo recomendado): la coordinación crea las cuentas en Supabase y entrega la contraseña inicial.
+  if(!C.autoRegistro){ $("#l-crear").hidden=true;
+    $("#l-ayuda").textContent="Escriba su correo y la contraseña que le dio la coordinación.";
+    $("#l-olvido").onclick=()=>lst("Pida a la coordinación una contraseña nueva. La coordinación la cambia desde el panel de Supabase."); }
+  sb=window.supabase.createClient(C.url,C.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+  sb.auth.onAuthStateChange((ev,session)=>{
+    if(ev==="PASSWORD_RECOVERY"){ mostrarApp(false); $("#l-form").hidden=true; $("#l-nueva").hidden=false; return; }
+    if(ev==="SIGNED_IN"||ev==="SIGNED_OUT"||ev==="INITIAL_SESSION") setTimeout(()=>entrar(session),0);
+  });
+})();
+})();
+</script>
+</body>
+</html>
