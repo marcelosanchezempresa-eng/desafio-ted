@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>Guía para docentes · Semáforo Jóvenes 26</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Montserrat:ital,wght@0,700;0,800;1,800&display=swap">
+<style>
+@page{size:A4;margin:16mm 15mm 16mm}
+:root{--azul:#1667ae;--azul2:#0f4f8a;--lima:#c4d92e;--tinta:#0e2338;--gris:#4c6178;--fondo:#eef3f9;--verde:#1f8a4c;--amar:#a87200;--rojo:#c23636}
+*{box-sizing:border-box}
+body{font-family:"Atkinson Hyperlegible","Segoe UI",sans-serif;color:var(--tinta);font-size:12.5pt;line-height:1.45;margin:0}
+h1,h2,h3{font-family:Montserrat,"Segoe UI",sans-serif;font-weight:800;margin:0;line-height:1.15}
+h2{font-size:19pt;color:var(--azul2);margin:0 0 4mm;padding-bottom:2mm;border-bottom:3px solid var(--lima)}
+h3{font-size:13.5pt;margin:5mm 0 2mm}
+p{margin:0 0 3mm}
+.pag{page-break-before:always}
+.portada{height:262mm;display:flex;flex-direction:column;justify-content:space-between;background:linear-gradient(180deg,var(--azul),var(--azul2));color:#fff;padding:18mm 14mm;border-radius:4mm}
+.portada .marca{display:inline-block;background:var(--lima);color:#0d3a63;font-style:italic;font-size:30pt;padding:1mm 4mm;font-family:Montserrat,sans-serif;font-weight:800}
+.portada h1{font-size:34pt;margin-top:8mm;font-style:italic}
+.portada .sub{font-size:15pt;margin-top:5mm;color:#cfe0f2;max-width:150mm}
+.portada .pie{font-size:11pt;color:#cfe0f2}
+.lights{display:inline-flex;gap:2mm;margin-left:3mm;vertical-align:middle}.lights i{width:5mm;height:5mm;border-radius:50%;display:block}
+.indice{background:rgba(255,255,255,.1);border-radius:3mm;padding:6mm 8mm;font-size:12.5pt}
+.indice ol{margin:0;padding-left:6mm;display:grid;gap:1.5mm}
+.paso{display:grid;grid-template-columns:62mm 1fr;gap:7mm;align-items:start;margin:0 0 6mm;page-break-inside:avoid}
+.paso img{width:62mm;border:1px solid #c8d6e6;border-radius:2.5mm;display:block}
+.paso.ancho{grid-template-columns:1fr}
+.paso.ancho img{width:100%;max-height:88mm;object-fit:cover;object-position:top left}
+.num{display:inline-flex;align-items:center;justify-content:center;width:8mm;height:8mm;border-radius:50%;background:var(--azul);color:#fff;font-weight:700;font-family:Montserrat,sans-serif;margin-right:2mm;flex:none}
+.paso h3{display:flex;align-items:center;margin-top:0}
+ul,ol{margin:0 0 3mm;padding-left:6mm}
+li{margin-bottom:1.5mm}
+.caja{border-radius:2.5mm;padding:4mm 5mm;margin:0 0 4mm;page-break-inside:avoid}
+.caja.info{background:var(--fondo);border-left:4px solid var(--azul)}
+.caja.ok{background:#dcf2e4;border-left:4px solid var(--verde)}
+.caja.alerta{background:#fbe0e0;border-left:4px solid var(--rojo)}
+.caja.nota{background:#fdf0c8;border-left:4px solid #f0b400}
+.colores{display:grid;grid-template-columns:repeat(3,1fr);gap:3mm;margin:0 0 4mm}
+.colores div{border-radius:2.5mm;padding:3mm 4mm;font-size:11pt}
+.dot{display:inline-block;width:4mm;height:4mm;border-radius:50%;vertical-align:-.5mm;margin-right:1.5mm}
+table{border-collapse:collapse;width:100%;font-size:10.5pt;margin:0 0 4mm;page-break-inside:avoid}
+th,td{border:1px solid #c8d6e6;padding:1.6mm 2.5mm;text-align:left;vertical-align:top}
+th{background:var(--fondo);font-family:Montserrat,sans-serif;font-size:10pt}
+.chip{display:inline-block;padding:.3mm 2.5mm;border-radius:9mm;font-weight:700;font-size:10.5pt}
+.chip.ok{background:#dcf2e4;color:var(--verde)} .chip.no{background:#fbe0e0;color:var(--rojo)}
+.pie-foto{font-size:10pt;color:var(--gris);margin-top:1.5mm}
+.dos{display:grid;grid-template-columns:1fr 1fr;gap:6mm}
+.dos img{width:100%;height:78mm;object-fit:cover;object-position:top;border:1px solid #c8d6e6;border-radius:2.5mm}
+</style></head><body>
+
+<section class="portada">
+  <div>
+    <span class="marca">Jóvenes 26</span><span class="lights"><i style="background:#1f8a4c"></i><i style="background:#f0b400"></i><i style="background:#c23636"></i></span>
+    <h1>Guía para docentes</h1>
+    <p class="sub">Cómo registrar en la aplicación «Semáforo Jóvenes 26» la asistencia, la actitud, la comunicación y el cumplimiento de cada estudiante, paso a paso.</p>
+  </div>
+  <div class="indice">
+    <ol>
+      <li>Qué es la aplicación y qué evalúa</li>
+      <li>Antes de empezar: entrar con su cuenta (una sola vez)</li>
+      <li>Registrar una clase</li>
+      <li>Hitos: trabajos, presentaciones y pruebas</li>
+      <li>Consultar: Semáforo, Ranking y Ficha</li>
+      <li>Problemas frecuentes y cómo resolverlos</li>
+      <li>Para la coordinación: invitar a los docentes</li>
+      <li>Práctica para la reunión</li>
+    </ol>
+  </div>
+  <p class="pie">CITEF · Centro Integral Tecnológico Educativo de Flores · Curso Jóvenes 26 (INEFOP)<br>Las capturas de pantalla usan nombres de ejemplo, no los de los estudiantes del curso.</p>
+</section>
+
+<section class="pag">
+  <h2>1. Qué es la aplicación y qué evalúa</h2>
+  <p>Es una aplicación compartida: cada docente registra lo que observa en su clase y todo se guarda en <b>una misma base de datos</b>. La coordinación ve el resumen de cada estudiante y el ranking para las pasantías.</p>
+  <p>En cada clase se evalúan <b>cuatro aspectos</b>:</p>
+  <ol>
+    <li><b>Asistencia y puntualidad</b></li>
+    <li><b>Actitud frente al aprendizaje</b></li>
+    <li><b>Comunicación</b> (con compañeros, docentes, coordinación y CITEF)</li>
+    <li><b>Cumplimiento de trabajos</b></li>
+  </ol>
+  <p>Cada aspecto se califica con tres colores, como un semáforo:</p>
+  <div class="colores">
+    <div style="background:#dcf2e4"><span class="dot" style="background:#1f8a4c"></span><b>Logrado</b><br>Lo hizo bien.</div>
+    <div style="background:#fdf0c8"><span class="dot" style="background:#f0b400"></span><b>En proceso</b><br>Le costó o lo hizo a medias. Conviene conversarlo.</div>
+    <div style="background:#fbe0e0"><span class="dot" style="background:#c23636"></span><b>No logrado</b><br>No lo hizo. Hace falta un seguimiento personal.</div>
+  </div>
+  <div class="caja info">La pestaña <b>Criterios</b> de la aplicación explica qué significa cada color en cada aspecto. Conviene leerla una vez para que todos evaluemos con la misma vara.</div>
+  <h3>Las pestañas de la aplicación</h3>
+  <table>
+    <tr><th>Pestaña</th><th>Para qué sirve</th><th>Quién la usa</th></tr>
+    <tr><td><b>Registrar clase</b></td><td>Calificar a cada estudiante en su clase del día.</td><td>Todos los docentes</td></tr>
+    <tr><td><b>Hitos</b></td><td>Crear y calificar entregas con fecha: trabajos, presentaciones orales, pruebas.</td><td>Todos los docentes</td></tr>
+    <tr><td><b>Semáforo</b></td><td>Ver el resumen de todos los estudiantes por semana, quincena o módulo.</td><td>Docentes y coordinación</td></tr>
+    <tr><td><b>Ranking</b></td><td>Ver el orden para las pasantías.</td><td>Coordinación</td></tr>
+    <tr><td><b>Ficha</b></td><td>Ver la historia de un estudiante, clase por clase.</td><td>Docentes y coordinación</td></tr>
+    <tr><td><b>Criterios</b></td><td>Qué significa cada color.</td><td>Todos</td></tr>
+    <tr><td><b>Configuración</b></td><td>Estudiantes, componentes, fechas y pesos.</td><td>Solo coordinación</td></tr>
+    <tr><td><b>Ayuda</b></td><td>Una versión corta de esta guía.</td><td>Todos</td></tr>
+  </table>
+</section>
+
+<section class="pag">
+  <h2>2. Antes de empezar: entrar con su cuenta</h2>
+  <p>Esto se hace <b>una sola vez</b>. Es el paso más importante: si no se hace bien, la aplicación se ve pero <b>no guarda</b>.</p>
+  <ol>
+    <li>Revise su correo. Le tiene que llegar una <b>invitación</b> a la aplicación «Semáforo Jóvenes 26».</li>
+    <li>Entre a <b>claude.ai</b> con <b>ese mismo correo</b>. Si no tiene cuenta, créela con ese correo.</li>
+    <li>Abra el enlace que llegó en la invitación.</li>
+    <li>Mire arriba, debajo del título. Tiene que decir <span class="chip ok">● Puede guardar</span>.</li>
+  </ol>
+  <div class="paso">
+    <img src="shots/01-inicio.png" alt="Pantalla inicial con el indicador Puede guardar">
+    <div>
+      <h3><span class="num">✓</span>Así se ve cuando todo está bien</h3>
+      <p>Debajo del título dice <span class="chip ok">● Puede guardar</span>. Ya puede calificar.</p>
+      <p>Si dice <span class="chip no">● Solo lectura</span> o <span class="chip no">● Sin sesión</span>, vaya a la sección 6 de esta guía, «Problemas frecuentes».</p>
+      <div class="caja nota"><b>Importante:</b> abrir el enlace que alguien pasó por WhatsApp <b>no alcanza</b> para guardar. Hay que entrar con la cuenta del correo al que llegó la invitación.</div>
+      <p class="pie-foto">En el celular funciona igual. Conviene guardar el enlace en favoritos o en la pantalla de inicio.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <h2>3. Registrar una clase</h2>
+  <div class="paso">
+    <img src="shots/01-inicio.png" alt="Fecha y componente">
+    <div>
+      <h3><span class="num">1</span>Elija la fecha y su componente</h3>
+      <p>Entre a <b>Registrar clase</b>. La fecha viene con el día de hoy. Si registra una clase de otro día, cámbiela.</p>
+      <p>En <b>Componente</b> elija su espacio, por ejemplo «Lecto Escritura».</p>
+      <p class="pie-foto">El formato de la fecha (día/mes o mes/día) depende de la configuración de su celular o computadora.</p>
+    </div>
+  </div>
+  <div class="paso">
+    <img src="shots/02-todos-presentes.png" alt="Todos presentes">
+    <div>
+      <h3><span class="num">2</span>Toque «Todos presentes y puntuales»</h3>
+      <p>Todos quedan con la asistencia en verde: es el <b>primer punto verde</b> al lado de cada nombre.</p>
+      <p>Después corrija solo a quienes llegaron tarde o faltaron. Así se ahorra tiempo.</p>
+      <p>Debajo de la fecha aparece <b>«Guardado ✓»</b> con la hora.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <div class="paso">
+    <img src="shots/03-tarjeta-abierta.png" alt="Tarjeta abierta">
+    <div>
+      <h3><span class="num">3</span>Toque el nombre de un estudiante</h3>
+      <p>Se abre su tarjeta con los cuatro aspectos. Cada uno tiene tres botones: <b>Logrado</b>, <b>En proceso</b> y <b>No logrado</b>.</p>
+      <p>Debajo del botón elegido aparece qué significa ese color, para ayudarlo a decidir.</p>
+    </div>
+  </div>
+  <div class="paso">
+    <img src="shots/04-marcando.png" alt="Marcando aspectos">
+    <div>
+      <h3><span class="num">4</span>Toque un botón en cada aspecto</h3>
+      <p>El botón elegido queda con borde de color. Los cuatro puntos al lado del nombre muestran cómo va.</p>
+      <ul>
+        <li>Para <b>cambiar</b> una calificación, toque otro botón.</li>
+        <li>Para <b>borrarla</b>, toque de nuevo el mismo botón.</li>
+        <li>Si ese día no había tarea, marque <b>«Hoy no había tarea»</b> en Cumplimiento.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <div class="paso">
+    <img src="shots/05-siguiente.png" alt="Siguiente estudiante">
+    <div>
+      <h3><span class="num">5</span>Si quiere, escriba una observación</h3>
+      <p>Es opcional. Sirve para dejar un dato que la coordinación debe saber, por ejemplo: «avisó que llegaba tarde».</p>
+      <h3><span class="num">6</span>Toque «Siguiente estudiante →»</h3>
+      <p>Se cierra esta tarjeta y se abre la del estudiante que sigue en la lista.</p>
+    </div>
+  </div>
+  <div class="paso">
+    <img src="shots/06-guardado-check.png" alt="Guardado y estudiante completo">
+    <div>
+      <h3><span class="num">7</span>Fíjese en la ✓ y en la barra</h3>
+      <p>Cuando un estudiante tiene todo calificado, aparece una <b>✓</b> junto a su nombre.</p>
+      <p>La barra verde lima debajo de la fecha muestra cuántos estudiantes faltan.</p>
+      <div class="caja ok">Cada toque se guarda solo. <b>No hay un botón de «Guardar».</b> Mientras diga «Guardado ✓», está todo bien.</div>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <div class="paso">
+    <img src="shots/07-ausente.png" alt="Estudiante ausente">
+    <div>
+      <h3><span class="num">8</span>Si un estudiante faltó</h3>
+      <p>Toque <b>No logrado</b> en Asistencia. Los otros tres aspectos de esa clase se borran solos: no se puede evaluar actitud ni comunicación de alguien que no estuvo.</p>
+      <p>Si la falta está <b>justificada</b> (certificado, aviso previo aceptado), marque la casilla <b>«Falta justificada»</b>. Esa clase no cuenta para ese estudiante.</p>
+      <div class="caja info">Si llegó tarde o se retiró antes, use <b>En proceso</b> (amarillo) en Asistencia.</div>
+    </div>
+  </div>
+  <h3>¿Se equivocó o se olvidó de registrar?</h3>
+  <ul>
+    <li>Puede volver a la misma fecha y componente <b>otro día</b> y corregir. Los datos anteriores siguen ahí.</li>
+    <li>Si dos docentes registran el mismo componente el mismo día, cada uno ve en vivo lo que marca el otro.</li>
+    <li>La aplicación no deja registrar clases antes del inicio del curso (13/10/2026).</li>
+  </ul>
+</section>
+
+<section class="pag">
+  <h2>4. Hitos: trabajos, presentaciones y pruebas</h2>
+  <p>Un <b>hito</b> es una entrega con fecha: un trabajo práctico, una presentación oral, una prueba. Cada hito vale <b>el doble que una tarea de clase</b> dentro del aspecto Cumplimiento.</p>
+  <div class="paso">
+    <img src="shots/08-hito-crear.png" alt="Crear un hito">
+    <div>
+      <h3><span class="num">1</span>Cree el hito</h3>
+      <ol>
+        <li>Entre a la pestaña <b>Hitos</b> y elija su componente.</li>
+        <li>Escriba el <b>nombre</b> o toque uno de los <b>sugeridos</b>, que salen del programa de su componente.</li>
+        <li>Elija el <b>tipo</b> y la <b>fecha de entrega</b>.</li>
+        <li>Toque <b>Crear hito</b>.</li>
+      </ol>
+    </div>
+  </div>
+  <div class="paso">
+    <img src="shots/09-hito-evaluar.png" alt="Calificar un hito">
+    <div>
+      <h3><span class="num">2</span>Califique a cada estudiante</h3>
+      <p>Toque el hito en la lista. Para cada estudiante elija:</p>
+      <ul>
+        <li><span class="dot" style="background:#1f8a4c"></span>entregó o presentó en tiempo y forma;</li>
+        <li><span class="dot" style="background:#f0b400"></span>entregó tarde o incompleto;</li>
+        <li><span class="dot" style="background:#c23636"></span>no entregó;</li>
+        <li><b>N/C</b>: no corresponde (por ejemplo, exonerado). No cuenta.</li>
+      </ul>
+      <div class="caja nota">Una <b>prueba diagnóstica</b> no debería cargarse como hito: mide el punto de partida, no el cumplimiento.</div>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <h2>5. Consultar: Semáforo, Ranking y Ficha</h2>
+  <div class="paso ancho">
+    <img src="shots/10-semaforo.png" alt="Semáforo">
+    <div>
+      <h3>Semáforo</h3>
+      <p>Una fila por estudiante y una columna por aspecto. Arriba se elige el período (semana, quincena, módulo o todo el curso) y el componente. La última columna indica a quién conviene <b>conversar</b> o citar a <b>entrevista</b>.</p>
+    </div>
+  </div>
+  <div class="paso ancho">
+    <img src="shots/11-ranking.png" alt="Ranking">
+    <div>
+      <h3>Ranking</h3>
+      <p>El orden de los estudiantes según el índice de empleabilidad. La línea punteada marca los <b>12 cupos de pasantía</b> y, más abajo, los <b>15 cupos ampliados</b>.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <div class="paso ancho">
+    <img src="shots/12-ficha.png" alt="Ficha">
+    <div>
+      <h3>Ficha del estudiante</h3>
+      <p>La historia de un estudiante: su índice, su puesto, cómo le va en cada componente y cada clase registrada con sus observaciones. Sirve para preparar una conversación personal.</p>
+    </div>
+  </div>
+  <div class="paso ancho">
+    <img src="shots/13-criterios.png" alt="Criterios">
+    <div>
+      <h3>Criterios</h3>
+      <p>Qué significa cada color en cada aspecto y cómo se calcula el índice.</p>
+    </div>
+  </div>
+</section>
+
+<section class="pag">
+  <h2>6. Problemas frecuentes y cómo resolverlos</h2>
+  <div class="dos">
+    <div><img src="shots/15-solo-lectura.png" alt="Solo lectura"><p class="pie-foto">Así se ve «Solo lectura».</p></div>
+    <div><img src="shots/16-sin-sesion.png" alt="Sin sesión"><p class="pie-foto">Así se ve «Sin sesión».</p></div>
+  </div>
+  <table>
+    <tr><th style="width:35%">Lo que ve</th><th>Qué pasa y qué hacer</th></tr>
+    <tr><td><span class="chip no">● Solo lectura</span> y un cuadro rojo</td><td>Su cuenta puede ver la aplicación pero <b>no guardar</b>. Pida a la coordinación que lo invite <b>por correo con permiso de Editor</b>. Cuando llegue la invitación, entre a claude.ai con ese correo y vuelva a abrir la aplicación.</td></tr>
+    <tr><td><span class="chip no">● Sin sesión</span></td><td>No entró a claude.ai, o entró con otra cuenta. Entre con el correo al que llegó la invitación y vuelva a abrir el enlace.</td></tr>
+    <tr><td>«No se guardó: su cuenta es de solo lectura»</td><td>Igual que «Solo lectura». Lo que marcó <b>no</b> quedó registrado: anótelo en papel y cárguelo cuando tenga el permiso.</td></tr>
+    <tr><td>«No se pudo guardar… Se reintentará»</td><td>Se cortó internet. No cierre la página: la aplicación vuelve a intentar sola. Espere a que diga «Guardado ✓».</td></tr>
+    <tr><td>No aparece mi componente</td><td>Pida a la coordinación que lo agregue en Configuración.</td></tr>
+    <tr><td>El aviso dice «Este componente no se dicta en esta fecha»</td><td>Es solo un aviso, se puede registrar igual. Revise que la fecha sea la correcta.</td></tr>
+    <tr><td>La fecha no deja elegir un día</td><td>Solo se pueden elegir días entre el inicio y el fin del curso.</td></tr>
+  </table>
+</section>
+
+<section class="pag">
+  <h2>7. Para la coordinación: invitar a los docentes</h2>
+  <div class="caja alerta"><b>Por qué algunos docentes no podían guardar.</b> La aplicación está en una cuenta personal de claude.ai. Con una cuenta personal, las personas de fuera solo pueden guardar datos si se las invita <b>por correo con permiso de Editor</b> y si el enlace público está <b>apagado</b>. Con el enlace público encendido, todos los invitados quedan como lectores, aunque se los haya invitado como Editores.</div>
+  <h3>Pasos (los hace el dueño de la aplicación)</h3>
+  <ol>
+    <li>Abra la aplicación en claude.ai y toque <b>Compartir</b>.</li>
+    <li>En el acceso general, cambie «Cualquiera con el enlace» a la opción que deja entrar <b>solo a las personas invitadas</b>.</li>
+    <li>Agregue el correo de cada docente y de la coordinadora, y elija el permiso <b>Editor</b>.</li>
+    <li>Pida a cada docente que abra la aplicación y confirme que ve <span class="chip ok">● Puede guardar</span>.</li>
+  </ol>
+  <div class="caja nota">Los nombres exactos de las opciones del menú Compartir pueden variar. Si al invitar a un correo externo no aparece la opción <b>Editor</b>, los docentes no van a poder guardar con esta cuenta y hay que buscar otra solución antes de la reunión.</div>
+  <div class="caja info"><b>Una consecuencia de dar permiso de Editor:</b> los docentes también pueden cambiar la pestaña <b>Configuración</b>. Conviene acordar en la reunión que solo la coordinación la toque.</div>
+  <h3>Configuración (solo coordinación)</h3>
+  <div class="paso ancho"><img src="shots/14-config.png" alt="Configuración"></div>
+  <p>Aquí se cargan las fechas del curso, los módulos, el receso, los componentes con su docente, los estudiantes, los cupos y el peso de cada aspecto. Los cambios se guardan con el botón <b>Guardar configuración</b>, al final de la página.</p>
+</section>
+
+<section class="pag">
+  <h2>8. Práctica para la reunión</h2>
+  <p>Un ensayo de unos 15 minutos para que cada docente compruebe que todo funciona.</p>
+  <ol>
+    <li><b>Antes de la reunión:</b> cada docente recibe la invitación por correo y entra a claude.ai con ese correo.</li>
+    <li><b>Todos abren la aplicación</b> en su celular o computadora y confirman que dice <span class="chip ok">● Puede guardar</span>. Quien vea otra cosa, resuelve con la sección 6.</li>
+    <li><b>Cada docente registra una clase de práctica</b>: su componente, con la fecha de la reunión, y tres estudiantes con los cuatro aspectos.</li>
+    <li><b>Prueba entre dos:</b> dos docentes eligen el mismo componente y la misma fecha. Uno marca y el otro tiene que ver el cambio en su pantalla en pocos segundos.</li>
+    <li><b>La coordinación abre Semáforo</b>, elige «Por módulo» y «Módulo 1», y verifica que aparecen los registros de todos.</li>
+    <li><b>Al terminar</b>, se borran las calificaciones de práctica: cada docente vuelve a su clase de práctica y toca de nuevo los botones marcados para dejarlos vacíos.</li>
+  </ol>
+  <div class="caja ok">Si los seis pasos salen bien, la aplicación está lista para usar todos los días.</div>
+</section>
+</body></html>

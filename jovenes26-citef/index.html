@@ -56,6 +56,18 @@ nav.tabs button:focus-visible{outline-color:var(--lima);outline-offset:-3px}
 .stu-foot{display:flex;justify-content:flex-end;gap:8px}
 @media (max-width:480px){.who{display:none}.brand h1{font-size:1.3rem}}
 .desc:empty{display:none}
+.estado{display:inline-flex;align-items:center;gap:6px;font-size:.8rem;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--band-2);color:var(--band-muted);white-space:nowrap}
+.estado::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--gris-dot)}
+.estado.ok{background:var(--verde-bg);color:var(--verde)} .estado.ok::before{background:var(--verde)}
+.estado.no{background:var(--rojo-bg);color:var(--rojo)} .estado.no::before{background:var(--rojo)}
+.banner.error{background:var(--rojo-bg);border-color:var(--rojo);color:var(--fg)}
+.banner.error b{color:var(--rojo)}
+body.solo-lectura .lvl,body.solo-lectura #r-todos,body.solo-lectura #h-crear,body.solo-lectura .ex{opacity:.45;pointer-events:none}
+.ayuda{display:flex;flex-direction:column;gap:14px;max-width:46rem}
+.ayuda h2{font-size:1.2rem}
+.ayuda h3{font-size:1rem;margin-top:6px}
+.ayuda ol,.ayuda ul{margin:0;padding-left:1.3rem;display:flex;flex-direction:column;gap:6px}
+.ayuda p{margin:0}
 
 main{max-width:1100px;margin:0 auto;padding-inline:16px;padding-block:16px 48px;display:flex;flex-direction:column;gap:16px}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:16px}
@@ -164,7 +176,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
     <div class="brand">
       <h1><span class="mark">Jóvenes 26</span>CITEF<span class="lights" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span></h1>
       <small id="subtitle">Seguimiento de empleabilidad · INEFOP</small>
-      <span class="who" id="who"></span>
+      <span class="who" id="who"></span><span class="estado" id="estado" role="status">Conectando…</span>
     </div>
     <nav class="tabs" role="tablist" aria-label="Secciones">
       <button role="tab" data-tab="registrar" aria-selected="true">Registrar clase</button>
@@ -174,12 +186,14 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <button role="tab" data-tab="ficha" aria-selected="false">Ficha</button>
       <button role="tab" data-tab="criterios" aria-selected="false">Criterios</button>
       <button role="tab" data-tab="config" aria-selected="false">Configuración</button>
+      <button role="tab" data-tab="ayuda" aria-selected="false">Ayuda</button>
     </nav>
   </div>
 </header>
 
 <main id="main">
   <div id="conn" class="banner">Conectando con el registro compartido…</div>
+  <div id="ro" class="banner error" hidden></div>
 
   <section data-view="registrar" class="view">
     <div class="panel">
@@ -260,6 +274,50 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <h2 style="font-size:1.2rem;margin-bottom:6px">Qué significa cada color</h2>
       <p class="note">Se evalúan conductas observables en la clase, no el nivel educativo previo: así un joven con primaria y uno con bachillerato compiten en igualdad de condiciones.</p>
       <div class="rubric" id="rubric"></div>
+    </div>
+  </section>
+
+  <section data-view="ayuda" class="view" hidden>
+    <div class="panel ayuda">
+      <h2>Cómo usar la aplicación</h2>
+      <p class="note">Hay una guía completa con capturas de pantalla en PDF. Esta es la versión corta.</p>
+      <h3>Antes de empezar (una sola vez)</h3>
+      <ol>
+        <li>Revise su correo: le tiene que llegar una <b>invitación</b> a la aplicación «Semáforo Jóvenes 26».</li>
+        <li>Entre a <b>claude.ai</b> con <b>ese mismo correo</b>. Si no tiene cuenta, créela con ese correo.</li>
+        <li>Abra el enlace de la invitación. Arriba a la derecha tiene que decir <b>«Puede guardar»</b> en verde.</li>
+        <li>Si dice <b>«Solo lectura»</b> en rojo, todavía no puede calificar: avise a la coordinación.</li>
+      </ol>
+      <h3>Registrar una clase</h3>
+      <ol>
+        <li>Entre a la pestaña <b>Registrar clase</b>.</li>
+        <li>Revise la <b>fecha</b> (sale la de hoy) y elija su <b>componente</b>.</li>
+        <li>Toque <b>«Todos presentes y puntuales»</b>. Todos quedan con asistencia en verde.</li>
+        <li>Toque el <b>nombre</b> de un estudiante: se abren los cuatro aspectos.</li>
+        <li>En cada aspecto toque <b>Logrado</b> (verde), <b>En proceso</b> (amarillo) o <b>No logrado</b> (rojo).</li>
+        <li>Si faltó, toque <b>No logrado</b> en asistencia: los otros tres aspectos se borran solos. Si la falta es justificada, marque la casilla.</li>
+        <li>Toque <b>«Siguiente estudiante»</b> y repita. Cuando un estudiante está completo aparece una ✓ junto a su nombre.</li>
+        <li>Cada toque se guarda solo. Debajo de la fecha debe decir <b>«Guardado ✓»</b>.</li>
+      </ol>
+      <h3>Si se equivoca</h3>
+      <ul>
+        <li>Toque el botón correcto: el anterior se reemplaza.</li>
+        <li>Toque de nuevo el mismo botón para dejarlo vacío.</li>
+        <li>Puede volver a la misma fecha y componente otro día y corregir.</li>
+      </ul>
+      <h3>Hitos (trabajos, presentaciones, pruebas)</h3>
+      <ol>
+        <li>Entre a la pestaña <b>Hitos</b> y elija su componente.</li>
+        <li>Escriba el nombre, elija el tipo y la fecha de entrega, y toque <b>Crear hito</b>. También puede tocar un hito sugerido.</li>
+        <li>Toque el hito en la lista y califique a cada estudiante. <b>N/C</b> es «no corresponde».</li>
+      </ol>
+      <h3>Consultar</h3>
+      <ul>
+        <li><b>Semáforo</b>: el resumen de cada estudiante por semana, quincena o módulo.</li>
+        <li><b>Ranking</b>: el orden para las pasantías.</li>
+        <li><b>Ficha</b>: la historia de un estudiante, clase por clase.</li>
+        <li><b>Criterios</b>: qué significa cada color.</li>
+      </ul>
     </div>
   </section>
 
@@ -365,6 +423,21 @@ let cfg=structuredClone(DEFAULT_CFG);
 let clases={}, hitos={};
 let db=null, user=null, myId=null, canAdmin=false;
 let openCard=null, selHito=null, delAsk=false;
+let soloLectura=false;
+const MSG_RO="<b>Su cuenta puede ver la aplicación, pero no guardar calificaciones.</b> Para poder guardar, la coordinación tiene que invitarlo <b>por correo con permiso de Editor</b>. Abrir el enlace no alcanza. Cuando reciba la invitación, entre a claude.ai con ese correo y vuelva a abrir la aplicación.";
+function marcarEstado(tipo,texto){const el=$("#estado"); el.className="estado "+(tipo||""); el.textContent=texto;}
+function pasarASoloLectura(){
+  if(soloLectura) return; soloLectura=true;
+  document.body.classList.add("solo-lectura"); marcarEstado("no","Solo lectura");
+  const ro=$("#ro"); ro.innerHTML=MSG_RO; ro.hidden=false;
+  // Lo que no se pudo guardar no debe seguir en pantalla como si estuviera guardado
+  for(const k in queue) delete queue[k]; for(const k in timers) clearTimeout(timers[k]);
+  for(const path in overlay){const [coll,id]=path.split("/"); const src=coll==="clases"?clases:hitos;
+    if(src[id]&&src[id].ev) for(const sid in overlay[path]) for(const f in overlay[path][sid]) delete src[id].ev[sid][f];
+    delete overlay[path];}
+  status("No se guardó: su cuenta es de solo lectura."); hStatus("No se guardó: su cuenta es de solo lectura.");
+  renderAll();
+}
 
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -478,6 +551,7 @@ const compOf=id=>(cfg.componentes.find(c=>c.id===id)||{}).nombre||"(componente e
 const overlay={}, queue={}, busy={}, timers={}, makers={}, sayers={};
 const blank=v=>v===undefined||v===null||v==="";
 function queueWrite(path,sid,patch,makeDoc,statusFn){
+  if(soloLectura){statusFn("No se guardó: su cuenta es de solo lectura.");return}
   const o=((overlay[path]=overlay[path]||{})[sid]=overlay[path][sid]||{});
   const q=((queue[path]=queue[path]||{})[sid]=queue[path][sid]||{});
   for(const f in patch){o[f]=patch[f]; q[f]=patch[f];}
@@ -492,7 +566,14 @@ async function flush(path){
   const data={ev:body,editadoEn:new Date().toISOString(),...(myId?{editadoPor:myId}:{})};
   try{
     try{ await ref.update(data); }
-    catch(e){ if(e&&e.code==="invalid_argument"&&makers[path]){ await ref.set(makers[path]()); } else throw e; }
+    catch(e){
+      if(!(e&&e.code==="invalid_argument")) throw e;
+      // invalid_argument: o la clase todavía no existe, o la base rechaza a esta cuenta
+      if(!makers[path]){pasarASoloLectura();return}
+      try{ await ref.set(makers[path]()); }
+      catch(e2){ if(e2&&e2.code==="invalid_argument"){pasarASoloLectura();return} throw e2; }
+    }
+    if(!soloLectura) marcarEstado("ok","Puede guardar");
     say("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"}));
     // pasado un momento, la base ya refleja lo escrito: se retira del overlay lo que no cambió desde entonces
     setTimeout(()=>{const o=overlay[path]; if(!o) return;
@@ -523,6 +604,7 @@ function clsId(){return $("#r-fecha").value+"_"+$("#r-comp").value}
 function status(t){$("#r-status").textContent=t}
 function setEval(sid,patch){
   if(!db){status("Sin conexión al registro compartido: el cambio no se guardó.");return}
+  if(soloLectura){status("No se guardó: su cuenta es de solo lectura.");return}
   if(!$("#r-comp").value){status("Elija un componente primero.");return}
   if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
   const id=clsId();
@@ -665,13 +747,13 @@ $("#h-crear").onclick=async()=>{
   const data={comp,nombre,tipo:$("#h-tipo").value,fecha,ev:{},creadoEn:new Date().toISOString(),...(myId?{autor:myId}:{})};
   $("#h-cstatus").textContent="Creando…";
   try{await db.doc("hitos/"+id).set(data); hitos[id]=data; selHito=id; $("#h-nombre").value=""; $("#h-cstatus").textContent="Hito creado ✓"; renderHitos();}
-  catch(e){$("#h-cstatus").textContent="No se pudo crear ("+(e.code||"error")+").";}
+  catch(e){ if(e&&e.code==="invalid_argument"){pasarASoloLectura(); $("#h-cstatus").textContent="No se pudo crear: su cuenta es de solo lectura.";} else $("#h-cstatus").textContent="No se pudo crear ("+(e.code||"error")+"). Revise la conexión y vuelva a intentar.";}
 };
 $("#h-eval").addEventListener("click",async e=>{
   if(e.target.id==="h-del"){delAsk=true;renderHitoEval();return}
   if(e.target.id==="h-del-no"){delAsk=false;renderHitoEval();return}
   if(e.target.id==="h-del-si"){const id=selHito; try{await db.doc("hitos/"+id).delete(); delete hitos[id]; delete overlay["hitos/"+id]; selHito=null; delAsk=false; renderHitos();}catch(err){hStatus("No se pudo eliminar ("+(err.code||"error")+").")} return}
-  const b=e.target.closest(".lvl"); if(!b||!selHito) return; const sid=b.closest(".hrow").dataset.sid;
+  const b=e.target.closest(".lvl"); if(!b||!selHito) return; if(soloLectura){hStatus("No se guardó: su cuenta es de solo lectura.");return} const sid=b.closest(".hrow").dataset.sid;
   const h=hitos[selHito]; h.ev=h.ev||{}; const cur=(h.ev[sid]||{}).l; const patch={l:cur===b.dataset.l?"":b.dataset.l};
   h.ev[sid]=Object.assign({},h.ev[sid],patch);
   queueWrite("hitos/"+selHito,sid,patch,null,hStatus); renderHitos();
@@ -786,7 +868,7 @@ $("#c-save").onclick=async()=>{
   draft.estudiantes=draft.estudiantes.filter(e=>e.nombre.trim()); draft.componentes=draft.componentes.filter(c=>c.nombre.trim());
   $("#c-status").textContent="Guardando…";
   try{await db.doc("config/curso").set(draft); $("#c-status").textContent="Configuración guardada ✓"; }
-  catch(e){$("#c-status").textContent="No se pudo guardar ("+(e.code||"error")+").";}
+  catch(e){$("#c-status").textContent=e&&e.code==="invalid_argument"?"No se pudo guardar: solo quien tiene permiso de Editor puede cambiar la configuración.":"No se pudo guardar ("+(e.code||"error")+"). Revise la conexión y vuelva a intentar.";}
 };
 
 // ---------- CSV ----------
@@ -806,7 +888,7 @@ $("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>download
 function renderAll(){
   fillPeriodSelectors();
   const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
-  ({registrar:renderRegistrar,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig}[t]||(()=>{}))();
+  ({registrar:renderRegistrar,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{}}[t]||(()=>{}))();
 }
 function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, input.obs-in, #c-bulk, .cfg-item input, #h-nombre")}
 
@@ -814,13 +896,15 @@ function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.mat
 $("#r-fecha").value=todayStr();
 const saved=gp("tab"); showTab(saved&&$(`[data-tab="${saved}"]`)?saved:"registrar");
 (async()=>{
-  if(!window.claude||!claude.use){$("#conn").textContent="Esta copia no está conectada al registro compartido. Ábrala desde el enlace de claude.ai.";return}
+  if(!window.claude||!claude.use){$("#conn").textContent="Esta copia no está conectada al registro compartido. Ábrala desde el enlace de claude.ai.";marcarEstado("no","Sin conexión");return}
   const [d,u]=await Promise.all([claude.use("db"),claude.use("user")]);
   user=u; db=d;
   if(user){ try{myId=await user.id()}catch(e){} try{canAdmin=await user.canEdit()}catch(e){}
     try{const me=await user.me(); $("#who").textContent=(me.name||"")+(canAdmin?" · coordinación":"");}catch(e){} }
-  if(!db){$("#conn").textContent="No se pudo abrir el registro compartido. Inicie sesión en claude.ai y vuelva a abrir el enlace.";$("#conn").classList.add("warn");return}
+  if(!db){$("#conn").innerHTML="<b>No hay una sesión iniciada.</b> Entre a claude.ai con el correo en el que recibió la invitación y vuelva a abrir este enlace. Sin sesión, la aplicación no puede mostrar ni guardar calificaciones.";$("#conn").className="banner error";marcarEstado("no","Sin sesión");$$(".view").forEach(v=>v.hidden=v.dataset.view!=="ayuda");$$("nav.tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.tab==="ayuda")));return}
   $("#conn").hidden=true;
+  let puede=null; if(user){try{puede=await user.can("data.write")}catch(e){}}
+  if(puede===false) pasarASoloLectura(); else marcarEstado(puede?"ok":"",puede?"Puede guardar":"Conectado");
   const err=e=>{$("#conn").hidden=false;$("#conn").textContent="Error al leer el registro compartido ("+e.code+")."};
   let fechaLista=false;
   db.doc("config/curso").onSnapshot(s=>{cfg=Object.assign(structuredClone(DEFAULT_CFG),s.exists?s.data():{});

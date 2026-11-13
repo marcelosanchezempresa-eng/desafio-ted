@@ -34,3 +34,10 @@ Inicio 13/10/2026. Módulo 1: 13/10–23/12. Receso: 24/12–31/01. Módulo 2: 0
 - `config/curso`: configuración.
 - `clases/{fecha}_{componente}`: un documento por clase con la evaluación de cada estudiante.
 - `hitos/{fecha}_{componente}_{id}`: un documento por hito con la evaluación de cada estudiante.
+
+## Permisos (importante)
+La app está en una cuenta personal de claude.ai. Para que un docente pueda **guardar**, el dueño tiene que invitarlo **por correo con permiso de Editor** y el enlace público tiene que estar **apagado**. Con el enlace público encendido, todos los invitados quedan como lectores. La app lo muestra arriba: «Puede guardar» (verde) o «Solo lectura» (rojo).
+
+## Manual
+- `Guia-docentes-Semaforo-Jovenes26.pdf`: guía paso a paso con capturas.
+- `manual/`: fuente HTML y capturas (datos de ejemplo) para regenerarla.
