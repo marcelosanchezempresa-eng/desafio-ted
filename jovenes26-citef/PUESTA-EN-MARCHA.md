@@ -52,3 +52,9 @@ Abra la dirección, entre con su correo y contraseña. Arriba tiene que decir **
 - **Receso de fin de año:** en el plan gratis, Supabase **pausa** el proyecto después de unos 7 días sin uso. Durante el receso (24/12 al 31/01) se va a pausar. Al volver, en febrero, entre a supabase.com y toque **Restore project**. Los datos no se pierden.
 - **Copia de respaldo:** el plan gratis no permite descargar respaldos desde el panel. Descargue el CSV del Ranking y del Semáforo al cierre de cada módulo.
 - **La app anterior en claude.ai** queda como estaba. Para no mezclar datos, usen solo la nueva.
+
+## Auto-registro de docentes (activado)
+Cada docente crea su propia contraseña la primera vez, **solo si su correo está autorizado**.
+1. SQL Editor → New query → pegar `jovenes26-citef/supabase/autoregistro.sql` → **Run**.
+2. Authentication → Sign In / Providers → *User Signups*: **encender** «Allow new users to sign up» y **apagar** «Confirm email». Guardar.
+3. Contraseña olvidada: Configuración → Docentes autorizados → **Reiniciar contraseña**.

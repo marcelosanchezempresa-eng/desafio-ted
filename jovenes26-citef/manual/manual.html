@@ -100,19 +100,16 @@ th{background:var(--fondo);font-family:Montserrat,sans-serif;font-size:10pt}
 
 <section class="pag">
   <h2>2. Antes de empezar: entrar a la aplicación</h2>
-  <p>La coordinación le entrega tres datos:</p>
-  <ul>
-    <li>la <b>dirección</b> de la aplicación: <b>https://marcelosanchezempresa-eng.github.io/desafio-ted/</b></li>
-    <li>su <b>correo</b> de usuario;</li>
-    <li>una <b>contraseña</b>.</li>
-  </ul>
+  <p>La coordinación <b>autoriza su correo</b> y le pasa la dirección de la aplicación:</p>
+  <p style="font-size:13.5pt"><b>https://marcelosanchezempresa-eng.github.io/desafio-ted/</b></p>
   <p>No hace falta instalar nada ni tener cuenta en ningún otro sitio. Funciona en el celular y en la computadora.</p>
   <div class="paso">
     <img src="shots2/00-ingreso.png" alt="Pantalla de ingreso">
     <div>
-      <h3><span class="num">1</span>Escriba su correo y su contraseña</h3>
-      <p>Abra la dirección, escriba el correo y la contraseña tal como se los dieron, y toque <b>Entrar</b>.</p>
-      <p>La aplicación lo recuerda: la próxima vez entra directo, sin escribir nada.</p>
+      <h3><span class="num">1</span>La primera vez: cree su contraseña</h3>
+      <p>Abra la dirección. Escriba <b>su correo</b> (el que autorizó la coordinación) y <b>una contraseña nueva</b> de 8 caracteres o más. Toque <b>«Crear mi contraseña»</b>: entra directo.</p>
+      <p><b>Las veces siguientes</b> la aplicación lo recuerda y entra sola. Si le pide los datos, escriba correo y contraseña y toque <b>Entrar</b>.</p>
+      <div class="caja nota"><b>Anote su contraseña</b> en un lugar seguro. Si la olvida, la coordinación la puede reiniciar y usted crea una nueva (sección 6).</div>
       <div class="caja info"><b>Para tenerla a mano en el celular:</b> en el menú del navegador elija «Agregar a la pantalla de inicio». Queda un ícono como el de cualquier aplicación.</div>
     </div>
   </div>
@@ -285,7 +282,10 @@ th{background:var(--fondo);font-family:Montserrat,sans-serif;font-size:10pt}
   </div>
   <table>
     <tr><th style="width:35%">Lo que ve</th><th>Qué pasa y qué hacer</th></tr>
-    <tr><td>«Correo o contraseña incorrectos»</td><td>Revise que estén escritos tal como se los dieron. La contraseña distingue mayúsculas y minúsculas. Si no la recuerda, pida una nueva a la coordinación.</td></tr>
+    <tr><td>«Correo o contraseña incorrectos»</td><td>Revise cómo los escribió: la contraseña distingue mayúsculas y minúsculas. Si es la primera vez, toque <b>«Crear mi contraseña»</b> en lugar de «Entrar».</td></tr>
+    <tr><td>Olvidé mi contraseña</td><td>Pida a la coordinación que toque <b>«Reiniciar contraseña»</b> junto a su nombre. Después escriba su correo y una contraseña nueva y toque <b>«Crear mi contraseña»</b>. No se pierde ninguna calificación.</td></tr>
+    <tr><td>«Ese correo no está autorizado»</td><td>La coordinación todavía no agregó su correo, o está escrito distinto. Pídale que lo agregue en «Docentes autorizados».</td></tr>
+    <tr><td>«Ese correo ya tiene contraseña»</td><td>Ya la creó antes: escríbala y toque <b>Entrar</b>. Si no la recuerda, vea «Olvidé mi contraseña».</td></tr>
     <tr><td><span class="chip no">● No autorizado</span> y un cuadro rojo</td><td>Su cuenta existe, pero su correo no está en la lista de docentes autorizados. Pida a la coordinación que lo agregue. Después toque <b>Salir</b> y vuelva a entrar.</td></tr>
     <tr><td>«No se guardó: su correo no está autorizado»</td><td>Igual que el anterior. Lo que marcó <b>no</b> quedó registrado: anótelo en papel y cárguelo cuando esté autorizado.</td></tr>
     <tr><td>«No se pudo guardar… Se reintentará»</td><td>Se cortó internet. No cierre la página: la aplicación vuelve a intentar sola. Espere a que diga «Guardado ✓».</td></tr>
@@ -298,19 +298,19 @@ th{background:var(--fondo);font-family:Montserrat,sans-serif;font-size:10pt}
 
 <section class="pag">
   <h2>7. Para la coordinación: dar de alta a un docente</h2>
-  <p>Para que un docente pueda entrar y calificar hacen falta <b>dos pasos</b>: crear su cuenta en Supabase y autorizar su correo en la aplicación.</p>
-  <h3>Paso A · Crear la cuenta (en supabase.com)</h3>
-  <ol>
-    <li>Entre a <b>supabase.com</b> con la cuenta del proyecto y abra el proyecto del curso.</li>
-    <li>En el menú de la izquierda, entre a <b>Authentication</b> y después a <b>Users</b>.</li>
-    <li>Toque <b>Add user</b> y elija <b>Create new user</b>.</li>
-    <li>Escriba el correo del docente y una contraseña de al menos 8 caracteres. Deje marcada la opción <b>Auto Confirm User</b>.</li>
-    <li>Toque <b>Create user</b>. Pásele al docente la dirección de la aplicación, su correo y la contraseña.</li>
-  </ol>
-  <h3>Paso B · Autorizar el correo (en la aplicación)</h3>
   <div class="paso ancho"><img src="shots2/14b-docentes.png" alt="Docentes autorizados"></div>
-  <p>En <b>Configuración → Docentes autorizados</b>, escriba el mismo correo y el nombre, elija el rol y toque <b>Autorizar</b>. El rol <b>Coordinación</b> puede autorizar docentes y cambiar la configuración; el rol <b>Docente</b> solo califica y consulta.</p>
-  <div class="caja info"><b>Si un docente deja el curso:</b> toque <b>Dar de baja</b>. Ya no puede entrar, pero sus calificaciones quedan guardadas.<br><b>Si olvida la contraseña:</b> en Supabase, en <b>Users</b>, borre su usuario y créelo de nuevo con otra contraseña. Sus calificaciones no se pierden, porque se guardan por correo.</div>
+  <h3>Autorizar a un docente</h3>
+  <ol>
+    <li>Entre a <b>Configuración</b> y baje hasta <b>Docentes autorizados</b>.</li>
+    <li>Escriba su <b>correo</b> y su <b>nombre</b>, elija el <b>rol</b> y toque <b>Autorizar</b>.</li>
+    <li>Pásele la dirección de la aplicación. La primera vez, el docente crea su propia contraseña con <b>«Crear mi contraseña»</b>.</li>
+  </ol>
+  <p>El rol <b>Coordinación</b> puede autorizar docentes y cambiar la configuración. El rol <b>Docente</b> solo califica y consulta. Para cambiar el rol de alguien, vuelva a escribir su correo, elija el rol nuevo y toque Autorizar.</p>
+  <h3>Si un docente olvida su contraseña</h3>
+  <p>Toque <b>Reiniciar contraseña</b> junto a su nombre y confirme con <b>Sí, reiniciar</b>. El docente vuelve a crear una contraseña con «Crear mi contraseña». <b>Sus calificaciones no se pierden</b>, porque se guardan por correo.</p>
+  <h3>Si un docente deja el curso</h3>
+  <p>Toque <b>Dar de baja</b>. Ya no puede entrar ni crear contraseña, pero lo que calificó queda guardado.</p>
+  <div class="caja alerta"><b>Cada persona con su propia cuenta.</b> No preste su usuario de coordinación: con él se puede cambiar la configuración y dar de baja a otros docentes.</div>
 </section>
 
 <section class="pag">
@@ -323,7 +323,7 @@ th{background:var(--fondo);font-family:Montserrat,sans-serif;font-size:10pt}
   <h2>8. Práctica para la reunión</h2>
   <p>Un ensayo de unos 15 minutos para que cada docente compruebe que todo funciona.</p>
   <ol>
-    <li><b>Antes de la reunión:</b> la coordinación crea la cuenta de cada docente y autoriza su correo (sección 7), y le pasa la dirección, el correo y la contraseña.</li>
+    <li><b>Antes de la reunión:</b> la coordinación autoriza el correo de cada docente (sección 7) y les pasa la dirección. En la reunión, cada uno crea su contraseña con «Crear mi contraseña».</li>
     <li><b>Todos abren la aplicación</b> en su celular o computadora y confirman que dice <span class="chip ok">● Puede guardar</span>. Quien vea otra cosa, resuelve con la sección 6.</li>
     <li><b>Cada docente registra una clase de práctica</b>: su componente, con la fecha de la reunión, y tres estudiantes con los cuatro aspectos.</li>
     <li><b>Prueba entre dos:</b> dos docentes eligen el mismo componente y la misma fecha. Uno marca y el otro tiene que ver el cambio en su pantalla en pocos segundos.</li>
