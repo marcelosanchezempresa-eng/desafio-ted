@@ -169,7 +169,7 @@ $("#d-add").onclick=async()=>{
   $("#d-status").textContent="Guardando…";
   const {error}=await sb.from("docentes").upsert({email,nombre,rol,activo:true});
   if(error){$("#d-status").textContent="No se pudo autorizar. Revise la conexión y vuelva a intentar.";return}
-  $("#d-email").value=""; $("#d-nombre").value=""; $("#d-status").textContent="Autorizado ✓ Ya puede crear su contraseña en la pantalla de ingreso."; cargarDocentes();
+  $("#d-email").value=""; $("#d-nombre").value=""; $("#d-status").textContent=(window.J26_SUPABASE||{}).autoRegistro?"Autorizado ✓ Ya puede crear su contraseña en la pantalla de ingreso.":"Autorizado ✓ Último paso: en supabase.com → Authentication → Users → Add user → Create new user, cree la cuenta con este mismo correo y una contraseña (deje marcado «Auto Confirm User»). Después pásele al docente la dirección, el correo y la contraseña."; cargarDocentes();
 };
 $("#c-docentes").addEventListener("click",async e=>{
   const b=e.target.closest("[data-act]"); if(!b) return; const email=b.closest(".doc-item").dataset.email;
