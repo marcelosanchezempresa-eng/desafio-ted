@@ -11,7 +11,7 @@ window.supabase={createClient(){const cbs=[];const fire=(ev)=>{const s=me()?{use
   return{
   auth:{onAuthStateChange(f){cbs.push(f);setTimeout(()=>f("INITIAL_SESSION",me()?{user:{email:me()}}:null),10);return{data:{subscription:{unsubscribe(){}}}}},
     async signInWithPassword({email,password}){if(password!=="clave1234")return{error:{message:"Invalid login credentials"}};localStorage.setItem("mockEmail",email);fire("SIGNED_IN");return{error:null}},
-    async signUp({email}){return{data:{session:null},error:null}},async resetPasswordForEmail(){return{error:null}},async updateUser(){return{error:null}},
+    async signUp({email,password}){const r=await post("/signup",{email});if(r.error)return{data:{},error:r.error};localStorage.setItem("mockEmail",email);fire("SIGNED_IN");return{data:{session:{user:{email}}},error:null}},async resetPasswordForEmail(){return{error:null}},async updateUser(){return{error:null}},
     async signOut(){localStorage.removeItem("mockEmail");fire("SIGNED_OUT");return{error:null}}},
   rpc:(fn,args)=>post("/rpc",{fn,args,email:me()}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null}),
   from:t=>builder(t),

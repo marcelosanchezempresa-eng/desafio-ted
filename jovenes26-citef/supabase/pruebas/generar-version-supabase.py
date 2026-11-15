@@ -85,9 +85,11 @@ R('''        <li>Revise su correo: le tiene que llegar una <b>invitación</b> a 
         <li>Entre a <b>claude.ai</b> con <b>ese mismo correo</b>. Si no tiene cuenta, créela con ese correo.</li>
         <li>Abra el enlace de la invitación. Arriba a la derecha tiene que decir <b>«Puede guardar»</b> en verde.</li>
         <li>Si dice <b>«Solo lectura»</b> en rojo, todavía no puede calificar: avise a la coordinación.</li>''',
-'''        <li>La coordinación le da <b>la dirección de la aplicación</b>, su <b>correo de usuario</b> y una <b>contraseña</b>.</li>
-        <li>Abra la dirección, escriba su correo y la contraseña, y toque <b>«Entrar»</b>. El celular la recuerda: no hace falta escribirla cada vez.</li>
-        <li>Arriba tiene que decir <b>«Puede guardar»</b> en verde. Si dice <b>«No autorizado»</b>, avise a la coordinación.</li>''')
+'''        <li>La coordinación <b>autoriza su correo</b> en la aplicación y le pasa la dirección.</li>
+        <li><b>La primera vez:</b> abra la dirección, escriba su correo y una contraseña nueva (8 caracteres o más) y toque <b>«Crear mi contraseña»</b>. Entra directo.</li>
+        <li><b>Las veces siguientes:</b> el celular lo recuerda y entra solo. Si le pide datos, escriba su correo y su contraseña y toque <b>«Entrar»</b>.</li>
+        <li>Arriba tiene que decir <b>«Puede guardar»</b> en verde.</li>
+        <li><b>¿Olvidó la contraseña?</b> Pida a la coordinación que toque «Reiniciar contraseña» junto a su nombre. Después vuelva a crearla con «Crear mi contraseña». No se pierde ninguna calificación.</li>''')
 R('<p class="note">Hay una guía completa con capturas de pantalla en PDF. Esta es la versión corta.</p>',
   '<p class="note">Hay una guía completa con capturas de pantalla en PDF. Esta es la versión corta.</p>\n      <p class="note" id="ayuda-login" hidden>Para empezar, entre con su correo en la pantalla de ingreso.</p>')
 
@@ -154,10 +156,11 @@ R('''  try{await db.doc("config/curso").set(draft); $("#c-status").textContent="
 
 # renderConfig: lista de docentes autorizados
 R('''function renderConfig(){
-  $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin;''', '''function renderDocentes(){
+  $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin;''', '''let reiniciarAsk=null;
+function renderDocentes(){
   $("#c-docentes-panel").hidden=!canAdmin; if(!canAdmin) return;
   const rol=r=>r==="coordinacion"?"Coordinación":"Docente";
-  setHTML($("#c-docentes"),docentes.length?docentes.map(d=>`<div class="doc-item" data-email="${esc(d.email)}"><span class="${d.activo?"":"baja"}" style="min-width:0;overflow:hidden;text-overflow:ellipsis"><b>${esc(d.nombre||"(sin nombre)")}</b><br><span class="muted" style="font-size:.85rem">${esc(d.email)}</span></span><span class="muted">${rol(d.rol)}${d.activo?"":" · dado de baja"}</span>${d.email===myId?'<span class="muted" style="font-size:.85rem">(usted)</span>':`<button class="btn" type="button" data-act="${d.activo?"baja":"alta"}">${d.activo?"Dar de baja":"Reactivar"}</button>`}<span></span></div>`).join(""):'<p class="muted">Todavía no hay docentes autorizados.</p>');
+  setHTML($("#c-docentes"),docentes.length?docentes.map(d=>`<div class="doc-item" data-email="${esc(d.email)}"><span class="${d.activo?"":"baja"}" style="min-width:0;overflow:hidden;text-overflow:ellipsis"><b>${esc(d.nombre||"(sin nombre)")}</b><br><span class="muted" style="font-size:.85rem">${esc(d.email)}</span></span><span class="muted">${rol(d.rol)}${d.activo?"":" · dado de baja"}</span>${d.email===myId?'<span class="muted" style="font-size:.85rem">(usted)</span>':`<button class="btn" type="button" data-act="${d.activo?"baja":"alta"}">${d.activo?"Dar de baja":"Reactivar"}</button>`}${d.email!==myId&&d.activo?(reiniciarAsk===d.email?`<span class="confirm"><button class="btn" type="button" data-act="reiniciar-si">Sí, reiniciar</button><button class="btn" type="button" data-act="reiniciar-no">No</button></span>`:`<button class="btn" type="button" data-act="reiniciar" title="Para cuando olvidó su contraseña">Reiniciar contraseña</button>`):"<span></span>"}</div>`).join(""):'<p class="muted">Todavía no hay docentes autorizados.</p>');
 }
 async function cargarDocentes(){
   if(!canAdmin) return; const {data,error}=await sb.from("docentes").select("*").order("nombre");
@@ -169,11 +172,16 @@ $("#d-add").onclick=async()=>{
   $("#d-status").textContent="Guardando…";
   const {error}=await sb.from("docentes").upsert({email,nombre,rol,activo:true});
   if(error){$("#d-status").textContent="No se pudo autorizar. Revise la conexión y vuelva a intentar.";return}
-  $("#d-email").value=""; $("#d-nombre").value=""; $("#d-status").textContent=(window.J26_SUPABASE||{}).autoRegistro?"Autorizado ✓ Ya puede crear su contraseña en la pantalla de ingreso.":"Autorizado ✓ Último paso: en supabase.com → Authentication → Users → Add user → Create new user, cree la cuenta con este mismo correo y una contraseña (deje marcado «Auto Confirm User»). Después pásele al docente la dirección, el correo y la contraseña."; cargarDocentes();
+  $("#d-email").value=""; $("#d-nombre").value=""; $("#d-status").textContent=(window.J26_SUPABASE||{}).autoRegistro?"Autorizado ✓ Pásele la dirección de la aplicación: la primera vez escribe su correo, elige una contraseña y toca «Crear mi contraseña».":"Autorizado ✓ Último paso: en supabase.com → Authentication → Users → Add user → Create new user, cree la cuenta con este mismo correo y una contraseña (deje marcado «Auto Confirm User»). Después pásele al docente la dirección, el correo y la contraseña."; cargarDocentes();
 };
 $("#c-docentes").addEventListener("click",async e=>{
-  const b=e.target.closest("[data-act]"); if(!b) return; const email=b.closest(".doc-item").dataset.email;
-  const {error}=await sb.from("docentes").update({activo:b.dataset.act==="alta"}).eq("email",email);
+  const b=e.target.closest("[data-act]"); if(!b) return; const email=b.closest(".doc-item").dataset.email, act=b.dataset.act;
+  if(act==="reiniciar"){reiniciarAsk=email; $("#d-status").textContent="¿Reiniciar la contraseña de "+email+"? Va a tener que crear una nueva con «Crear mi contraseña». Sus calificaciones no se pierden."; renderDocentes(); return}
+  if(act==="reiniciar-no"){reiniciarAsk=null; $("#d-status").textContent=""; renderDocentes(); return}
+  if(act==="reiniciar-si"){reiniciarAsk=null; const r=await sb.rpc("reiniciar_acceso",{p_email:email});
+    $("#d-status").textContent=r.error?"No se pudo reiniciar. Revise la conexión y vuelva a intentar.":r.data?"Listo ✓ "+email+" ya puede crear una contraseña nueva con «Crear mi contraseña».":email+" todavía no había creado su contraseña: puede hacerlo directamente con «Crear mi contraseña».";
+    renderDocentes(); return}
+  const {error}=await sb.from("docentes").update({activo:act==="alta"}).eq("email",email);
   $("#d-status").textContent=error?"No se pudo cambiar. Vuelva a intentar.":"Cambio guardado ✓"; cargarDocentes();
 });
 function renderConfig(){
@@ -244,8 +252,10 @@ async function entrar(session){
 const lst=t=>$("#l-status").textContent=t;
 const tradErr=e=>{const m=(e&&e.message)||"";
   if(/Invalid login credentials/i.test(m)) return (window.J26_SUPABASE||{}).autoRegistro?"Correo o contraseña incorrectos. Si es la primera vez, toque «Crear mi contraseña».":"Correo o contraseña incorrectos. Revise que sean los que le dio la coordinación (respetando mayúsculas y minúsculas).";
+  if(/Signups not allowed|signup.*disabled/i.test(m)) return "La creación de contraseñas todavía no está habilitada. Avise a la coordinación.";
+  if(/Database error saving new user|correo_no_autorizado/i.test(m)) return "Ese correo no está autorizado. Pida a la coordinación que lo agregue en «Docentes autorizados» y vuelva a intentar. Revise también que esté bien escrito.";
   if(/Email not confirmed/i.test(m)) return "Todavía no confirmó su correo. Busque el mensaje de confirmación (revise también Spam) y toque el enlace.";
-  if(/already registered|already been registered/i.test(m)) return "Ese correo ya tiene contraseña. Toque «Entrar», o «Olvidé mi contraseña».";
+  if(/already registered|already been registered/i.test(m)) return "Ese correo ya tiene contraseña: escríbala y toque «Entrar». Si la olvidó, pida a la coordinación que la reinicie.";
   if(/at least|Password should/i.test(m)) return "La contraseña tiene que tener al menos 8 caracteres.";
   if(/rate limit|too many/i.test(m)) return "Demasiados intentos seguidos. Espere unos minutos y vuelva a intentar.";
   return "No se pudo completar. Revise la conexión y vuelva a intentar.";};
@@ -261,11 +271,8 @@ $("#l-crear").onclick=async()=>{
   if(error){lst(tradErr(error));return}
   lst(data.session?"":"Listo. Le enviamos un correo a "+email+": ábralo y toque el enlace para confirmar. Después vuelva acá y toque «Entrar».");
 };
-$("#l-olvido").onclick=async()=>{
-  const email=$("#l-email").value.trim().toLowerCase(); if(!email){lst("Escriba su correo y vuelva a tocar «Olvidé mi contraseña».");return}
-  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
-  lst(error?tradErr(error):"Le enviamos un correo a "+email+" con un enlace para crear una contraseña nueva.");
-};
+// Sin servicio de correo propio: la coordinación reinicia la contraseña desde la app.
+$("#l-olvido").onclick=()=>lst("Pida a la coordinación que toque «Reiniciar contraseña» junto a su nombre (en Configuración). Después escriba su correo y una contraseña nueva, y toque «Crear mi contraseña».");
 $("#l-nueva").addEventListener("submit",async e=>{ e.preventDefault();
   const {error}=await sb.auth.updateUser({password:$("#l-pass2").value});
   $("#l-status2").textContent=error?tradErr(error):"Contraseña guardada ✓"; if(!error){$("#l-nueva").hidden=true;$("#l-form").hidden=false;}
@@ -280,6 +287,7 @@ $("#salir").onclick=async()=>{ await sb.auth.signOut(); location.reload(); };
   if(!C.autoRegistro){ $("#l-crear").hidden=true;
     $("#l-ayuda").textContent="Escriba su correo y la contraseña que le dio la coordinación.";
     $("#l-olvido").onclick=()=>lst("Pida a la coordinación una contraseña nueva. La coordinación la cambia desde el panel de Supabase."); }
+  else $("#l-ayuda").innerHTML="<b>La primera vez:</b> escriba su correo, elija una contraseña (8 caracteres o más) y toque «Crear mi contraseña». <b>Después:</b> correo, contraseña y «Entrar».";
   sb=window.supabase.createClient(C.url,C.anonKey,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
   sb.auth.onAuthStateChange((ev,session)=>{
     if(ev==="PASSWORD_RECOVERY"){ mostrarApp(false); $("#l-form").hidden=true; $("#l-nueva").hidden=false; return; }
