@@ -36,7 +36,7 @@ update public.config
      {"id":"comunicacion",    "nombre":"Comunicación",                  "docente":"Cecilia Tarde",                         "horas":"", "modulo":"t"},
      {"id":"sexualidad",      "nombre":"Sexualidad",                    "docente":"Luciana Urbeltz y Andrea Iturburua",    "horas":"", "modulo":"t"},
      {"id":"acompanamiento",  "nombre":"Acompañamiento socio laboral",  "docente":"Eugenia Andrada y Natalia López",       "horas":"", "modulo":"t"},
-     {"id":"emprendimiento",  "nombre":"Emprendimiento",                "docente":"Paula Rodao",                           "horas":"", "modulo":"t"}
+     {"id":"emprendimiento",  "nombre":"Emprendimiento",                "docente":"Paula Rodáo",                           "horas":"", "modulo":"t"}
    ]'::jsonb),
        editado_en = now(), editado_por = 'puesta a punto 17/11'
  where id = 1;
