@@ -59,7 +59,7 @@ await abrirEval(C,"i1");await C.selectOption("#i-est","e0");
 const baja=async(btn)=>{const [d]=await Promise.all([C.waitForEvent("download",{timeout:30000}),C.click(btn)]);const ru=OUT+d.suggestedFilename();await d.saveAs(ru);return ru};
 let ru=await baja("#i-word"),t=leer(ru);
 ok(t.includes("Informe individual de evaluación")&&t.includes("Calificaciones por área")&&/Lecto Escritura \| [^|]* \| 9/.test(t)&&/Promedio \|  \| 8/.test(t),"Hito 1 individual: tabla de notas y promedio 8");
-ok(t.includes("Resultado de la actividad de diagnóstico")&&t.includes("Juicio conceptual")&&t.includes("alta motivación"),"incluye resultado, juicio conceptual e informe de los técnicos");
+ok(t.includes("Resultado obtenido en la actividad")&&t.includes("Juicio conceptual")&&t.includes("alta motivación"),"incluye resultado, juicio conceptual e informe de los técnicos");
 ok(/4 \| 3 \| 1 \| 0 \| 0 \| 100 %/.test(t),"asistencia de Ana: 4 clases, 3 puntual, 1 tarde, 100 %");
 console.log(t.split("\n").slice(0,12).map(x=>"     | "+x).join("\n"));
 ru=await baja("#i-gword");t=leer(ru);ok(t.includes("Planilla de calificaciones")&&t.includes("Juicio conceptual sobre el grupo")&&t.includes("Informe grupal de los técnicos")&&t.includes("Grupo comprometido"),"Hito 1 grupal: planilla, juicios del grupo y técnicos");
