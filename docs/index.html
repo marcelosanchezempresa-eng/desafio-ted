@@ -212,6 +212,12 @@ button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid va
 .hz-tag.nocal{background:#fff;color:#0e2338;border:1.5px solid #0e2338}
 .hz-vacio{flex:1;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--surface-2);color:var(--muted);font-weight:700;min-height:70px}
 .hz-editor{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.hz-sheet .hz-cell{display:flex;flex-direction:column;gap:4px;padding:8px;border-radius:10px;background:var(--c,var(--surface-2));color:#0e2338}
+.hz-sheet .hz-cell label{font-family:var(--font-data);font-size:.74rem;opacity:.85}
+.hz-sheet .hz-cell select,.hz-sheet .hz-cell input{background:#fff;color:#0e2338;width:100%;min-width:0}
+.hz-sheet .hz-cell input.hz-cn{font-size:.82rem;min-height:32px;padding:4px 8px}
+.hz-sheet .hz-cell.cambiada{box-shadow:0 0 0 3px var(--fg)}
+.hz-sheet-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
 .hz-swatches{display:flex;gap:6px;flex-wrap:wrap}
 .hz-swatches button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
 .hz-swatches button[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--fg)}
@@ -1212,7 +1218,7 @@ function renderHorario(){
   if(!hzLunes) hzLunes=lunesDe(todayStr());
   const editar=canAdmin&&$("#hz-edit").checked; $("#hz-edit-l").hidden=!canAdmin;
   const sem=[0,7,14].map(k=>fromDay(dayNum(hzLunes)+k));
-  $("#hz-rango").textContent=`Del ${fmt(sem[0])} al ${fmt(fromDay(dayNum(sem[2])+4))}. ${canAdmin?"Marcá «Editar horario» para cambiar un bloque.":"Tus clases tienen borde azul."}`;
+  $("#hz-rango").textContent=`Del ${fmt(sem[0])} al ${fmt(fromDay(dayNum(sem[2])+4))}. ${canAdmin?"Marcá «Editar horario»: «Editar semana completa» carga toda la semana de una vez; tocando un bloque cambiás solo ese.":"Tus clases tienen borde azul."}`;
   hzBanner($("#hz-cambios"));
   const hoy=todayStr();
   const html=sem.map(l=>{ const dias=[0,1,2,3,4].map(k=>fromDay(dayNum(l)+k));
@@ -1226,7 +1232,7 @@ function renderHorario(){
         return editar?`<button type="button" class="${cls}"${st} data-hzf="${f}" data-hzb="${esc(x.bs[0])}" aria-label="Editar ${DIAS[d]} ${fmt(f)} ${esc(hm(x.desde))}">${inner}</button>`:`<div class="${cls}"${st}>${inner}</div>`; }).join("");
       return `<div class="hz-day${f===hoy?" hoy":""}"><div class="hz-dh">${DIAS[d]} <span>${fmt(f)}</span>${f===hoy?'<span class="hz-hoy">Hoy</span>':""}</div><div class="hz-slots">${cuerpo}</div></div>`; }).join("");
     const ed=editar&&hzSel&&dias.includes(hzSel.f)?hzEditorHTML():"";
-    return `<div class="panel hz-week" data-lunes="${l}"><div class="hz-wk-head"><h3>Semana del ${fmt(dias[0])} al ${fmt(dias[4])}</h3>${editar?`<button class="btn" type="button" data-hzcopiar="${l}">Completar con la semana anterior</button>`:""}</div><div class="hz-grid">${cols}</div>${ed}</div>`; }).join("");
+    return `<div class="panel hz-week" data-lunes="${l}"><div class="hz-wk-head"><h3>Semana del ${fmt(dias[0])} al ${fmt(dias[4])}</h3>${editar&&!(hzSemana&&hzSemana.lunes===l)?`<button class="btn primary" type="button" data-hzsemana="${l}">Editar semana completa</button>`:""}</div>${hzSemana&&hzSemana.lunes===l?hzSheetHTML(l,dias):`<div class="hz-grid">${cols}</div>${ed}`}</div>`; }).join("");
   setHTML($("#hz-weeks"),html);
 }
 function hzEditorHTML(){ const f=hzSel.f, b=bloques().find(x=>x.id===hzSel.b)||{}, F=hzForm;
@@ -1248,10 +1254,10 @@ async function hzGuardar(cambios){
   data.horario=h;
   const w=await sb.from("config").upsert({id:1,data,editado_en:new Date().toISOString(),editado_por:myId}); if(w.error) throw w.error;
   cfg.horario=h; if(draft) draft.horario=h; }
-$("#hz-prev").onclick=()=>{hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))-7); hzSel=null; renderHorario();};
-$("#hz-next").onclick=()=>{hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))+7); hzSel=null; renderHorario();};
+$("#hz-prev").onclick=()=>{hzSemana=null;hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))-7); hzSel=null; renderHorario();};
+$("#hz-next").onclick=()=>{hzSemana=null;hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))+7); hzSel=null; renderHorario();};
 $("#hz-hoy").onclick=()=>{hzLunes=lunesDe(todayStr()); hzSel=null; renderHorario();};
-$("#hz-edit").onchange=()=>{hzSel=null; $("#hz-status").textContent=""; renderHorario();};
+$("#hz-edit").onchange=()=>{hzSel=null; hzSemana=null; $("#hz-status").textContent=""; renderHorario();};
 $("#hz-weeks").addEventListener("click",async e=>{
   const sl=e.target.closest("[data-hzf]");
   if(sl){ const f=sl.dataset.hzf, b=sl.dataset.hzb, cur=hzSlot(f,b)||{}, inf=hzInfo(cur);
@@ -1272,16 +1278,7 @@ $("#hz-weeks").addEventListener("click",async e=>{
     try{ await hzGuardar({[hzKey(f,b)]:nuevo}); hzSel=null; $("#hz-status").textContent="Horario guardado ✓"+(F.aviso?" Los docentes van a ver el aviso del cambio.":""); renderHorario(); }
     catch(err){ $("#hz-status").textContent=esSinPermiso(err)?"Solo la coordinación puede cambiar el horario.":"No se pudo guardar. Revisá la conexión y volvé a intentar."; }
     return }
-  const cp=e.target.closest("[data-hzcopiar]");
-  if(cp){ const l=cp.dataset.hzcopiar, cambios={}; let n=0;
-    for(let k=0;k<5;k++){ const f=fromDay(dayNum(l)+k), f0=fromDay(dayNum(l)+k-7);
-      bloques().forEach(b=>{ const src=hzSlot(f0,b.id), dst=hzSlot(f,b.id);
-        if(!hzInfo(dst)&&!(dst&&dst.aviso)&&hzInfo(src)&&!src.sc&&!enReceso(f)){ cambios[hzKey(f,b.id)]={c:src.c||"",t:src.t||"",col:src.col||"",n:"",en:new Date().toISOString(),por:myId}; n++; } }); }
-    if(!n){$("#hz-status").textContent="No había bloques vacíos para completar en esa semana.";return}
-    $("#hz-status").textContent="Guardando…";
-    try{ await hzGuardar(cambios); $("#hz-status").textContent=`Listo ✓ Se completaron ${n} bloques con la semana anterior. Revisá los cambios puntuales.`; renderHorario(); }
-    catch(err){ $("#hz-status").textContent="No se pudo guardar. Revisá la conexión y volvé a intentar."; }
-  }
+  hzSheetClick(e);
 });
 $("#hz-weeks").addEventListener("input",e=>{ if(!hzForm) return;
   if(e.target.id==="hz-t") hzForm.t=e.target.value; if(e.target.id==="hz-n") hzForm.n=e.target.value; });
@@ -1336,6 +1333,73 @@ $("#hz-share").onclick=async()=>{
     descargar(blob,nombre); st.textContent="Imagen descargada ✓ Ya la podés enviar por WhatsApp.";
   }catch(err){ st.textContent="No se pudo armar la imagen."; }
 };
+
+
+// ---------- Editar semana completa: planilla con todos los bloques y un solo «Guardar» ----------
+let hzSemana=null; // {lunes, celdas:{clave:{c,t,col,sc,n}}, aviso}
+const hzLimpio=sl=>({c:(sl&&sl.c)||"",t:(sl&&sl.t)||"",col:(sl&&sl.col)||"",sc:!!(sl&&sl.sc),n:(sl&&sl.n)||""});
+const hzIgual=(a,b)=>{a=hzLimpio(a);b=hzLimpio(b);return a.c===b.c&&a.t===b.t&&(a.c||a.t?a.col===b.col:true)&&a.sc===b.sc&&a.n===b.n};
+function hzPresets(){ const m=new Map();
+  [...Object.values(cfg.horario||{}),...Object.values(hzSemana?hzSemana.celdas:{})].forEach(sl=>{ if(!sl||!sl.t) return; const x=hzLimpio(sl); const k=JSON.stringify([x.c,x.t,x.col,x.sc]); if(!m.has(k)) m.set(k,x); });
+  return [...m.values()].sort((a,b)=>a.t.localeCompare(b.t)); }
+function hzValor(cel,pres){ if(cel&&cel.otro&&!cel.c) return "_otro"; const x=hzLimpio(cel); if(!x.c&&!x.t) return "";
+  const i=pres.findIndex(p=>p.c===x.c&&p.t===x.t&&p.col===x.col&&p.sc===x.sc); if(x.t&&i>=0) return "p:"+i;
+  if(x.c&&!x.t) return "c:"+x.c; return "_otro"; }
+function hzSheetHTML(l,dias){ const pres=hzPresets(), S=hzSemana;
+  const opts=v=>`<option value="">Sin clase</option><optgroup label="Componentes">${cfg.componentes.map(c=>`<option value="c:${esc(c.id)}"${v==="c:"+c.id?" selected":""}>${esc(c.nombre)}</option>`).join("")}</optgroup>${pres.length?`<optgroup label="Como se muestran en el horario">${pres.map((p,i)=>{const c=cfg.componentes.find(x=>x.id===p.c);return `<option value="p:${i}"${v==="p:"+i?" selected":""}>${esc(p.t)}${c?" ("+esc(c.nombre)+")":""}${p.sc?" · sin calificación":""}</option>`}).join("")}</optgroup>`:""}<option value="_otro"${v==="_otro"?" selected":""}>Otro (escribir)…</option>`;
+  const cols=dias.map(f=>{ const d=wday(dayNum(f));
+    const cuerpo=enReceso(f)?`<div class="hz-vacio">Receso</div>`:bloques().map(b=>{ const k=hzKey(f,b.id), cel=S.celdas[k]||{}, inf=hzInfo(cel), v=hzValor(cel,pres), cambio=!hzIgual(cel,hzSlot(f,b.id));
+      return `<div class="hz-cell${cambio?" cambiada":""}"${inf?` style="--c:${esc(inf.color)}"`:""}><label for="hzs-${k}">${esc(hm(b.desde))} – ${esc(hm(b.hasta))}</label><select id="hzs-${k}" data-hzk="${k}" aria-label="${DIAS[d]} ${fmt(f)} ${esc(hm(b.desde))}">${opts(v)}</select>${v==="_otro"?`<input type="text" data-hzkt="${k}" value="${esc(cel.t||"")}" placeholder="Texto del bloque" aria-label="Texto del bloque">`:""}<input type="text" class="hz-cn" data-hzkn="${k}" value="${esc(cel.n||"")}" placeholder="Nota (opcional)" aria-label="Nota"></div>`; }).join("");
+    return `<div class="hz-day${f===todayStr()?" hoy":""}"><div class="hz-dh">${DIAS[d]} <span>${fmt(f)}</span></div><div class="hz-slots">${cuerpo}</div></div>`; }).join("");
+  const n=Object.keys(S.celdas).filter(k=>!hzIgual(S.celdas[k],hzSlot(k.slice(0,10),k.slice(11)))).length;
+  return `<div class="hz-sheet" id="hz-sheet">
+    <div class="hz-sheet-bar"><button class="btn" type="button" data-hzs="copiar">Copiar la semana anterior</button><button class="btn" type="button" data-hzs="vaciar">Vaciar</button><span class="note" style="margin:0">Elegí qué hay en cada bloque. Nada se guarda hasta tocar «Guardar semana».</span></div>
+    <div class="hz-grid">${cols}</div>
+    <label class="corr-toggle" style="margin-top:12px"><input type="checkbox" id="hz-s-aviso"${S.aviso?" checked":""}> Avisar a los docentes de los cambios en clases que ya estaban cargadas</label>
+    <div class="row" style="gap:8px;margin-top:10px;align-items:center"><button class="btn primary" type="button" data-hzs="guardar">Guardar semana</button><button class="btn" type="button" data-hzs="cancelar">Cancelar</button><span class="note" style="margin:0" id="hz-s-n">${n?`${n} bloque${n===1?"":"s"} con cambios (con borde oscuro).`:"Sin cambios todavía."}</span></div></div>`; }
+function hzAbrirSemana(l){ const celdas={}; for(let k=0;k<5;k++){ const f=fromDay(dayNum(l)+k); if(enReceso(f)) continue; bloques().forEach(b=>{ celdas[hzKey(f,b.id)]=hzLimpio(hzSlot(f,b.id)); }); }
+  const lleno=Object.values(celdas).some(c=>c.c||c.t);
+  hzSemana={lunes:l,celdas,aviso:lleno&&fromDay(dayNum(l)+4)>=todayStr()}; hzSel=null; }
+function hzColorTexto(t){ let h=0; for(const ch of t) h=(h*31+ch.charCodeAt(0))>>>0; return SWATCH[h%SWATCH.length]; }
+async function hzSheetClick(e){
+  const ab=e.target.closest("[data-hzsemana]"); if(ab){ hzAbrirSemana(ab.dataset.hzsemana); $("#hz-status").textContent=""; renderHorario(); const sh=$("#hz-sheet"); if(sh) sh.scrollIntoView({block:"nearest",behavior:"smooth"}); return }
+  const a=e.target.closest("[data-hzs]"); if(!a||!hzSemana) return; const S=hzSemana;
+  if(a.dataset.hzs==="cancelar"){ hzSemana=null; renderHorario(); return }
+  if(a.dataset.hzs==="vaciar"){ for(const k in S.celdas) S.celdas[k]=hzLimpio(null); renderHorario(); return }
+  if(a.dataset.hzs==="copiar"){ let n=0;
+    for(const k in S.celdas){ const f=k.slice(0,10), b=k.slice(11), src=hzSlot(fromDay(dayNum(f)-7),b);
+      const x=hzLimpio(src); S.celdas[k]=x.sc?hzLimpio(null):Object.assign(x,{n:""}); if(x.c||x.t) n++; }
+    renderHorario(); $("#hz-status").textContent=n?`Se copiaron ${n} bloques de la semana anterior. Cambiá lo que haga falta y tocá «Guardar semana».`:"La semana anterior estaba vacía."; return }
+  if(a.dataset.hzs==="guardar"){
+    const cambios={}, ahora=new Date().toISOString(), hoy=todayStr(); let n=0;
+    for(const k in S.celdas){ const f=k.slice(0,10), b=k.slice(11), cur=hzSlot(f,b), nw=hzLimpio(S.celdas[k]);
+      if(nw.t) nw.t=nw.t.trim();
+      if(hzIgual(nw,cur)) continue;
+      if(!nw.c&&!nw.t&&!(cur&&(cur.c||cur.t))&&!nw.n){ continue; }
+      let sl=(nw.c||nw.t)?{c:nw.c,t:nw.t,col:nw.t&&!nw.col&&!nw.c?hzColorTexto(nw.t):nw.col,n:nw.n,en:ahora,por:myId}:null;
+      if(sl&&nw.sc&&nw.c) sl.sc=true;
+      const pinf=hzInfo(cur);
+      if(S.aviso&&f>=hoy&&pinf){ sl=Object.assign(sl||{en:ahora,por:myId,n:nw.n},{aviso:true}); const antes=cur.aviso?cur.antes:pinf.nombre, antesC=cur.aviso?cur.antesC:(cur.c||""); if(antes) sl.antes=antes; if(antesC) sl.antesC=antesC; }
+      cambios[k]=sl; n++; }
+    if(!n){ $("#hz-status").textContent="No hay cambios para guardar."; return }
+    $("#hz-status").textContent="Guardando…";
+    try{ await hzGuardar(cambios); hzSemana=null; $("#hz-status").textContent=`Semana guardada ✓ (${n} bloque${n===1?"":"s"}). Ya la ven todos al abrir la app.`; renderHorario(); }
+    catch(err){ $("#hz-status").textContent=esSinPermiso(err)?"Solo la coordinación puede cambiar el horario.":"No se pudo guardar. Revisá la conexión y volvé a intentar."; }
+  }
+}
+$("#hz-weeks").addEventListener("change",e=>{ if(!hzSemana) return; const S=hzSemana;
+  const k=e.target.dataset.hzk;
+  if(k){ const v=e.target.value, pres=hzPresets(), prev=S.celdas[k]||hzLimpio(null);
+    if(!v) S.celdas[k]=Object.assign(hzLimpio(null),{n:prev.n});
+    else if(v.startsWith("c:")) S.celdas[k]=Object.assign(hzLimpio(null),{c:v.slice(2),n:prev.n});
+    else if(v.startsWith("p:")) S.celdas[k]=Object.assign(hzLimpio(pres[+v.slice(2)]),{n:prev.n});
+    else S.celdas[k]=Object.assign(hzLimpio(null),{t:prev.c?"":prev.t,n:prev.n,otro:true});
+    renderHorario(); const nx=document.querySelector(`[data-hzkt="${k}"]`); if(nx&&v==="_otro") nx.focus(); return }
+  if(e.target.id==="hz-s-aviso") S.aviso=e.target.checked; });
+$("#hz-weeks").addEventListener("input",e=>{ if(!hzSemana) return;
+  const kt=e.target.dataset.hzkt, kn=e.target.dataset.hzkn;
+  if(kt){ hzSemana.celdas[kt].t=e.target.value; hzSemana.celdas[kt].col=""; }
+  if(kn) hzSemana.celdas[kn].n=e.target.value; });
 
 // ---------- Respaldo completo (archivo .sql que reconstruye la base) ----------
 async function leerTabla(t,orden){const out=[];
@@ -1715,7 +1779,7 @@ function renderAll(){
   const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
   ({registrar:renderRegistrar,horario:renderHorario,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{},evaluaciones:renderEval}[t]||(()=>{}))();
 }
-function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre, #hz-t, #hz-n")}
+function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre, #hz-t, #hz-n, .hz-sheet input")}
 
 // ---------- Arranque ----------
 $("#r-fecha").value=todayStr();
