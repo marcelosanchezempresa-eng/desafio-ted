@@ -15,7 +15,7 @@ async function abrir(email,w=430,scheme="light"){const ctx=await b.newContext({v
   const p=await ctx.newPage();p.on("pageerror",e=>errs.push(e.message));await p.goto("http://localhost:8765/");await p.waitForTimeout(1300);return p}
 console.log("1) Pantalla de inicio");
 const L=await abrir("lect@ej.uy");
-ok((await L.textContent("#h-saludo")).includes("Marcelo"),"saludo: «"+await L.textContent("#h-saludo")+"» · "+await L.textContent("#h-fecha"));
+ok((await L.textContent("#h-saludo")).includes("Marcelo"),"saludo: «"+await L.textContent("#h-saludo")+"» · "+await L.textContent("#hero-fecha"));
 const tiles=await L.$$eval("#h-tiles .hero-tile",ts=>ts.map(t=>t.innerText.replace(/\n/g," ")));console.log("   ",tiles.join(" | "));
 ok(tiles.length===4&&tiles[0].startsWith("0")&&tiles[2].includes("Hito 1"),"tarjetas: clases de la semana, componentes, próximo hito, participantes");
 await L.screenshot({path:OUT+"inicio-claro.png"});

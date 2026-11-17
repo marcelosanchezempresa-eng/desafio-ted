@@ -5,7 +5,7 @@ const me=()=>{try{return localStorage.getItem("mockEmail")}catch(e){return null}
 function builder(table){const st={table,op:"select",filters:[]};const p={
   select(){if(st.op==="select")st.op="select";return p},insert(x){st.op="insert";st.payload=x;return p},upsert(x){st.op="upsert";st.payload=x;return p},
   update(x){st.op="update";st.payload=x;return p},delete(){st.op="delete";return p},eq(c,v){st.filters.push([c,v]);return p},
-  order(c,o){st.order={col:c,asc:!(o&&o.ascending===false)};return p},limit(n){st.limit=n;return p},maybeSingle(){st.single=true;return p},
+  order(c,o){st.order={col:c,asc:!(o&&o.ascending===false)};return p},limit(n){st.limit=n;return p},range(a,b){st.offset=a;st.limit=b-a+1;return p},maybeSingle(){st.single=true;return p},
   then(ok,ko){return post("/q",{...st,email:me()}).then(r=>{if(r.error)return{data:null,error:r.error};let d=r.data;if(st.single)d=(d&&d[0])||null;return{data:d,error:null}}).then(ok,ko)}};return p}
 window.supabase={createClient(){const cbs=[];const fire=(ev)=>{const s=me()?{user:{email:me()}}:null;cbs.forEach(f=>f(ev,s))};
   return{

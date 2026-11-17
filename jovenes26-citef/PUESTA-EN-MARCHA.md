@@ -14,7 +14,7 @@ Se hace **una sola vez**, en unos 20 minutos.
 1. Menú izquierdo → **SQL Editor** → *New query*.
 2. Pegue **todo** el contenido de `jovenes26-citef/supabase/esquema.sql` y toque **Run**. Tiene que decir *Success*.
 3. *New query* otra vez. Pegue el contenido de **`semilla-privada.sql`** (se lo envié aparte, **no está en GitHub** porque tiene los nombres de los estudiantes) y toque **Run**.
-   Esto carga los 25 estudiantes, los 11 componentes, el calendario y lo deja a usted como coordinación.
+   Esto carga los 25 estudiantes, los componentes, el calendario y lo deja a usted como coordinación.
 
 ## 3. Cerrar el registro libre
 **Authentication** → **Sign In / Providers** (o *Providers*) → **Email**:
@@ -49,9 +49,46 @@ En uno o dos minutos la app queda en:
 Abra la dirección, entre con su correo y contraseña. Arriba tiene que decir **«Puede guardar»**.
 
 ## Para tener en cuenta
-- **Receso de fin de año:** en el plan gratis, Supabase **pausa** el proyecto después de unos 7 días sin uso. Durante el receso (24/12 al 31/01) se va a pausar. Al volver, en febrero, entre a supabase.com y toque **Restore project**. Los datos no se pierden.
-- **Copia de respaldo:** el plan gratis no permite descargar respaldos desde el panel. Descargue el CSV del Ranking y del Semáforo al cierre de cada módulo.
 - **La app anterior en claude.ai** queda como estaba. Para no mezclar datos, usen solo la nueva.
+
+## Receso: pausa de Supabase (plan gratuito)
+**Qué pasa.** Si nadie usa la app durante unos **7 días**, Supabase pausa el proyecto. Cuenta como uso entrar a la app o al panel de Supabase. En el receso (24/12 al 31/01) se va a pausar, probablemente a fines de diciembre.
+
+**Los datos no se pierden.** Al pausar, la base queda guardada tal cual y Supabase hace además una copia de respaldo. Se conserva todo: clases, semáforo, asistencia, hitos, juicios, notas, rúbricas, configuración, docentes y contraseñas.
+
+**Mientras está pausado,** la app muestra un error de conexión y no deja entrar.
+
+**Cómo reactivarlo, al volver en febrero:**
+1. Entrá a **supabase.com** con tu cuenta.
+2. Abrí el proyecto `jovenes26-citef`, que figura como *Paused*.
+3. Tocá **Restore project** y esperá unos minutos, hasta que figure activo.
+4. Abrí la app y comprobá que estén los datos.
+
+**Plazo.** Según la documentación de Supabase (consultada el 17/11/2026), un proyecto pausado se puede restaurar desde el panel durante **1 año**; antes el plazo era de 90 días. Pasado ese plazo, igual se puede descargar desde el panel el respaldo que se hizo al pausar. El receso dura unas 6 semanas.
+
+**Para no depender solo de Supabase:**
+- **Antes del 23/12**, descargá el **respaldo completo** (ver abajo) y guardalo en dos lugares.
+- **Opcional:** si una persona de coordinación entra a la app una vez por semana durante el receso, el proyecto no se pausa.
+- Los planes pagos de Supabase no se pausan nunca y hacen respaldos diarios. Conviene si la app se usa a escala institucional.
+
+> Estas son políticas de Supabase y pueden cambiar. Por eso el respaldo propio es la garantía principal.
+
+## Respaldo completo (coordinación)
+**Configuración → Respaldo completo → Descargar respaldo completo.**
+Se descarga `respaldo-jovenes26-AAAA-MM-DD.sql`, con toda la base: configuración, estudiantes, docentes autorizados, clases, hitos, juicios, notas y rúbricas.
+- Hacelo antes de cada receso y al cierre de cada hito.
+- Guardalo en un lugar privado (tu computadora y un Drive institucional). Tiene nombres de estudiantes y correos: **no lo subas a GitHub**.
+- No incluye contraseñas. Si hubiera que reconstruir la base, cada docente crea la suya de nuevo con «Crear mi contraseña».
+
+**Cómo restaurar desde el respaldo:**
+1. **Si el proyecto sigue existiendo** y faltan datos: SQL Editor → New query → pegá todo el archivo → **Run**. Lo que ya está en la base no se pisa; la configuración vuelve a la del respaldo.
+2. **Si hay que empezar de cero** con un proyecto nuevo: corré primero, en este orden, `esquema.sql`, `autoregistro.sql`, `componentes-e-instancias.sql` y `hitos-inefop.sql`. Después corré el archivo de respaldo y actualizá `docs/config.js` con la URL y la clave *anon* del proyecto nuevo.
+3. Si el archivo es muy grande para pegarlo en el SQL Editor, pedí ayuda para correrlo con `psql`, que no tiene ese límite.
+
+## Configuración: quitar elementos y cambios sin guardar
+- El botón **✕** ya no borra de inmediato: pregunta «¿Quitar…?» y hay que confirmar con **Sí, quitar**.
+- Nada se guarda en la base hasta tocar **Guardar configuración**. Si algo se quitó por error, tocá **Descartar cambios** y vuelve lo guardado.
+- Si se guardó sin querer la configuración sin los módulos, `jovenes26-citef/supabase/restaurar-modulos.sql` los vuelve a cargar (Módulo 1: 13/10/2026 al 23/12/2026; Módulo 2: 01/02/2027 al 15/03/2027).
 
 ## Auto-registro de docentes (activado)
 Cada docente crea su propia contraseña la primera vez, **solo si su correo está autorizado**.

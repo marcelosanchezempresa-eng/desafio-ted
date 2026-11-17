@@ -9,11 +9,11 @@ async function como(email,fn){const c=await pool.connect();try{await c.query("be
   await c.query(email?"set local role authenticated":"set local role anon");
   const r=await fn(c);await c.query("commit");return r}catch(e){await c.query("rollback").catch(()=>{});throw e}finally{c.release()}}
 async function emitir(table,ev,row){const m="data: "+JSON.stringify({table,eventType:ev,new:row,old:row})+"\n\n";for(const s of subs)s.write(m)}
-async function q(b){const {email,table,op,payload,filters=[],order,limit}=b;if(!TABLES.has(table))throw new Error("tabla");
+async function q(b){const {email,table,op,payload,filters=[],order,limit,offset}=b;if(!TABLES.has(table))throw new Error("tabla");
   const w=[],vals=[];for(const [col,v] of filters){if(!COL.test(col))throw new Error("col");vals.push(v);w.push(`${col}=$${vals.length}`)}
   const where=w.length?" where "+w.join(" and "):"";
   return como(email,async c=>{
-    if(op==="select"){let sql=`select * from public.${table}${where}`;if(order&&COL.test(order.col))sql+=` order by ${order.col} ${order.asc?"asc":"desc"}`;if(limit)sql+=` limit ${+limit}`;
+    if(op==="select"){let sql=`select * from public.${table}${where}`;if(order&&COL.test(order.col))sql+=` order by ${order.col} ${order.asc?"asc":"desc"}`;if(limit)sql+=` limit ${+limit}`;if(offset)sql+=` offset ${+offset}`;
       return (await c.query(sql,vals)).rows.map(fix)}
     const rows=Array.isArray(payload)?payload:[payload];let out=[];
     for(const p of rows){const ks=Object.keys(p||{}).filter(k=>COL.test(k));const pv=ks.map(k=>typeof p[k]==="object"&&p[k]!==null&&!Array.isArray(p[k])?JSON.stringify(p[k]):p[k]);
