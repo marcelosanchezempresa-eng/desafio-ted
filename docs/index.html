@@ -117,6 +117,7 @@ textarea{width:100%;min-height:60px;resize:vertical}
 .lvl[data-l=v][aria-pressed=true]{background:var(--verde-bg);border-color:var(--verde)}
 .lvl[data-l=a][aria-pressed=true]{background:var(--amarillo-bg);border-color:var(--amarillo-dot)}
 .lvl[data-l=r][aria-pressed=true]{background:var(--rojo-bg);border-color:var(--rojo)}
+.rub .lvl[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
 .extra{font-size:.85rem;display:flex;gap:6px;align-items:center;color:var(--muted)}
 .desc{font-size:.84rem;color:var(--muted);min-height:1.1em}
 @media (max-width:480px){.lvl{padding:8px 4px;font-size:.78rem;gap:4px}}
@@ -156,6 +157,8 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .cfg-item{display:grid;grid-template-columns:2em minmax(0,1fr) minmax(0,10em) auto;gap:6px;align-items:center}
 .cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 4.5em minmax(0,9em) auto}
 .cfg-item.per{grid-template-columns:minmax(0,1fr) auto auto auto}
+.cfg-item.inst{grid-template-columns:minmax(0,1fr) auto auto auto auto}
+.cfg-item.est{grid-template-columns:2em minmax(0,1fr) minmax(0,9em) minmax(0,9.5em) auto}
 @media (max-width:560px){.cfg-item,.cfg-item.comp,.cfg-item.per{grid-template-columns:1fr 1fr}.cfg-item>.idx{display:none}.cfg-item>input:first-of-type{grid-column:1/-1}}
 .rubric{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
 .rubric div{background:var(--surface-2);border-radius:8px;padding:10px;font-size:.88rem}
@@ -295,17 +298,17 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
     <div class="students" id="e-list"></div>
     <div class="panel" id="e-inf" hidden>
       <h2 style="font-size:1.15rem;margin-bottom:6px">Informes para INEFOP</h2>
-      <p class="note">Reúne, para la instancia elegida arriba, el seguimiento en clase, los juicios de todos los componentes y los hitos. El Word se puede editar antes de enviarlo.</p>
+      <p class="note">Para la instancia elegida arriba. El Word se puede editar antes de enviarlo. En el Hito 4 solo entran los participantes que sostienen hasta el final.</p>
+      <h3 style="font-size:.98rem;margin:10px 0 6px">Informe individual</h3>
       <div class="row">
-        <div class="field" style="flex:1;min-width:220px"><label for="i-est">Estudiante</label><select id="i-est"></select></div>
-        <button class="btn primary" id="i-word" type="button">Descargar Word</button>
-        <button class="btn" id="i-pdf" type="button">Ver para PDF</button>
+        <div class="field" style="flex:1;min-width:220px"><label for="i-est">Participante</label><select id="i-est"></select></div>
+        <button class="btn primary" id="i-word" type="button">Word</button>
+        <button class="btn" id="i-pdf" type="button">PDF</button>
       </div>
-      <div class="row" style="margin-top:10px">
-        <span class="muted" style="align-self:center">Informe del grupo:</span>
-        <button class="btn" id="i-gword" type="button">Word del grupo</button>
-        <button class="btn" id="i-gpdf" type="button">PDF del grupo</button>
-      </div>
+      <h3 style="font-size:.98rem;margin:14px 0 6px">Informe grupal <span class="muted" style="font-weight:400">(asistencia, planilla de notas, juicios del grupo y de los técnicos)</span></h3>
+      <div class="row"><button class="btn" id="i-gword" type="button">Word</button><button class="btn" id="i-gpdf" type="button">PDF</button></div>
+      <h3 style="font-size:.98rem;margin:14px 0 6px">Listas de asistencia diaria <span class="muted" style="font-weight:400">(por componente, desde el inicio del curso hasta la fecha del hito)</span></h3>
+      <div class="row"><button class="btn" id="i-aword" type="button">Word</button><button class="btn" id="i-apdf" type="button">PDF</button><button class="btn" id="i-acsv" type="button">Excel (CSV)</button></div>
       <p class="status" id="i-status"></p>
     </div>
   </section>
@@ -393,7 +396,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <ol>
         <li>Entre a <b>Evaluaciones</b>, elija la <b>instancia</b> y su <b>componente</b>.</li>
         <li>Escriba el <b>juicio sobre el grupo</b>: desempeño, necesidades y propuestas.</li>
-        <li>Toque cada estudiante: elija una <b>valoración global</b> y escriba <b>logros</b>, <b>aspectos a mejorar</b> y <b>orientaciones</b>. Se guarda solo.</li>
+        <li>Toque cada estudiante. En el <b>Hito 1</b> (30/11): nota de 1 a 12, resultado del diagnóstico y juicio conceptual. En el <b>Hito 4</b> (30/04): nota de 1 a 12, juicio conceptual, competencias técnicas y la rúbrica de comunicación asertiva, trabajo colaborativo y orientación a objetivos. Se guarda solo.</li>
         <li>La coordinación descarga los informes en <b>Word</b> o <b>PDF</b> al final de esa pestaña.</li>
       </ol>
       <h3>Consultar</h3>
@@ -452,7 +455,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
     </div>
     <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
-      <p class="note">Nombre y nivel educativo alcanzado (dato de contexto, no puntúa).</p>
+      <p class="note">Nombre, nivel educativo alcanzado (dato de contexto, no puntúa) y situación. Quien se desvincula deja de aparecer para calificar y no entra en el informe final; su historial se conserva.</p>
       <div class="cfg-list" id="c-est"></div>
       <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
       <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
@@ -743,7 +746,7 @@ function renderRegistrar(){
   const list=$("#r-list");
   if(!cfg.estudiantes.length){setHTML(list,`<div class="panel empty"><h3>Todavía no hay estudiantes cargados</h3><p>La coordinación los agrega en <b>Configuración</b>. Después cada docente elige su componente y evalúa aquí, en la misma clase.</p></div>`);return}
   // La estructura (tarjetas y botones) solo se arma cuando cambia la clase, la lista o la tarjeta abierta.
-  setHTML(list,cfg.estudiantes.map((s,i)=>{
+  setHTML(list,activos().map((s,i)=>{
     const open=openCard===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
       <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${DIMS.map(d=>`<span class="dot" data-k="${d.k}" title="${esc(d.n)}"></span>`).join("")}</span><span class="chev" aria-hidden="true">▾</span></button>
@@ -752,7 +755,7 @@ function renderRegistrar(){
           ${d.extra?`<label class="extra"><input type="checkbox" class="ex" id="ex-${d.extra.k}-${esc(s.id)}" data-x="${d.extra.k}"> ${esc(d.extra.n)}</label>`:""}
           <div class="desc"></div></div>`).join("")}
         <div class="field"><label for="obs-${esc(s.id)}">Observación (opcional, visible para coordinación)</label><textarea id="obs-${esc(s.id)}" class="obs" placeholder="Ej.: avisó por WhatsApp a la coordinación que llegaba tarde"></textarea></div>
-        <div class="stu-foot"><button type="button" class="btn primary next">${i<cfg.estudiantes.length-1?"Siguiente estudiante →":"Terminar"}</button></div>
+        <div class="stu-foot"><button type="button" class="btn primary next">${i<activos().length-1?"Siguiente estudiante →":"Terminar"}</button></div>
       </div>`:""}
     </div>`}).join(""));
   paintRegistrar();
@@ -770,17 +773,17 @@ function paintRegistrar(){
     const ta=card.querySelector(".obs"); if(ta&&document.activeElement!==ta) ta.value=e.obs||"";
     card.classList.toggle("done",completo(e));
   });
-  const hechos=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
-  $("#r-prog i").style.width=(cfg.estudiantes.length?hechos/cfg.estudiantes.length*100:0)+"%";
+  const hechos=activos().filter(s=>completo(ev[s.id]||{})).length;
+  $("#r-prog i").style.width=(activos().length?hechos/activos().length*100:0)+"%";
   const st=$("#r-status").textContent;
   if(!st.startsWith("Guard")&&!st.startsWith("No se")&&!st.startsWith("Asist")){
-    const n=cfg.estudiantes.filter(s=>completo(ev[s.id]||{})).length;
-    status(c.fecha?`Evaluación completa: ${n} de ${cfg.estudiantes.length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
+    const n=activos().filter(s=>completo(ev[s.id]||{})).length;
+    status(c.fecha?`Evaluación completa: ${n} de ${activos().length} estudiantes.`:"Clase sin registros todavía. Toque un nombre para evaluar.");}
 }
 $("#r-list").addEventListener("click",ev=>{
   const card=ev.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
   if(ev.target.closest(".stu-head")){openCard=openCard===sid?null:sid;renderRegistrar();return}
-  if(ev.target.closest(".next")){const i=cfg.estudiantes.findIndex(s=>s.id===sid), nx=cfg.estudiantes[i+1];
+  if(ev.target.closest(".next")){const i=activos().findIndex(s=>s.id===sid), nx=activos()[i+1];
     openCard=nx?nx.id:null; renderRegistrar();
     const el=nx&&document.querySelector(`.stu[data-sid="${CSS.escape(nx.id)}"]`); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-$("header.top").offsetHeight-8,behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"});
     return}
@@ -802,7 +805,7 @@ $("#r-todos").onclick=()=>{
   if(!cfg.estudiantes.length||!$("#r-comp").value) return;
   if(antesDelInicio($("#r-fecha").value)){status("El curso comienza el "+fmt(cfg.inicio)+": no se registran clases antes de esa fecha.");return}
   const ev=((clases[clsId()]||{}).ev)||{};
-  cfg.estudiantes.forEach(s=>{const e=ev[s.id]||{}; if(blank(e.as)&&!e.j) setEval(s.id,{as:"v"})});
+  activos().forEach(s=>{const e=ev[s.id]||{}; if(blank(e.as)&&!e.j) setEval(s.id,{as:"v"})});
   status("Asistencia en verde para quienes no tenían dato. Corrija a quienes llegaron tarde o faltaron.");
 };
 $("#r-fecha").onchange=()=>{openCard=null;status("");renderRegistrar()};
@@ -816,7 +819,7 @@ function renderHitos(){
   const hs=Object.entries(hitos).filter(([id,h])=>h.comp===comp).sort((a,b)=>(a[1].fecha||"").localeCompare(b[1].fecha||""));
   if(selHito&&!hitos[selHito]) selHito=null;
   if(selHito&&hitos[selHito].comp!==comp) selHito=null;
-  const total=cfg.estudiantes.length, hoy=todayStr();
+  const total=activos().length, hoy=todayStr();
   setHTML(list,hs.length?hs.map(([id,h])=>{const n=Object.values(h.ev||{}).filter(e=>e&&!blank(e.l)).length, venc=h.fecha&&h.fecha<hoy&&n<total;
     return `<button type="button" class="hito" data-id="${esc(id)}" aria-current="${selHito===id}"><span class="hn">${esc(h.nombre)}<br><span class="hm">${esc(TIPOS[h.tipo]||"")}</span></span><span class="hm num">${h.fecha?fmt(h.fecha):"sin fecha"}</span><span class="pill ${n>=total?"v":venc?"r":""}">${n}/${total}</span></button>`}).join("")
     :'<p class="muted">Este componente todavía no tiene hitos. Cree uno abajo o elija uno sugerido.</p>');
@@ -831,7 +834,7 @@ function renderHitoEval(){
   setHTML(box,`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
     <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
     <p class="status" id="h-estatus"></p>
-    <div>${cfg.estudiantes.map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
+    <div>${activos().map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
       ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
       <button type="button" class="lvl" data-l="x" aria-pressed="false" title="${esc(HITO_LV.x)}">N/C</button>
       <input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" placeholder="Observación (opcional)" hidden></div>`).join("")}</div>
@@ -876,7 +879,7 @@ $("#h-eval").addEventListener("change",e=>{
 // ---------- Semáforo ----------
 function renderSemaforo(){
   compSelect($("#s-comp"),null,true); const pv=$("#s-per").value, comp=$("#s-comp").value;
-  const st=stats(pv,comp), order=ranked(st);
+  const st=stats(pv,comp), vivos=new Set(activos().map(e=>e.id)), order=ranked(st).filter(x=>vivos.has(x.id));
   if(!cfg.estudiantes.length){$("#s-table").innerHTML='<tr><td class="empty">Sin estudiantes cargados.</td></tr>';$("#s-cov").textContent="";return}
   $("#s-table").innerHTML=`<thead><tr><th>Estudiante</th>${DIMS.map(d=>`<th>${esc(d.n)}</th>`).join("")}<th>Índice</th><th>Registros</th><th>Seguimiento</th></tr></thead><tbody>${
     order.map(s=>`<tr><td><b>${esc(nameOf(s.id))}</b></td>${s.pct.map((p,i)=>`<td class="cell ${band(p)}">${p===null?"—":p+"%"}<small>${s.dims[i].v}/${s.dims[i].a}/${s.dims[i].r}${i===3&&(s.h.v+s.h.a+s.h.r)?` · H ${s.h.v}/${s.h.a}/${s.h.r}`:""}</small></td>`).join("")}
@@ -892,7 +895,7 @@ function renderSemaforo(){
 
 // ---------- Ranking ----------
 function renderRanking(){
-  const pv=$("#k-per").value, st=stats(pv), order=ranked(st), w=cfg.pesos;
+  const pv=$("#k-per").value, st=stats(pv), vivos=new Set(activos().map(e=>e.id)), order=ranked(st).filter(x=>vivos.has(x.id)), w=cfg.pesos;
   $("#k-formula").textContent=`Índice de empleabilidad = asistencia ${w[0]}% + actitud ${w[1]}% + comunicación ${w[2]}% + cumplimiento ${w[3]}% (cada hito vale como ${cfg.pesoHito} tareas de clase). Desempate: menos rojos, luego mejor asistencia. Quedan al final quienes tienen menos de ${cfg.min} registros en el período.`;
   if(!order.length||order.every(s=>!s.n)){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya registros de clase o hitos evaluados en el período.</div>';return}
   let html=""; order.forEach((s,i)=>{
@@ -992,11 +995,11 @@ function renderConfig(){
   draft.pesos.forEach((p,i)=>$("#c-w"+i).value=p);
   $("#c-mod").innerHTML=draft.modulos.length?draft.modulos.map((m,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cm-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" aria-label="Nombre del módulo"><input type="date" id="cm-d-${esc(m.id)}" data-f="desde" value="${esc(m.desde)}" aria-label="Desde"><input type="date" id="cm-h-${esc(m.id)}" data-f="hasta" value="${esc(m.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin módulos.</p>';
   draft.instancias=draft.instancias||[];
-  $("#c-inst").innerHTML=draft.instancias.length?draft.instancias.map((m,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="ci-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" placeholder="Nombre de la instancia" aria-label="Nombre de la instancia"><input type="date" id="ci-f-${esc(m.id)}" data-f="fecha" value="${esc(m.fecha)}" aria-label="Fecha"><span></span><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin instancias.</p>';
+  $("#c-inst").innerHTML=draft.instancias.length?draft.instancias.map((m,i)=>`<div class="cfg-item inst" data-i="${i}"><input type="text" id="ci-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" placeholder="Nombre de la instancia" aria-label="Nombre de la instancia"><input type="date" id="ci-f-${esc(m.id)}" data-f="fecha" value="${esc(m.fecha)}" aria-label="Fecha"><select id="ci-t-${esc(m.id)}" data-f="tipo" aria-label="Tipo de evaluación"><option value="diagnostico"${m.tipo==="diagnostico"?" selected":""}>Diagnóstico (nota + juicio)</option><option value="final"${m.tipo==="final"?" selected":""}>Final (nota + juicio + rúbrica)</option><option value="general"${m.tipo!=="diagnostico"&&m.tipo!=="final"?" selected":""}>Seguimiento (solo juicio)</option></select><select id="ci-e-${esc(m.id)}" data-f="escala" aria-label="Escala de notas"><option value="12"${String(m.escala||12)==="12"?" selected":""}>Notas 1 a 12</option><option value="7"${String(m.escala)==="7"?" selected":""}>Notas 1 a 7</option></select><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin instancias.</p>';
   $("#c-rec").innerHTML=draft.recesos.length?draft.recesos.map((r,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cr-n-${i}" data-f="nombre" value="${esc(r.nombre||"")}" placeholder="Receso" aria-label="Nombre del receso"><input type="date" id="cr-d-${i}" data-f="desde" value="${esc(r.desde)}" aria-label="Desde"><input type="date" id="cr-h-${i}" data-f="hasta" value="${esc(r.hasta)}" aria-label="Hasta"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Sin recesos.</p>';
   const modOpts=v=>`<option value="t"${!v||v==="t"?" selected":""}>Todo el curso</option>`+draft.modulos.map(m=>`<option value="${esc(m.id)}"${v===m.id?" selected":""}>${esc(m.nombre)}</option>`).join("");
   $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
-  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
+  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item est" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><select id="ce-s-${esc(e.id)}" data-f="estado" aria-label="Situación"><option value="activo"${e.estado!=="desvinculado"?" selected":""}>Sigue en el curso</option><option value="desvinculado"${e.estado==="desvinculado"?" selected":""}>Se desvinculó</option></select><button class="btn" type="button" data-del aria-label="Quitar">✕</button></div>`).join(""):'<p class="muted">Lista vacía.</p>';
 }
 function bindList(sel,key){
   const h=e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value;};
@@ -1004,7 +1007,7 @@ function bindList(sel,key){
   $(sel).addEventListener("click",e=>{if(!e.target.closest("[data-del]")) return; const i=+e.target.closest(".cfg-item").dataset.i; draft[key].splice(i,1); renderConfig(); $("#c-status").textContent="Quitado de la lista (los registros previos se conservan). Guarde para confirmar.";});
 }
 bindList("#c-est","estudiantes"); bindList("#c-comp","componentes"); bindList("#c-mod","modulos"); bindList("#c-rec","recesos"); bindList("#c-inst","instancias");
-$("#c-inst-add").onclick=()=>{draft.instancias=draft.instancias||[]; draft.instancias.push({id:uid("i"),nombre:"",fecha:""}); renderConfig();};
+$("#c-inst-add").onclick=()=>{draft.instancias=draft.instancias||[]; draft.instancias.push({id:uid("i"),nombre:"",fecha:"",tipo:"general",escala:12}); renderConfig();};
 ["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).addEventListener("input",e=>{draft[k]=e.target.type==="number"?+e.target.value:e.target.value}));
 [0,1,2,3].forEach(i=>$("#c-w"+i).addEventListener("input",e=>{draft.pesos[i]=+e.target.value}));
 $("#c-bulk-add").onclick=()=>{
@@ -1044,15 +1047,44 @@ $("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>download
 // La coordinación ve y corrige todos; cada docente, solo los que la coordinación le asignó.
 const misComps=()=>canAdmin||!perfil||perfil.componentes===null?cfg.componentes:cfg.componentes.filter(c=>perfil.componentes.includes(c.id));
 
-// ---------- Evaluaciones: juicios formativos por instancia ----------
+// ---------- Evaluaciones: hitos de INEFOP (juicio conceptual + nota + rúbrica) ----------
 let juicios={}, eOpen=null;
-const JUI_EST=[["logros","Logros y fortalezas","Qué logró, en qué se destaca, cómo trabaja…"],["mejorar","Aspectos a mejorar","Dificultades observadas, qué le cuesta…"],["orientaciones","Orientaciones y próximos pasos","Qué se le propone, qué apoyo necesita…"]];
-const JUI_GRU=[["logros","Desempeño del grupo","Cómo trabaja el grupo, clima, participación, avances…"],["mejorar","Necesidades del grupo","Qué necesita el grupo para avanzar…"],["orientaciones","Propuestas y estrategias","Qué se propone trabajar en la próxima etapa…"]];
+const TECNICOS="_tecnicos";
+// Campos de texto según el tipo de instancia. Columnas en la base: logros / mejorar / orientaciones.
+const CAMPOS={
+  diagnostico:{est:[["logros","Resultado de la actividad de diagnóstico","Qué actividad se hizo y qué resultado obtuvo: qué sabe hacer, cómo lo hace…"],["mejorar","Juicio conceptual","Valoración del docente sobre su punto de partida en el área…"],["orientaciones","Orientaciones para el proceso (opcional)","Qué se propone trabajar con este estudiante…"]],
+               gru:[["logros","Resultado del diagnóstico grupal","Cómo llega el grupo al área: saberes previos, dinámica…"],["mejorar","Juicio conceptual sobre el grupo","Valoración del docente sobre el grupo…"],["orientaciones","Propuestas para el grupo (opcional)","Qué se propone trabajar en la próxima etapa…"]]},
+  final:{est:[["logros","Juicio conceptual (evaluación del área)","Valoración del docente sobre el desempeño final en el área…"],["mejorar","Competencias técnicas logradas (evidencia)","Qué sabe hacer ahora y cómo se comprobó: trabajos, presentaciones, prácticas…"],["orientaciones","Recomendaciones (opcional)","Para su inserción laboral o la continuidad de su formación…"]],
+         gru:[["logros","Desempeño del grupo en el área","Cómo terminó el grupo: logros y avances…"],["mejorar","Logros y dificultades del grupo","Qué se consolidó y qué quedó pendiente…"],["orientaciones","Propuestas (opcional)","Recomendaciones para futuras ediciones…"]]},
+  general:{est:[["logros","Logros y fortalezas","Qué logró, en qué se destaca…"],["mejorar","Aspectos a mejorar","Dificultades observadas…"],["orientaciones","Orientaciones y próximos pasos","Qué se le propone…"]],
+           gru:[["logros","Desempeño del grupo","Cómo trabaja el grupo…"],["mejorar","Necesidades del grupo","Qué necesita el grupo…"],["orientaciones","Propuestas y estrategias","Qué se propone…"]]},
+  tecnicos:{est:[["logros","Informe de los técnicos","Síntesis del equipo técnico sobre el estudiante en esta instancia…"]],
+            gru:[["logros","Informe grupal de los técnicos","Síntesis del equipo técnico sobre el grupo en esta instancia…"]]}
+};
+// Rúbrica de competencias transversales (INEFOP): 4 niveles con descriptores
+const RUBRICA=[
+ {k:"com",n:"Comunicación asertiva",d:["Le cuesta expresar ideas u opiniones; evita intervenir o lo hace de forma poco adecuada al contexto.","Expresa ideas con apoyo; a veces interrumpe o no adecua el registro; escucha de forma parcial.","Expresa ideas y desacuerdos con claridad y respeto; escucha y adecua el registro a la situación.","Comunica con claridad y empatía en distintas situaciones; propone, negocia y ayuda a resolver conflictos."]},
+ {k:"col",n:"Trabajo colaborativo",d:["Trabaja de forma aislada o se desentiende de la tarea común.","Participa cuando se le asigna una tarea; cumple su parte con recordatorios.","Cumple su parte en tiempo, comparte información y respeta los acuerdos del grupo.","Promueve la participación de otros, coordina tareas y ayuda a sostener al grupo."]},
+ {k:"obj",n:"Orientación a objetivos",d:["No identifica metas ni pasos; abandona ante las dificultades.","Identifica la meta con ayuda; avanza de forma irregular.","Se plantea metas concretas, organiza los pasos y cumple plazos.","Se fija metas desafiantes, evalúa su avance y ajusta el plan por iniciativa propia."]}];
+const NIV=["Inicial","En desarrollo","Logrado","Destacado"];
+const activos=()=>cfg.estudiantes.filter(e=>e.estado!=="desvinculado");
 const instancias=()=>(cfg.instancias||[]).filter(i=>i.nombre);
 const instOf=id=>instancias().find(i=>i.id===id)||{};
+const tipoDe=inst=>({diagnostico:1,final:1}[inst.tipo]?inst.tipo:"general");
+const escalaDe=inst=>+inst.escala||12;
+const usaNota=inst=>tipoDe(inst)!=="general";
+const usaRubrica=inst=>tipoDe(inst)==="final";
+const camposDe=(inst,comp)=>CAMPOS[comp===TECNICOS?"tecnicos":tipoDe(inst)];
+const compNombre=id=>id===TECNICOS?"Informe de los técnicos":compOf(id);
 const jId=(inst,comp,suj)=>inst+"|"+comp+"|"+suj;
 const jVal=(inst,comp,suj)=>juicios[jId(inst,comp,suj)]||{};
-const jCompleto=j=>!!(j&&(j.logros||"").trim()&&(j.mejorar||"").trim());
+const tx=v=>(v||"").trim();
+function jCompleto(inst,comp,j){ if(!j) return false;
+  if(comp===TECNICOS) return !!tx(j.logros);
+  if(!tx(j.logros)||!tx(j.mejorar)) return false;
+  if(usaNota(inst)&&!j.nota) return false;
+  if(usaRubrica(inst)&&RUBRICA.some(r=>!(j.rubrica||{})[r.k])) return false;
+  return true; }
 function eStatus(t){$("#e-status").textContent=t}
 
 const jPend={}, jTimer={}, jBusy={};
@@ -1071,41 +1103,49 @@ async function jFlush(id){
   jBusy[id]=false;
   if(!error){eStatus("Guardado ✓ "+new Date().toLocaleTimeString("es-UY",{hour:"2-digit",minute:"2-digit"})); paintEval(); return}
   if(esSinPermiso(error)){eStatus("No se guardó: este componente no está asignado a su usuario. Pida a la coordinación que se lo asigne."); return}
+  if(/nota|rubrica/.test(error.message||"")){eStatus("No se guardó: falta ejecutar en Supabase el archivo hitos-inefop.sql."); return}
   eStatus("No se pudo guardar (sin conexión). Se reintentará en unos segundos; no cierre la página.");
   jPend[id]=Object.assign(body,jPend[id]||{}); jTimer[id]=setTimeout(()=>jFlush(id),3000);
 }
 
 function renderEval(){
   const si=$("#e-inst"), cur=si.value||gp("e-inst"), ins=instancias();
-  setHTML(si,ins.length?ins.map(i=>`<option value="${esc(i.id)}">${esc(i.nombre)}${i.fecha?" · "+fmt(i.fecha):""}</option>`).join(""):'<option value="">Sin instancias: la coordinación las crea en Configuración</option>');
+  setHTML(si,ins.length?ins.map(i=>`<option value="${esc(i.id)}">${esc(i.nombre)}${i.fecha?" · "+fmt(i.fecha)+"/"+i.fecha.slice(0,4):""}</option>`).join(""):'<option value="">Sin instancias: la coordinación las crea en Configuración</option>');
   if(ins.some(i=>i.id===cur)) si.value=cur; else if(ins.length){const prox=ins.find(i=>i.fecha>=todayStr())||ins[ins.length-1]; si.value=prox.id;}
-  const sc=$("#e-comp"), mc=misComps(), cc=sc.value||gp("e-comp");
-  setHTML(sc,mc.length?mc.map(c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`).join(""):'<option value="">No tiene componentes asignados</option>');
+  const sc=$("#e-comp"), mc=misComps().map(c=>({id:c.id,t:c.nombre+(c.docente?" — "+c.docente:"")})), cc=sc.value||gp("e-comp");
+  if(canAdmin) mc.push({id:TECNICOS,t:"Informe de los técnicos (coordinación)"});
+  setHTML(sc,mc.length?mc.map(c=>`<option value="${esc(c.id)}">${esc(c.t)}</option>`).join(""):'<option value="">No tiene componentes asignados</option>');
   if(mc.some(c=>c.id===cc)) sc.value=cc;
-  const inst=si.value, comp=sc.value, box=$("#e-list"), gbox=$("#e-grupo");
+  const instId=si.value, inst=instOf(instId), comp=sc.value, box=$("#e-list"), gbox=$("#e-grupo");
   $("#e-inf").hidden=!canAdmin; if(canAdmin) renderInformesSel();
-  if(!inst||!comp){setHTML(gbox,"");setHTML(box,`<div class="panel empty">${!mc.length?"Todavía no tiene componentes asignados. Pida a la coordinación que se los asigne en <b>Configuración → Docentes autorizados</b>.":"Elija una instancia de evaluación."}</div>`);return}
+  if(!instId||!comp){setHTML(gbox,"");setHTML(box,`<div class="panel empty">${!mc.length?"Todavía no tiene componentes asignados. Pida a la coordinación que se los asigne en <b>Configuración → Docentes autorizados</b>.":"Elija una instancia de evaluación."}</div>`);return}
+  const C=camposDe(inst,comp), est=activos();
   const campos=(lista,suj)=>lista.map(([k,t,ph])=>`<div class="field"><label for="j-${esc(suj)}-${k}">${esc(t)}</label><textarea id="j-${esc(suj)}-${k}" class="jtxt" data-suj="${esc(suj)}" data-k="${k}" placeholder="${esc(ph)}" rows="3"></textarea></div>`).join("");
-  setHTML(gbox,`<div class="panel"><h2 style="font-size:1.1rem;margin-bottom:4px">Juicio sobre el grupo</h2><p class="note" style="margin:0 0 8px">Su mirada sobre el grupo en ${esc(compOf(comp))} en esta instancia.</p><div class="stu-body" style="border:0;padding:0">${campos(JUI_GRU,"_grupo")}</div></div>`);
-  setHTML(box,cfg.estudiantes.map((s,i)=>{const open=eOpen===s.id;
+  const nota=suj=>usaNota(inst)&&comp!==TECNICOS?`<div class="field"><label for="jn-${esc(suj)}">Nota (1 a ${escalaDe(inst)})</label><select id="jn-${esc(suj)}" class="jnota" data-suj="${esc(suj)}" style="max-width:8em"><option value="">—</option>${Array.from({length:escalaDe(inst)},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("")}</select></div>`:"";
+  const rub=suj=>usaRubrica(inst)&&comp!==TECNICOS?`<div class="dim-title" style="margin-top:6px">Rúbrica de competencias transversales</div>${RUBRICA.map(r=>`<div class="dim rub" data-r="${r.k}"><div class="dim-title" style="font-weight:600">${esc(r.n)}</div>
+     <div class="levels" style="grid-template-columns:repeat(4,1fr)">${NIV.map((n,i)=>`<button type="button" class="lvl" data-n="${i+1}" aria-pressed="false"><span class="t">${esc(n)}</span></button>`).join("")}</div><div class="desc"></div></div>`).join("")}`:"";
+  const tema={diagnostico:"Hito 1: resultado del diagnóstico, juicio conceptual y nota de cada estudiante.",final:"Hito 4: nota final, juicio conceptual, competencias técnicas y rúbrica de competencias transversales."}[tipoDe(inst)]||"";
+  setHTML(gbox,`<div class="panel"><h2 style="font-size:1.1rem;margin-bottom:4px">${comp===TECNICOS?"Informe grupal de los técnicos":"Juicio sobre el grupo"}</h2><p class="note" style="margin:0 0 8px">${esc(compNombre(comp))} · ${esc(inst.nombre||"")}${tema&&comp!==TECNICOS?" · "+esc(tema):""}</p><div class="stu-body" style="border:0;padding:0">${campos(C.gru,"_grupo")}</div></div>`);
+  setHTML(box,est.map((s,i)=>{const open=eOpen===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
-      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true"><span class="dot jdot"></span></span><span class="chev" aria-hidden="true">▾</span></button>
-      ${open?`<div class="stu-body"><div class="dim" data-k="nivel"><div class="dim-title">Valoración global en esta instancia</div>
-        <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div></div>
-        ${campos(JUI_EST,s.id)}
-        <div class="stu-foot"><button type="button" class="btn primary next">${i<cfg.estudiantes.length-1?"Siguiente estudiante →":"Terminar"}</button></div></div>`:""}
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum jsum muted num" aria-hidden="true"></span><span class="chev" aria-hidden="true">▾</span></button>
+      ${open?`<div class="stu-body">${nota(s.id)}${campos(C.est,s.id)}${rub(s.id)}
+        <div class="stu-foot"><button type="button" class="btn primary next">${i<est.length-1?"Siguiente estudiante →":"Terminar"}</button></div></div>`:""}
     </div>`}).join(""));
   paintEval();
 }
 function paintEval(){
-  const inst=$("#e-inst").value, comp=$("#e-comp").value; if(!inst||!comp) return;
-  $$("#e-grupo .jtxt, #e-list .jtxt").forEach(t=>{ if(document.activeElement!==t) t.value=jVal(inst,comp,t.dataset.suj)[t.dataset.k]||""; });
-  let hechos=0;
-  $$("#e-list .stu").forEach(card=>{const j=jVal(inst,comp,card.dataset.sid), ok=jCompleto(j); if(ok) hechos++;
-    card.classList.toggle("done",ok); const d=card.querySelector(".jdot"); d.className="dot jdot "+(j.nivel||"");
-    card.querySelectorAll(".dim[data-k=nivel] .lvl").forEach(b=>b.setAttribute("aria-pressed",String(j.nivel===b.dataset.l)));});
-  const st=$("#e-status").textContent; if(!st.startsWith("Guard")&&!st.startsWith("No se")) eStatus(`Juicios completos: ${hechos} de ${cfg.estudiantes.length} estudiantes (completo = logros y aspectos a mejorar escritos).`);
-  $("#e-prog i").style.width=(cfg.estudiantes.length?hechos/cfg.estudiantes.length*100:0)+"%";
+  const instId=$("#e-inst").value, inst=instOf(instId), comp=$("#e-comp").value; if(!instId||!comp) return;
+  $$("#e-grupo .jtxt, #e-list .jtxt").forEach(t=>{ if(document.activeElement!==t) t.value=jVal(instId,comp,t.dataset.suj)[t.dataset.k]||""; });
+  $$("#e-list .jnota").forEach(s=>{ if(document.activeElement!==s) s.value=jVal(instId,comp,s.dataset.suj).nota||""; });
+  let hechos=0; const est=activos();
+  $$("#e-list .stu").forEach(card=>{const j=jVal(instId,comp,card.dataset.sid), ok=jCompleto(inst,comp,j); if(ok) hechos++;
+    card.classList.toggle("done",ok); card.querySelector(".jsum").textContent=j.nota?"Nota "+j.nota:"";
+    card.querySelectorAll(".rub").forEach(d=>{const r=RUBRICA.find(x=>x.k===d.dataset.r), v=(j.rubrica||{})[r.k];
+      d.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.n===v)));
+      d.querySelector(".desc").textContent=v?NIV[v-1]+": "+r.d[v-1]:"";});});
+  const st=$("#e-status").textContent; if(!st.startsWith("Guard")&&!st.startsWith("No se")) eStatus(`Completos: ${hechos} de ${est.length} estudiantes.`);
+  $("#e-prog i").style.width=(est.length?hechos/est.length*100:0)+"%";
 }
 $("#e-inst").onchange=()=>{sp("e-inst",$("#e-inst").value);eOpen=null;eStatus("");renderEval()};
 $("#e-comp").onchange=()=>{sp("e-comp",$("#e-comp").value);eOpen=null;eStatus("");renderEval()};
@@ -1113,73 +1153,104 @@ const eDeb={};
 ["#e-list","#e-grupo"].forEach(sel=>{
   $(sel).addEventListener("input",e=>{const t=e.target; if(!t.classList.contains("jtxt")) return; const k=t.dataset.suj+t.dataset.k;
     clearTimeout(eDeb[k]); eDeb[k]=setTimeout(()=>jGuardar($("#e-inst").value,$("#e-comp").value,t.dataset.suj,t.dataset.k,t.value),900);});
-  $(sel).addEventListener("change",e=>{const t=e.target; if(!t.classList.contains("jtxt")) return; clearTimeout(eDeb[t.dataset.suj+t.dataset.k]);
+  $(sel).addEventListener("change",e=>{const t=e.target;
+    if(t.classList.contains("jnota")){jGuardar($("#e-inst").value,$("#e-comp").value,t.dataset.suj,"nota",t.value?+t.value:null); paintEval(); return}
+    if(!t.classList.contains("jtxt")) return; clearTimeout(eDeb[t.dataset.suj+t.dataset.k]);
     jGuardar($("#e-inst").value,$("#e-comp").value,t.dataset.suj,t.dataset.k,t.value);});
 });
 $("#e-list").addEventListener("click",e=>{
-  const card=e.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid;
+  const card=e.target.closest(".stu"); if(!card) return; const sid=card.dataset.sid, est=activos();
   if(e.target.closest(".stu-head")){eOpen=eOpen===sid?null:sid; renderEval(); return}
-  if(e.target.closest(".next")){const i=cfg.estudiantes.findIndex(s=>s.id===sid), nx=cfg.estudiantes[i+1]; eOpen=nx?nx.id:null; renderEval();
+  if(e.target.closest(".next")){const i=est.findIndex(s=>s.id===sid), nx=est[i+1]; eOpen=nx?nx.id:null; renderEval();
     const el=nx&&document.querySelector(`#e-list .stu[data-sid="${CSS.escape(nx.id)}"]`); if(el) window.scrollTo({top:el.getBoundingClientRect().top+window.scrollY-$("header.top").offsetHeight-8}); return}
-  const b=e.target.closest(".lvl"); if(b){const inst=$("#e-inst").value, comp=$("#e-comp").value, cur=jVal(inst,comp,sid).nivel;
-    jGuardar(inst,comp,sid,"nivel",cur===b.dataset.l?"":b.dataset.l); paintEval();}
+  const b=e.target.closest(".rub .lvl"); if(b){const inst=$("#e-inst").value, comp=$("#e-comp").value, k=b.closest(".rub").dataset.r;
+    const r=Object.assign({},jVal(inst,comp,sid).rubrica||{}); r[k]=r[k]===+b.dataset.n?0:+b.dataset.n; if(!r[k]) delete r[k];
+    jGuardar(inst,comp,sid,"rubrica",r); paintEval();}
 });
 
-// ---------- Informes (coordinación) ----------
-function renderInformesSel(){
-  const s=$("#i-est"), cur=s.value;
-  setHTML(s,'<option value="todos">Todos los estudiantes (un solo archivo)</option>'+cfg.estudiantes.map(e=>`<option value="${esc(e.id)}">${esc(e.nombre)}</option>`).join(""));
-  if([...s.options].some(o=>o.value===cur)) s.value=cur;
-}
-function datosInforme(instId,sid){
-  const inst=instOf(instId), hasta=inst.fecha||todayStr(), desde=cfg.inicio||hasta;
-  const pv=dayNum(desde)+":"+dayNum(hasta), st=stats(pv)[sid]||{pct:[null,null,null,null],idx:null,dims:DIMS.map(()=>({v:0,a:0,r:0})),h:{v:0,a:0,r:0}};
-  const est=cfg.estudiantes.find(e=>e.id===sid)||{};
-  const comps=cfg.componentes.map(c=>({c,j:jVal(instId,c.id,sid)})).filter(o=>o.j&&(o.j.logros||o.j.mejorar||o.j.orientaciones||o.j.nivel));
-  const hs=Object.values(hitos).filter(h=>h.fecha&&h.fecha<=hasta&&h.ev&&h.ev[sid]&&h.ev[sid].l).sort((a,b)=>a.fecha.localeCompare(b.fecha));
-  return {inst,desde,hasta,st,est,comps,hs};
-}
-const nivelTxt=l=>l?LV[l].t:"Sin valoración";
-const hitoTxt=l=>({v:"En tiempo y forma",a:"Fuera de plazo o incompleto",r:"No entregó",x:"No corresponde"})[l]||"";
-function datosGrupo(instId){
-  const inst=instOf(instId), hasta=inst.fecha||todayStr(), desde=cfg.inicio||hasta, pv=dayNum(desde)+":"+dayNum(hasta);
-  const st=stats(pv), filas=ranked(st);
-  const comps=cfg.componentes.map(c=>({c,j:jVal(instId,c.id,"_grupo")})).filter(o=>o.j&&(o.j.logros||o.j.mejorar||o.j.orientaciones));
-  return {inst,desde,hasta,filas,comps};
-}
+// ---------- Cálculos para los informes ----------
+function periodo(instId){const inst=instOf(instId), hasta=inst.fecha||todayStr(), desde=cfg.inicio||hasta; return {inst,desde,hasta,pv:dayNum(desde)+":"+dayNum(hasta)}}
+function asistencia(sid,pv){const r={p:0,t:0,a:0,j:0};
+  Object.values(clases).forEach(c=>{if(!c.fecha||!inPeriod(c.fecha,pv)) return; const e=(c.ev||{})[sid]; if(!e) return;
+    if(e.j) r.j++; else if(e.as==="v") r.p++; else if(e.as==="a") r.t++; else if(e.as==="r") r.a++;});
+  r.total=r.p+r.t+r.a+r.j; r.pct=r.total?Math.round((r.p+r.t)/r.total*100):null; return r;}
+const pctTxt=p=>p===null||p===undefined?"—":p+" %";
+const mediana=a=>{const v=a.filter(Boolean).sort((x,y)=>x-y); if(!v.length) return 0; return v[Math.floor((v.length-1)/2)]};
+const promedio=a=>{const v=a.filter(x=>x); return v.length?Math.round(v.reduce((s,x)=>s+x,0)/v.length*10)/10:null};
+const compsConJuicio=(instId,sid)=>cfg.componentes.map(c=>({c,j:jVal(instId,c.id,sid)})).filter(o=>o.j&&(o.j.logros||o.j.mejorar||o.j.orientaciones||o.j.nota||Object.keys(o.j.rubrica||{}).length));
+const nivelRub=(instId,sid,k)=>mediana(cfg.componentes.map(c=>(jVal(instId,c.id,sid).rubrica||{})[k]));
 const ENC="CITEF · Centro Integral Tecnológico Educativo de Flores · Curso Jóvenes 26 · INEFOP";
+const fechaLarga=f=>f?fmt(f)+"/"+f.slice(0,4):"";
 
-// PDF: vista para imprimir (el navegador ofrece «Guardar como PDF»)
-function htmlInforme(instId,sids){
-  const cel=p=>p===null||p===undefined?"—":p+" %";
-  const parr=t=>esc(t||"").split(/\n+/).filter(Boolean).map(x=>`<p>${x}</p>`).join("")||'<p class="vacio">—</p>';
-  const unEst=sid=>{const d=datosInforme(instId,sid);
-    return `<section class="hoja"><p class="enc">${esc(ENC)}</p><h1>Informe de evaluación</h1>
-    <table class="meta"><tr><th>Estudiante</th><td>${esc(d.est.nombre||"")}</td></tr><tr><th>Instancia</th><td>${esc(d.inst.nombre||"")} · ${d.inst.fecha?fmt(d.inst.fecha)+"/"+d.inst.fecha.slice(0,4):""}</td></tr>${d.est.nivel?`<tr><th>Nivel educativo</th><td>${esc(d.est.nivel)}</td></tr>`:""}<tr><th>Período considerado</th><td>${fmt(d.desde)} al ${fmt(d.hasta)}</td></tr></table>
-    <h2>1. Seguimiento en clase (semáforo)</h2><table class="t"><tr>${DIMS.map(x=>`<th>${esc(x.n)}</th>`).join("")}<th>Índice</th></tr><tr>${d.st.pct.map(p=>`<td>${cel(p)}</td>`).join("")}<td><b>${d.st.idx===null?"—":d.st.idx}</b></td></tr></table>
-    <p class="nota">Porcentaje de logro en el período: verde = 100, amarillo = 50, rojo = 0.</p>
-    <h2>2. Juicios de los docentes por componente</h2>${d.comps.length?d.comps.map(o=>`<div class="comp"><h3>${esc(o.c.nombre)}${o.c.docente?` <span>· ${esc(o.c.docente)}</span>`:""}</h3><p><b>Valoración global:</b> ${esc(nivelTxt(o.j.nivel))}</p><h4>Logros y fortalezas</h4>${parr(o.j.logros)}<h4>Aspectos a mejorar</h4>${parr(o.j.mejorar)}<h4>Orientaciones y próximos pasos</h4>${parr(o.j.orientaciones)}</div>`).join(""):'<p class="vacio">Todavía no hay juicios cargados en esta instancia.</p>'}
-    <h2>3. Hitos del período</h2>${d.hs.length?`<table class="t"><tr><th>Fecha</th><th>Componente</th><th>Hito</th><th>Resultado</th></tr>${d.hs.map(h=>`<tr><td>${fmt(h.fecha)}</td><td>${esc(compOf(h.comp))}</td><td>${esc(h.nombre)}</td><td>${esc(hitoTxt(h.ev[sid].l))}</td></tr>`).join("")}</table>`:'<p class="vacio">Sin hitos evaluados en el período.</p>'}
-    <h2>4. Síntesis de la coordinación</h2><div class="lineas"></div></section>`;};
-  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Informe ${esc(instOf(instId).nombre||"")}</title><style>
-  @page{size:A4;margin:16mm}body{font-family:Calibri,"Segoe UI",Arial,sans-serif;color:#0e2338;font-size:11.5pt;line-height:1.4;margin:0}
-  .hoja{page-break-after:always;max-width:180mm;margin:0 auto}.hoja:last-child{page-break-after:auto}.enc{font-size:9pt;color:#4c6178;margin:0 0 6mm}
-  h1{font-size:20pt;color:#0f4f8a;margin:0 0 4mm}h2{font-size:13pt;color:#0f4f8a;margin:7mm 0 2mm;border-bottom:1.5px solid #c4d92e;padding-bottom:1mm}h3{font-size:12pt;margin:4mm 0 1mm}h3 span{font-weight:400;color:#4c6178}h4{font-size:10.5pt;margin:2mm 0 0;color:#4c6178}
-  p{margin:1mm 0}.comp{page-break-inside:avoid;border:1px solid #c8d6e6;border-radius:3mm;padding:2mm 4mm;margin:3mm 0}
-  table{border-collapse:collapse;width:100%}.meta th{text-align:left;width:38mm;color:#4c6178;font-weight:600;padding:1mm 0}.meta td{padding:1mm 0}
-  .t th,.t td{border:1px solid #c8d6e6;padding:1.5mm 2mm;text-align:left;font-size:10pt}.t th{background:#eef3f9}.nota,.vacio{font-size:9.5pt;color:#4c6178}
-  .lineas{height:35mm;border:1px dashed #c8d6e6;border-radius:3mm}@media screen{body{background:#eef3f9;padding:10mm}.hoja{background:#fff;padding:12mm;margin-bottom:10mm;box-shadow:0 1px 4px #0002}}
-  </style></head><body>${sids.map(unEst).join("")}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
+// Un informe es una lista de bloques; se dibuja igual en Word y en PDF.
+function bloquesEstudiante(instId,sid){
+  const {inst,desde,hasta,pv}=periodo(instId), est=cfg.estudiantes.find(e=>e.id===sid)||{}, tipo=tipoDe(inst), B=[];
+  const as=asistencia(sid,pv), comps=compsConJuicio(instId,sid), C=CAMPOS[tipo], tec=jVal(instId,TECNICOS,sid);
+  B.push({t:"enc"},{t:"titulo",x:"Informe individual de evaluación"},{t:"meta",pares:[["Participante",est.nombre||""],["Instancia",(inst.nombre||"")+" · "+fechaLarga(inst.fecha)],...(est.nivel?[["Nivel educativo",est.nivel]]:[]),["Período considerado",fmt(desde)+" al "+fmt(hasta)]]});
+  let n=1;
+  B.push({t:"h2",x:(n++)+". Asistencia"},{t:"tabla",filas:[["Clases registradas","Presente","Llegada tarde o retiro","Ausente","Falta justificada","Asistencia"],[as.total,as.p,as.t,as.a,as.j,pctTxt(as.pct)]].map(f=>f.map(String))},{t:"nota",x:"Asistencia = clases con presencia (puntual o tarde) sobre el total de clases registradas."});
+  if(usaNota(inst)){const notas=comps.filter(o=>o.j.nota);
+    B.push({t:"h2",x:(n++)+". Calificaciones por área (escala 1 a "+escalaDe(inst)+")"});
+    B.push(notas.length?{t:"tabla",filas:[["Área","Docente","Nota"],...notas.map(o=>[o.c.nombre,o.c.docente||"",String(o.j.nota)]),["Promedio","",String(promedio(notas.map(o=>o.j.nota))??"—")]]}:{t:"p",x:"Todavía no hay notas cargadas en esta instancia.",muted:1});}
+  B.push({t:"h2",x:(n++)+". "+(tipo==="diagnostico"?"Resultados del diagnóstico y juicio conceptual por área":tipo==="final"?"Evaluación conceptual de cada área":"Juicios de los docentes por área")});
+  if(!comps.length) B.push({t:"p",x:"Todavía no hay juicios cargados en esta instancia.",muted:1});
+  comps.forEach(o=>{B.push({t:"h3",x:o.c.nombre+(o.c.docente?" · "+o.c.docente:"")});
+    if(o.j.nota) B.push({t:"p",x:"Nota: "+o.j.nota+" (escala 1 a "+escalaDe(inst)+")",bold:1});
+    C.est.forEach(([k,t])=>{ if(k==="orientaciones"&&!tx(o.j[k])) return; B.push({t:"label",x:t.replace(" (opcional)","")},{t:"textos",x:o.j[k]}); });});
+  if(usaRubrica(inst)){
+    B.push({t:"h2",x:(n++)+". Rúbrica de competencias transversales"});
+    const conR=comps.filter(o=>Object.keys(o.j.rubrica||{}).length);
+    B.push({t:"tabla",filas:[["Competencia",...conR.map(o=>o.c.nombre),"Nivel alcanzado"],...RUBRICA.map(r=>[r.n,...conR.map(o=>{const v=(o.j.rubrica||{})[r.k];return v?NIV[v-1]:"—"}),(v=>v?NIV[v-1]:"—")(nivelRub(instId,sid,r.k))])],chico:1});
+    RUBRICA.forEach(r=>{const v=nivelRub(instId,sid,r.k); if(v) B.push({t:"p",x:r.n+" — "+NIV[v-1]+": "+r.d[v-1]});});
+    B.push({t:"nota",x:"Nivel alcanzado = valor central (mediana) de las valoraciones de los docentes. Niveles: Inicial, En desarrollo, Logrado, Destacado."});}
+  const st=stats(pv)[sid]; if(st){B.push({t:"h2",x:(n++)+". Seguimiento en clase (semáforo)"},{t:"tabla",filas:[[...DIMS.map(x=>x.n),"Índice"],[...st.pct.map(pctTxt),st.idx===null?"—":String(st.idx)]],chico:1});}
+  B.push({t:"h2",x:(n++)+". Informe de los técnicos"},{t:"textos",x:tec.logros});
+  return B;
 }
-function htmlGrupo(instId){
-  const d=datosGrupo(instId), cel=p=>p===null||p===undefined?"—":p+" %";
+function bloquesGrupo(instId){
+  const {inst,desde,hasta,pv}=periodo(instId), tipo=tipoDe(inst), est=tipo==="final"?activos():cfg.estudiantes, B=[], C=CAMPOS[tipo];
+  B.push({t:"enc"},{t:"titulo",x:"Informe grupal de evaluación"},{t:"meta",pares:[["Instancia",(inst.nombre||"")+" · "+fechaLarga(inst.fecha)],["Período considerado",fmt(desde)+" al "+fmt(hasta)],["Participantes",tipo==="final"?`${est.length} sostienen hasta el final (de ${cfg.estudiantes.length} inscriptos)`:String(cfg.estudiantes.length)]]});
+  let n=1;
+  B.push({t:"h2",x:(n++)+". Asistencia del grupo"},{t:"tabla",filas:[["#","Participante","Presente","Tarde","Ausente","Justificada","Asistencia"],...est.map((s,i)=>{const a=asistencia(s.id,pv);return [String(i+1),s.nombre+(s.estado==="desvinculado"?" (desvinculado)":""),a.p,a.t,a.a,a.j,pctTxt(a.pct)].map(String)})],chico:1});
+  if(usaNota(inst)){const cs=cfg.componentes.filter(c=>est.some(s=>jVal(instId,c.id,s.id).nota));
+    B.push({t:"h2",x:(n++)+". Planilla de calificaciones (escala 1 a "+escalaDe(inst)+")"});
+    B.push(cs.length?{t:"tabla",filas:[["Participante",...cs.map(c=>c.nombre),"Promedio"],...est.map(s=>{const ns=cs.map(c=>jVal(instId,c.id,s.id).nota);return [s.nombre,...ns.map(v=>v?String(v):"—"),String(promedio(ns)??"—")]})],chico:1}:{t:"p",x:"Todavía no hay notas cargadas en esta instancia.",muted:1});}
+  if(usaRubrica(inst)){B.push({t:"h2",x:(n++)+". Competencias transversales: nivel alcanzado por participante"});
+    B.push({t:"tabla",filas:[["Participante",...RUBRICA.map(r=>r.n)],...est.map(s=>[s.nombre,...RUBRICA.map(r=>(v=>v?NIV[v-1]:"—")(nivelRub(instId,s.id,r.k)))])],chico:1});}
+  B.push({t:"h2",x:(n++)+". Juicios de los docentes sobre el grupo"});
+  const gs=cfg.componentes.map(c=>({c,j:jVal(instId,c.id,"_grupo")})).filter(o=>o.j&&(o.j.logros||o.j.mejorar||o.j.orientaciones));
+  if(!gs.length) B.push({t:"p",x:"Todavía no hay juicios sobre el grupo en esta instancia.",muted:1});
+  gs.forEach(o=>{B.push({t:"h3",x:o.c.nombre+(o.c.docente?" · "+o.c.docente:"")}); C.gru.forEach(([k,t])=>{ if(k==="orientaciones"&&!tx(o.j[k])) return; B.push({t:"label",x:t.replace(" (opcional)","")},{t:"textos",x:o.j[k]}); });});
+  B.push({t:"h2",x:(n++)+". Informe grupal de los técnicos"},{t:"textos",x:jVal(instId,TECNICOS,"_grupo").logros});
+  if(usaRubrica(inst)){B.push({t:"salto"},{t:"h2",x:"Anexo · Rúbrica de competencias transversales"},{t:"tabla",filas:[["Competencia",...NIV],...RUBRICA.map(r=>[r.n,...r.d])],chico:1});}
+  return B;
+}
+function bloquesAsistencia(instId){
+  const {inst,desde,hasta,pv}=periodo(instId), B=[{t:"enc"},{t:"titulo",x:"Listas de asistencia diaria"},{t:"meta",pares:[["Instancia",(inst.nombre||"")+" · "+fechaLarga(inst.fecha)],["Período",fmt(desde)+" al "+fmt(hasta)],["Referencias","P = presente · T = llegó tarde o se retiró antes · A = ausente · J = falta justificada · vacío = sin registro"]]}];
+  cfg.componentes.forEach(c=>{const fechas=Object.values(clases).filter(k=>k.comp===c.id&&k.fecha&&inPeriod(k.fecha,pv)).sort((a,b)=>a.fecha.localeCompare(b.fecha)); if(!fechas.length) return;
+    for(let i=0;i<fechas.length;i+=14){const tramo=fechas.slice(i,i+14);
+      B.push({t:"h3",x:c.nombre+(c.docente?" · "+c.docente:"")+(fechas.length>14?` (${i/14+1})`:"")});
+      B.push({t:"tabla",filas:[["Participante",...tramo.map(k=>fmt(k.fecha))],...cfg.estudiantes.map(s=>[s.nombre,...tramo.map(k=>{const e=(k.ev||{})[s.id]||{};return e.j?"J":e.as==="v"?"P":e.as==="a"?"T":e.as==="r"?"A":""})])],chico:1});}});
+  if(B.length===3) B.push({t:"p",x:"No hay clases registradas en el período.",muted:1});
+  return B;
+}
+
+// ---------- Dibujo: PDF (vista para imprimir) ----------
+function htmlDe(bloquesPorHoja,horizontal){
   const parr=t=>esc(t||"").split(/\n+/).filter(Boolean).map(x=>`<p>${x}</p>`).join("")||'<p class="vacio">—</p>';
-  const base=htmlInforme(instId,[]).split("<body>")[0];
-  return base+`<body><section class="hoja"><p class="enc">${esc(ENC)}</p><h1>Informe del grupo</h1>
-  <table class="meta"><tr><th>Instancia</th><td>${esc(d.inst.nombre||"")} · ${d.inst.fecha?fmt(d.inst.fecha)+"/"+d.inst.fecha.slice(0,4):""}</td></tr><tr><th>Período considerado</th><td>${fmt(d.desde)} al ${fmt(d.hasta)}</td></tr><tr><th>Estudiantes</th><td>${cfg.estudiantes.length}</td></tr></table>
-  <h2>1. Juicios de los docentes sobre el grupo</h2>${d.comps.length?d.comps.map(o=>`<div class="comp"><h3>${esc(o.c.nombre)}${o.c.docente?` <span>· ${esc(o.c.docente)}</span>`:""}</h3><h4>Desempeño del grupo</h4>${parr(o.j.logros)}<h4>Necesidades del grupo</h4>${parr(o.j.mejorar)}<h4>Propuestas y estrategias</h4>${parr(o.j.orientaciones)}</div>`).join(""):'<p class="vacio">Todavía no hay juicios sobre el grupo en esta instancia.</p>'}
-  <h2>2. Seguimiento en clase de cada estudiante</h2><table class="t"><tr><th>#</th><th>Estudiante</th>${DIMS.map(x=>`<th>${esc(x.n.split(" ")[0])}</th>`).join("")}<th>Índice</th></tr>${d.filas.map((s,i)=>`<tr><td>${i+1}</td><td>${esc(nameOf(s.id))}</td>${s.pct.map(p=>`<td>${cel(p)}</td>`).join("")}<td><b>${s.idx===null?"—":s.idx}</b></td></tr>`).join("")}</table>
-  <h2>3. Síntesis de la coordinación</h2><div class="lineas"></div></section><script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
+  const uno=b=>({enc:()=>`<p class="enc">${esc(ENC)}</p>`,titulo:()=>`<h1>${esc(b.x)}</h1>`,meta:()=>`<table class="meta">${b.pares.map(([a,v])=>`<tr><th>${esc(a)}</th><td>${esc(v)}</td></tr>`).join("")}</table>`,
+    h2:()=>`<h2>${esc(b.x)}</h2>`,h3:()=>`<h3>${esc(b.x)}</h3>`,p:()=>`<p class="${b.muted?"vacio":""}">${b.bold?"<b>":""}${esc(b.x)}${b.bold?"</b>":""}</p>`,label:()=>`<h4>${esc(b.x)}</h4>`,textos:()=>parr(b.x),
+    nota:()=>`<p class="nota">${esc(b.x)}</p>`,salto:()=>`<div class="salto"></div>`,
+    tabla:()=>`<table class="t${b.chico?" chico":""}">${b.filas.map((f,i)=>`<tr>${f.map(c=>i===0?`<th>${esc(c)}</th>`:`<td>${esc(c)}</td>`).join("")}</tr>`).join("")}</table>`}[b.t]||(()=>""))();
+  return `<!doctype html><html lang="es"><head><meta charset="utf-8"><title>Informe · Jóvenes 26</title><style>
+  @page{size:A4 ${horizontal?"landscape":"portrait"};margin:14mm}body{font-family:Calibri,"Segoe UI",Arial,sans-serif;color:#0e2338;font-size:11pt;line-height:1.4;margin:0}
+  .hoja{page-break-after:always;max-width:${horizontal?"270mm":"182mm"};margin:0 auto}.hoja:last-child{page-break-after:auto}.enc{font-size:9pt;color:#4c6178;margin:0 0 5mm}
+  h1{font-size:19pt;color:#0f4f8a;margin:0 0 4mm}h2{font-size:13pt;color:#0f4f8a;margin:6mm 0 2mm;border-bottom:1.5px solid #c4d92e;padding-bottom:1mm}h3{font-size:11.5pt;margin:4mm 0 1mm;page-break-after:avoid}h4{font-size:10pt;margin:2mm 0 0;color:#4c6178}
+  p{margin:1mm 0}table{border-collapse:collapse;width:100%;margin:1mm 0 2mm}.meta th{text-align:left;width:40mm;color:#4c6178;font-weight:600;padding:.8mm 0;vertical-align:top}.meta td{padding:.8mm 0}
+  .t th,.t td{border:1px solid #c8d6e6;padding:1.2mm 1.8mm;text-align:left;font-size:9.5pt;vertical-align:top}.t th{background:#eef3f9}.t.chico th,.t.chico td{font-size:8.5pt;padding:.8mm 1.2mm}
+  .nota,.vacio{font-size:9pt;color:#4c6178}.salto{page-break-before:always}tr{page-break-inside:avoid}
+  @media screen{body{background:#eef3f9;padding:10mm}.hoja{background:#fff;padding:12mm;margin-bottom:10mm;box-shadow:0 1px 4px #0002}}
+  </style></head><body>${bloquesPorHoja.map(bs=>`<section class="hoja">${bs.map(uno).join("")}</section>`).join("")}<script>window.onload=()=>setTimeout(()=>window.print(),400)<\/script></body></html>`;
 }
 function abrirImprimir(html,msgEl){
   const w=window.open("","_blank"); if(!w){msgEl.textContent="El navegador bloqueó la ventana nueva: permita las ventanas emergentes para esta página y vuelva a intentar.";return}
@@ -1187,73 +1258,58 @@ function abrirImprimir(html,msgEl){
   msgEl.textContent="Se abrió el informe. En la ventana de impresión elija «Guardar como PDF».";
 }
 
-// Word (.docx), con la librería docx cargada recién cuando se pide un informe
+// ---------- Dibujo: Word (.docx) ----------
 let docxLib=null;
 function cargarDocx(){ if(docxLib) return Promise.resolve(docxLib);
   return new Promise((ok,ko)=>{const s=document.createElement("script"); s.src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js";
     s.onload=()=>{docxLib=window.docx; docxLib?ok(docxLib):ko(new Error("docx"))}; s.onerror=()=>ko(new Error("docx")); document.head.appendChild(s);}); }
 function descargar(blob,nombre){const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=nombre; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href); a.remove()},1500);}
 const archivo=t=>t.normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9]+/g,"-").replace(/^-|-$/g,"");
-function docxBase(D){
-  const {Paragraph,TextRun,HeadingLevel,Table,TableRow,TableCell,WidthType,ShadingType,AlignmentType}=D;
-  const P=(t,o={})=>new Paragraph({spacing:{after:80},...o,children:[new TextRun({text:t,...(o.run||{})})]});
-  const H=(t,lvl,pb)=>new Paragraph({heading:lvl,pageBreakBefore:!!pb,spacing:{before:240,after:100},children:[new TextRun({text:t,color:"0F4F8A",bold:true})]});
-  const textos=t=>{const ls=(t||"").split(/\n+/).map(x=>x.trim()).filter(Boolean); return ls.length?ls.map(x=>P(x)):[P("—",{run:{color:"4C6178"}})]};
-  const celda=(t,enc)=>new TableCell({shading:enc?{type:ShadingType.CLEAR,color:"auto",fill:"EEF3F9"}:undefined,margins:{top:60,bottom:60,left:100,right:100},children:[new Paragraph({children:[new TextRun({text:String(t),bold:!!enc,size:20})]})]});
-  const tabla=filas=>new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:filas.map((f,i)=>new TableRow({children:f.map(c=>celda(c,i===0))}))});
-  const meta=pares=>new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:pares.map(([a,b])=>new TableRow({children:[celda(a,true),celda(b,false)]}))});
-  const enc=()=>P(ENC,{run:{size:18,color:"4C6178"}});
-  return {P,H,textos,tabla,meta,enc,HeadingLevel,AlignmentType};
-}
-async function wordEstudiantes(instId,sids,msgEl){
+async function wordDe(bloquesPorHoja,nombre,msgEl,horizontal){
   msgEl.textContent="Preparando el documento…";
   let D; try{D=await cargarDocx()}catch(e){msgEl.textContent="No se pudo preparar el Word (sin conexión). Pruebe con «Ver para PDF».";return}
-  const {P,H,textos,tabla,meta,enc,HeadingLevel}=docxBase(D), cel=p=>p===null||p===undefined?"—":p+" %", hijos=[];
-  sids.forEach((sid,k)=>{const d=datosInforme(instId,sid);
-    hijos.push(new D.Paragraph({pageBreakBefore:k>0,spacing:{after:120},children:[new D.TextRun({text:ENC,size:18,color:"4C6178"})]}));
-    hijos.push(new D.Paragraph({heading:HeadingLevel.TITLE,spacing:{after:160},children:[new D.TextRun({text:"Informe de evaluación",color:"0F4F8A",bold:true})]}));
-    const pares=[["Estudiante",d.est.nombre||""],["Instancia",(d.inst.nombre||"")+(d.inst.fecha?" · "+fmt(d.inst.fecha)+"/"+d.inst.fecha.slice(0,4):"")]];
-    if(d.est.nivel) pares.push(["Nivel educativo",d.est.nivel]); pares.push(["Período considerado",fmt(d.desde)+" al "+fmt(d.hasta)]);
-    hijos.push(meta(pares));
-    hijos.push(H("1. Seguimiento en clase (semáforo)",HeadingLevel.HEADING_2));
-    hijos.push(tabla([[...DIMS.map(x=>x.n),"Índice"],[...d.st.pct.map(cel),d.st.idx===null?"—":String(d.st.idx)]]));
-    hijos.push(P("Porcentaje de logro en el período: verde = 100, amarillo = 50, rojo = 0.",{run:{size:18,color:"4C6178"}}));
-    hijos.push(H("2. Juicios de los docentes por componente",HeadingLevel.HEADING_2));
-    if(!d.comps.length) hijos.push(P("Todavía no hay juicios cargados en esta instancia.",{run:{color:"4C6178"}}));
-    d.comps.forEach(o=>{hijos.push(H(o.c.nombre+(o.c.docente?" · "+o.c.docente:""),HeadingLevel.HEADING_3));
-      hijos.push(P("Valoración global: "+nivelTxt(o.j.nivel),{run:{bold:true}}));
-      [["Logros y fortalezas",o.j.logros],["Aspectos a mejorar",o.j.mejorar],["Orientaciones y próximos pasos",o.j.orientaciones]].forEach(([t,v])=>{hijos.push(P(t,{run:{bold:true,color:"4C6178"}})); hijos.push(...textos(v));});});
-    hijos.push(H("3. Hitos del período",HeadingLevel.HEADING_2));
-    hijos.push(d.hs.length?tabla([["Fecha","Componente","Hito","Resultado"],...d.hs.map(h=>[fmt(h.fecha),compOf(h.comp),h.nombre,hitoTxt(h.ev[sid].l)])]):P("Sin hitos evaluados en el período.",{run:{color:"4C6178"}}));
-    hijos.push(H("4. Síntesis de la coordinación",HeadingLevel.HEADING_2)); hijos.push(P("")); hijos.push(P(""));
-  });
-  const doc=new D.Document({creator:"Semáforo Jóvenes 26",title:"Informe de evaluación",styles:{default:{document:{run:{font:"Calibri",size:22}}}},sections:[{properties:{page:{margin:{top:1000,bottom:1000,left:1100,right:1100}}},children:hijos}]});
-  const blob=await D.Packer.toBlob(doc), inst=instOf(instId);
-  descargar(blob,`Informe-${archivo(inst.nombre||"instancia")}-${sids.length===1?archivo(nameOf(sids[0])):"todos"}.docx`);
+  const {Paragraph,TextRun,HeadingLevel,Table,TableRow,TableCell,WidthType,ShadingType}=D;
+  const P=(t,o={})=>new Paragraph({spacing:{after:80},...(o.p||{}),children:[new TextRun({text:String(t),...(o.run||{})})]});
+  const celda=(t,enc,chico)=>new TableCell({shading:enc?{type:ShadingType.CLEAR,color:"auto",fill:"EEF3F9"}:undefined,margins:{top:40,bottom:40,left:80,right:80},children:[new Paragraph({children:[new TextRun({text:String(t),bold:!!enc,size:chico?16:20})]})]});
+  const hijos=[];
+  bloquesPorHoja.forEach((bs,h)=>bs.forEach((b,i)=>{const pb=h>0&&i===0;
+    ({enc:()=>hijos.push(P(ENC,{p:{pageBreakBefore:pb},run:{size:18,color:"4C6178"}})),
+      titulo:()=>hijos.push(new Paragraph({heading:HeadingLevel.TITLE,pageBreakBefore:pb,spacing:{after:160},children:[new TextRun({text:b.x,color:"0F4F8A",bold:true})]})),
+      meta:()=>hijos.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:b.pares.map(([a,v])=>new TableRow({children:[celda(a,true),celda(v,false)]}))})),
+      h2:()=>hijos.push(new Paragraph({heading:HeadingLevel.HEADING_2,pageBreakBefore:pb,spacing:{before:240,after:100},children:[new TextRun({text:b.x,color:"0F4F8A",bold:true})]})),
+      h3:()=>hijos.push(new Paragraph({heading:HeadingLevel.HEADING_3,spacing:{before:180,after:60},keepNext:true,children:[new TextRun({text:b.x,color:"0E2338",bold:true})]})),
+      p:()=>hijos.push(P(b.x,{run:{bold:!!b.bold,color:b.muted?"4C6178":undefined}})),
+      label:()=>hijos.push(P(b.x,{run:{bold:true,color:"4C6178",size:20}})),
+      textos:()=>{const ls=(b.x||"").split(/\n+/).map(x=>x.trim()).filter(Boolean); (ls.length?ls:["—"]).forEach(x=>hijos.push(P(x)));},
+      nota:()=>hijos.push(P(b.x,{run:{size:17,color:"4C6178"}})),
+      salto:()=>hijos.push(new Paragraph({pageBreakBefore:true,children:[]})),
+      tabla:()=>hijos.push(new Table({width:{size:100,type:WidthType.PERCENTAGE},rows:b.filas.map((f,k)=>new TableRow({tableHeader:k===0,children:f.map(c=>celda(c,k===0,b.chico))}))}))}[b.t]||(()=>{}))();}));
+  const doc=new D.Document({creator:"Semáforo Jóvenes 26",title:nombre,styles:{default:{document:{run:{font:"Calibri",size:22}}}},
+    sections:[{properties:{page:{size:horizontal?{orientation:D.PageOrientation.LANDSCAPE}:undefined,margin:{top:900,bottom:900,left:1000,right:1000}}},children:hijos}]});
+  descargar(await D.Packer.toBlob(doc),nombre+".docx");
   msgEl.textContent="Listo ✓ Se descargó el Word. Se puede editar antes de enviarlo a INEFOP.";
 }
-async function wordGrupo(instId,msgEl){
-  msgEl.textContent="Preparando el documento…";
-  let D; try{D=await cargarDocx()}catch(e){msgEl.textContent="No se pudo preparar el Word (sin conexión). Pruebe con «Ver para PDF».";return}
-  const {P,H,textos,tabla,meta,enc,HeadingLevel}=docxBase(D), d=datosGrupo(instId), cel=p=>p===null||p===undefined?"—":p+" %", hijos=[enc()];
-  hijos.push(new D.Paragraph({heading:HeadingLevel.TITLE,spacing:{after:160},children:[new D.TextRun({text:"Informe del grupo",color:"0F4F8A",bold:true})]}));
-  hijos.push(meta([["Instancia",(d.inst.nombre||"")+(d.inst.fecha?" · "+fmt(d.inst.fecha)+"/"+d.inst.fecha.slice(0,4):"")],["Período considerado",fmt(d.desde)+" al "+fmt(d.hasta)],["Estudiantes",String(cfg.estudiantes.length)]]));
-  hijos.push(H("1. Juicios de los docentes sobre el grupo",HeadingLevel.HEADING_2));
-  if(!d.comps.length) hijos.push(P("Todavía no hay juicios sobre el grupo en esta instancia.",{run:{color:"4C6178"}}));
-  d.comps.forEach(o=>{hijos.push(H(o.c.nombre+(o.c.docente?" · "+o.c.docente:""),HeadingLevel.HEADING_3));
-    [["Desempeño del grupo",o.j.logros],["Necesidades del grupo",o.j.mejorar],["Propuestas y estrategias",o.j.orientaciones]].forEach(([t,v])=>{hijos.push(P(t,{run:{bold:true,color:"4C6178"}})); hijos.push(...textos(v));});});
-  hijos.push(H("2. Seguimiento en clase de cada estudiante",HeadingLevel.HEADING_2));
-  hijos.push(tabla([["#","Estudiante",...DIMS.map(x=>x.n.split(" ")[0]),"Índice"],...d.filas.map((s,i)=>[String(i+1),nameOf(s.id),...s.pct.map(cel),s.idx===null?"—":String(s.idx)])]));
-  hijos.push(H("3. Síntesis de la coordinación",HeadingLevel.HEADING_2)); hijos.push(P("")); hijos.push(P(""));
-  const doc=new D.Document({creator:"Semáforo Jóvenes 26",title:"Informe del grupo",styles:{default:{document:{run:{font:"Calibri",size:22}}}},sections:[{properties:{page:{margin:{top:1000,bottom:1000,left:1100,right:1100}}},children:hijos}]});
-  descargar(await D.Packer.toBlob(doc),`Informe-grupo-${archivo(d.inst.nombre||"instancia")}.docx`);
-  msgEl.textContent="Listo ✓ Se descargó el Word del grupo.";
+
+// ---------- Botones de la sección Informes ----------
+function renderInformesSel(){
+  const s=$("#i-est"), cur=s.value;
+  setHTML(s,'<option value="todos">Todos los participantes (un solo archivo)</option>'+cfg.estudiantes.map(e=>`<option value="${esc(e.id)}">${esc(e.nombre)}${e.estado==="desvinculado"?" (desvinculado)":""}</option>`).join(""));
+  if([...s.options].some(o=>o.value===cur)) s.value=cur;
 }
-const sidsSel=()=>$("#i-est").value==="todos"?cfg.estudiantes.map(e=>e.id):[$("#i-est").value];
-$("#i-word").onclick=()=>{const i=$("#e-inst").value; if(!i) return; wordEstudiantes(i,sidsSel(),$("#i-status"));};
-$("#i-pdf").onclick=()=>{const i=$("#e-inst").value; if(!i) return; abrirImprimir(htmlInforme(i,sidsSel()),$("#i-status"));};
-$("#i-gword").onclick=()=>{const i=$("#e-inst").value; if(!i) return; wordGrupo(i,$("#i-status"));};
-$("#i-gpdf").onclick=()=>{const i=$("#e-inst").value; if(!i) return; abrirImprimir(htmlGrupo(i),$("#i-status"));};
+const sidsSel=()=>{const inst=instOf($("#e-inst").value); return $("#i-est").value==="todos"?(tipoDe(inst)==="final"?activos():cfg.estudiantes).map(e=>e.id):[$("#i-est").value]};
+const nomInst=()=>archivo(instOf($("#e-inst").value).nombre||"instancia");
+$("#i-word").onclick=()=>{const i=$("#e-inst").value; if(!i) return; const ids=sidsSel(); wordDe(ids.map(s=>bloquesEstudiante(i,s)),`Informe-individual-${nomInst()}-${ids.length===1?archivo(nameOf(ids[0])):"todos"}`,$("#i-status"));};
+$("#i-pdf").onclick=()=>{const i=$("#e-inst").value; if(!i) return; abrirImprimir(htmlDe(sidsSel().map(s=>bloquesEstudiante(i,s))),$("#i-status"));};
+$("#i-gword").onclick=()=>{const i=$("#e-inst").value; if(!i) return; wordDe([bloquesGrupo(i)],`Informe-grupal-${nomInst()}`,$("#i-status"),true);};
+$("#i-gpdf").onclick=()=>{const i=$("#e-inst").value; if(!i) return; abrirImprimir(htmlDe([bloquesGrupo(i)],true),$("#i-status"));};
+$("#i-aword").onclick=()=>{const i=$("#e-inst").value; if(!i) return; wordDe([bloquesAsistencia(i)],`Asistencia-diaria-${nomInst()}`,$("#i-status"),true);};
+$("#i-apdf").onclick=()=>{const i=$("#e-inst").value; if(!i) return; abrirImprimir(htmlDe([bloquesAsistencia(i)],true),$("#i-status"));};
+$("#i-acsv").onclick=()=>{const i=$("#e-inst").value; if(!i) return; const {pv}=periodo(i);
+  const rows=[["Fecha","Componente","Docente","Participante","Asistencia"]];
+  Object.values(clases).filter(k=>k.fecha&&inPeriod(k.fecha,pv)).sort((a,b)=>a.fecha.localeCompare(b.fecha)||a.comp.localeCompare(b.comp)).forEach(k=>{const c=cfg.componentes.find(x=>x.id===k.comp)||{};
+    cfg.estudiantes.forEach(s=>{const e=(k.ev||{})[s.id]; if(!e) return; rows.push([fmt(k.fecha)+"/"+k.fecha.slice(0,4),c.nombre||k.comp,c.docente||"",s.nombre,e.j?"Falta justificada":e.as==="v"?"Presente":e.as==="a"?"Llegó tarde o se retiró antes":e.as==="r"?"Ausente":""]);});});
+  const csv="﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(";")).join("\r\n");
+  descargar(new Blob([csv],{type:"text/csv;charset=utf-8"}),`Asistencia-diaria-${nomInst()}.csv`); $("#i-status").textContent="Listo ✓ Se descargó la planilla de asistencia (se abre con Excel).";};
 
 // ---------- Render ----------
 function renderAll(){

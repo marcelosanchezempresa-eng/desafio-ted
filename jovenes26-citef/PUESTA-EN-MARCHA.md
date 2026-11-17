@@ -68,3 +68,11 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 
 ## Borrar los datos de prueba
 `jovenes26-citef/supabase/borrar-datos-de-prueba.sql`: primero muestra qué se borra (clases e hitos creados antes del 17/11/2026), después borra. No toca estudiantes, componentes, configuración ni docentes.
+
+## Hitos de evaluación INEFOP
+`jovenes26-citef/supabase/hitos-inefop.sql` (después de componentes-e-instancias.sql):
+- **Hito 1 · 30/11/2026 · Diagnóstico inicial:** nota de 1 a 12 (complemento), resultado de la actividad de diagnóstico y juicio conceptual de cada docente; juicio del grupo.
+- **Hito 4 · 30/04/2027 · Evaluación final:** nota de 1 a 12, juicio conceptual, competencias técnicas logradas y rúbrica de competencias transversales (comunicación asertiva, trabajo colaborativo, orientación a objetivos; niveles Inicial / En desarrollo / Logrado / Destacado).
+- **Informe de los técnicos** (coordinación), individual y grupal, en cada hito.
+- Informes: individual, grupal (con planilla de notas), listas de asistencia diaria (Word, PDF y CSV).
+- Participantes desvinculados: Configuración → Estudiantes → «Se desvinculó». No aparecen para calificar ni en el informe final.

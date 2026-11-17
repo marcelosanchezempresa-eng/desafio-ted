@@ -53,7 +53,7 @@ console.log("5) Coordinación");
 const C=await abrir("coord@ej.uy",1000);await C.click("[data-tab=config]");await C.waitForTimeout(800);
 ok(await C.isVisible("#c-docentes-panel"),"ve el panel de docentes autorizados");
 ok((await C.locator("#c-docentes .doc-item").count())===3,"lista 3 docentes");
-await C.fill("#d-email","Nueva.Profe@Ejemplo.com");await C.fill("#d-nombre","Profe Nueva");await C.click("#d-add");await C.waitForTimeout(800);
+await C.fill("#d-email","Nueva.Profe@Ejemplo.com");await C.fill("#d-nombre","Profe Nueva");await C.check("#d-comps input[value=lectoescritura]");await C.click("#d-add");await C.waitForTimeout(800);
 ok((await pool.query("select 1 from docentes where email='nueva.profe@ejemplo.com' and activo")).rowCount===1,"autorizó un correo nuevo (guardado en minúsculas)");
 await C.fill("#c-cupos","13");await C.click("#c-save");await C.waitForTimeout(800);
 ok((await pool.query("select data->>'cupos' c from config")).rows[0].c==="13","guardó la configuración");

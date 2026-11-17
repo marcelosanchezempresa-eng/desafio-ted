@@ -1,6 +1,6 @@
 -- =====================================================================
 --  Semáforo Jóvenes 26 · Hitos de evaluación según INEFOP
---  Hito 1 (30/11/2026): diagnóstico inicial, juicio conceptual, sin nota.
+--  Hito 1 (30/11/2026): diagnóstico inicial, juicio conceptual y nota de 1 a 12 (complemento).
 --  Hito 4 (30/04/2027): evaluación final, nota de 1 a 12 y rúbrica de
 --  competencias transversales (comunicación asertiva, trabajo colaborativo,
 --  orientación a objetivos).
@@ -17,11 +17,11 @@ alter table public.juicios add constraint juicios_nota_1_12 check (nota is null 
 -- Instancias: las dos que exige INEFOP (la coordinación puede agregar otras en Configuración)
 update public.config
    set data = data || jsonb_build_object('instancias', jsonb_build_array(
-         jsonb_build_object('id','i1','nombre','Hito 1 · Diagnóstico inicial','fecha','2026-11-30','tipo','diagnostico'),
-         jsonb_build_object('id','i4','nombre','Hito 4 · Evaluación final','fecha','2027-04-30','tipo','final'))),
+         jsonb_build_object('id','i1','nombre','Hito 1 · Diagnóstico inicial','fecha','2026-11-30','tipo','diagnostico','escala',12),
+         jsonb_build_object('id','i4','nombre','Hito 4 · Evaluación final','fecha','2027-04-30','tipo','final','escala',12))),
        editado_en = now(), editado_por = 'hitos INEFOP'
  where id = 1;
 
 -- Comprobar
-select i->>'nombre' as instancia, i->>'fecha' as fecha, i->>'tipo' as tipo
+select i->>'nombre' as instancia, i->>'fecha' as fecha, i->>'tipo' as tipo, i->>'escala' as escala
   from public.config, jsonb_array_elements(data->'instancias') i where id = 1;
