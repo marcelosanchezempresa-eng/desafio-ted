@@ -1,0 +1,24 @@
+const {chromium}=require("playwright");const {Pool}=require("pg");const fs=require("fs");
+const pool=new Pool({host:"/var/lib/postgresql/j26test",port:55432,user:"postgres",database:"postgres"});
+const MOCK=fs.readFileSync(__dirname+"/mock-supabase.js","utf8");
+(async()=>{
+await pool.query("truncate docentes; insert into docentes(email,nombre,rol,componentes) values ('coord@ej.uy','Coordinación Ejemplo','coordinacion','{}'),('pepe@ej.uy','pepe','docente','{}'),('arturo@ej.uy','Arturo Olivera','docente','{informatica}')");
+const b=await chromium.launch();const errs=[];let f=0;const ok=(c,m)=>{console.log((c?"  OK  ":"  FALLA ")+m);if(!c)f++};
+const ctx=await b.newContext({viewport:{width:1100,height:1400},locale:"es-UY"});
+await ctx.route(/cdn\.jsdelivr\.net\/npm\/@supabase/,r=>r.fulfill({contentType:"text/javascript",body:MOCK}));
+await ctx.addInitScript(()=>{try{localStorage.clear();localStorage.setItem("mockEmail","coord@ej.uy")}catch(x){}});
+const p=await ctx.newPage();p.on("pageerror",e=>errs.push(e.message));await p.goto("http://localhost:8765/");await p.waitForTimeout(1300);
+await p.click("[data-tab=config]");await p.waitForTimeout(900);
+let t=await p.textContent("#c-porcomp");ok(t.includes("Informática")&&t.includes("Arturo Olivera")&&t.includes("Sin docente asignado"),"cuadro por componente muestra asignados y faltantes");
+ok((await p.locator("#c-porcomp tbody tr").count())===13,"13 filas, una por componente");
+await p.fill("#d-email","Leticia.Listur@Ej.uy");await p.fill("#d-nombre","Leticia Listur");await p.click("#d-add");await p.waitForTimeout(300);
+ok((await p.textContent("#d-status")).includes("Marque al menos un componente"),"pide marcar componente: «"+await p.textContent("#d-status")+"»");
+await p.check('#d-comps input[value=marketing]');await p.click("#d-add");await p.waitForTimeout(900);
+const r=(await pool.query("select componentes from docentes where email='leticia.listur@ej.uy'")).rows[0];ok(r&&JSON.stringify(r.componentes)==='["marketing"]',"autorizada con su componente en un paso");
+t=await p.textContent("#c-porcomp");ok(/Marketing Digital[\s\S]*Leticia Listur/.test(t),"el cuadro ya la muestra en Marketing Digital");
+await p.locator('#c-docentes .doc-item[data-email="pepe@ej.uy"] [data-act=borrar]').click();await p.waitForTimeout(200);
+await p.locator('#c-docentes .doc-item[data-email="pepe@ej.uy"] [data-act=borrar-si]').click();await p.waitForTimeout(900);
+ok((await pool.query("select 1 from docentes where email='pepe@ej.uy'")).rowCount===0,"«pepe» eliminado: "+await p.textContent("#d-status"));
+ok((await p.locator('#c-docentes .doc-item[data-email="coord@ej.uy"] [data-act=borrar]').count())===0,"no se puede eliminar a uno mismo");
+await p.locator("#c-docentes-panel").screenshot({path:__dirname+"/../docentes-panel.png"});
+console.log("errores JS:",errs.length?errs:"ninguno");console.log(f?f+" FALLAS":"TODO OK");await b.close();await pool.end();process.exit(f?1:0)})();
