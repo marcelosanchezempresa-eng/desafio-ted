@@ -119,3 +119,20 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 - **La base de datos** también lo controla. Aunque alguien intentara saltarse la pantalla, un docente no puede guardar nada en un componente ajeno.
 - **Para corregir el error de un docente,** la coordinación marca la casilla **«Corregir otro componente (coordinación)»**. Mientras está marcada, aparece un aviso rojo que dice de quién es el componente. Lo que se cargue queda registrado a nombre de quien corrigió. La casilla se desmarca sola al recargar la página.
 - **Consultar no tiene restricción.** Semáforo, Ranking e Informes muestran todos los componentes a todos.
+
+## Horario de clases
+**Una sola vez:** SQL Editor → New query → pegar `jovenes26-citef/supabase/horario-noviembre-2026.sql` → **Run**. Carga las semanas del 16/11, 23/11 y 30/11 según la captura de la coordinación. No pisa nada que ya se haya editado.
+
+**Pestaña «Horario» (todos):**
+- Muestra tres semanas, cada componente con su color. Las clases propias tienen borde azul y la etiqueta «Tu clase».
+- **«Compartir imagen»** arma una imagen lista para WhatsApp. En el celular abre directamente el menú de compartir; en la computadora la descarga.
+
+**Para la coordinación, con «Editar horario» marcado:**
+- **Cambiar un bloque:** tocá el bloque y elegí un componente, «Otro (escribir)» o «Sin clase». La nota es opcional.
+- **«Completar con la semana anterior»:** llena solo los bloques vacíos de esa semana. Después se corrigen los cambios puntuales.
+- **«Avisar a los docentes como cambio de horario»:** a los docentes afectados les aparece un aviso en la pantalla de inicio y un punto en la pestaña, hasta que tocan «Entendido».
+- **Colores:** se cambian en Configuración → Componentes. Si dos bloques seguidos tienen el mismo componente, se muestran unidos (por ejemplo, Informática de 8:15 a 12:00).
+
+**Pantalla de inicio:** cada docente ve «Hoy tenés clase…» o «Tu próxima clase…».
+
+> Los avisos aparecen al abrir la app. No llegan como notificación al teléfono con la app cerrada.

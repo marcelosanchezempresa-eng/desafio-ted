@@ -177,7 +177,8 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .tl .obs{grid-column:1/-1;font-size:.86rem;color:var(--muted);padding-left:6.5em}
 .cfg-list{display:flex;flex-direction:column;gap:6px}
 .cfg-item{display:grid;grid-template-columns:2em minmax(0,1fr) minmax(0,10em) auto;gap:6px;align-items:center}
-.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 4.5em minmax(0,9em) auto}
+.cfg-item.comp{grid-template-columns:minmax(0,1fr) minmax(0,1fr) 4.5em minmax(0,9em) 3rem auto}
+.cfg-item input[type=color]{padding:2px;height:40px;cursor:pointer}
 .cfg-item.per{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,11rem) auto}
 .cfg-item.inst{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,17rem) minmax(0,9rem) auto}
 .cfg-item input,.cfg-item select{min-width:0;width:100%}
@@ -185,6 +186,39 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .cfg-head.per{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,11rem) 42px}
 .cfg-head.inst{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,17rem) minmax(0,9rem) 42px}
 .cfg-stack{display:flex;flex-direction:column;gap:16px}
+/* Horario semanal */
+nav.tabs button.aviso::after{content:"";display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--lima);margin-left:6px;vertical-align:middle}
+.hz-weeks{display:flex;flex-direction:column;gap:16px}
+.hz-wk-head{display:flex;flex-wrap:wrap;gap:8px;justify-content:space-between;align-items:center;margin-bottom:10px}
+.hz-wk-head h3{font-size:1.05rem}
+.hz-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}
+.hz-day{display:flex;flex-direction:column;gap:6px;min-width:0}
+.hz-dh{font-family:var(--font-display);font-size:.8rem;font-weight:800;text-transform:uppercase;letter-spacing:.03em;color:var(--muted);padding:0 2px 5px;border-bottom:3px solid var(--line);display:flex;gap:6px;align-items:baseline;flex-wrap:wrap}
+.hz-dh span{font-family:var(--font-data);font-weight:500}
+.hz-day.hoy .hz-dh{color:var(--accent);border-bottom-color:var(--lima)}
+.hz-hoy{background:var(--lima);color:var(--lima-ink);border-radius:99px;padding:0 7px;font-family:var(--font-display)!important;font-weight:800!important;font-size:.7rem}
+.hz-slots{display:flex;flex-direction:column;gap:6px;flex:1}
+.hz-slot{display:flex;flex-direction:column;gap:3px;padding:9px 10px;border-radius:10px;background:var(--c);color:#0e2338;min-height:70px;flex:1;text-align:left;border:0;font:inherit;width:100%}
+.hz-slot.libre{background:transparent;border:1.5px dashed var(--line);color:var(--muted)}
+.hz-slot.mio{box-shadow:0 0 0 3px var(--accent)}
+.hz-slot.sel{outline:3px solid var(--fg);outline-offset:2px}
+button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hz-hora{font-family:var(--font-data);font-size:.74rem;opacity:.85}
+.hz-nom{font-family:var(--font-display);font-weight:800;font-size:.86rem;line-height:1.15;text-transform:uppercase;overflow-wrap:anywhere}
+.hz-nota{font-size:.78rem;font-style:italic}
+.hz-tags{display:flex;gap:4px;flex-wrap:wrap;margin-top:auto}
+.hz-tag{font-size:.68rem;font-weight:700;background:#0e2338;color:#fff;border-radius:99px;padding:1px 8px}
+.hz-tag.cambio{background:#c23636}
+.hz-vacio{flex:1;display:flex;align-items:center;justify-content:center;border-radius:10px;background:var(--surface-2);color:var(--muted);font-weight:700;min-height:70px}
+.hz-editor{margin-top:12px;border-top:1px solid var(--line);padding-top:12px}
+.hz-swatches{display:flex;gap:6px;flex-wrap:wrap}
+.hz-swatches button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0}
+.hz-swatches button[aria-pressed="true"]{border-color:var(--fg);box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--fg)}
+.hz-cambios{margin-bottom:12px}
+.hz-cambios ul{margin:6px 0 8px;padding-left:1.2em}
+.hero-agenda{margin:6px 0 0;font-weight:700;color:var(--band-ink)}
+.hero-agenda b{color:var(--lima)}
+@media (max-width:760px){.hz-grid{grid-template-columns:1fr;gap:14px}.hz-slots{flex-direction:row}.hz-slot,.hz-vacio{min-height:64px}}
 .field label.corr-toggle,.corr-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;margin-top:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600;opacity:.9}
 .corr-toggle input{width:auto;min-height:0}
 .corr-aviso{margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--rojo);background:var(--rojo-bg);color:var(--fg);font-size:.88rem;text-align:left}
@@ -245,6 +279,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
     </div>
     <nav class="tabs" role="tablist" aria-label="Secciones">
       <button role="tab" data-tab="registrar" aria-selected="true">Registrar clase</button>
+      <button role="tab" data-tab="horario" aria-selected="false">Horario</button>
       <button role="tab" data-tab="hitos" aria-selected="false">Hitos</button>
       <button role="tab" data-tab="evaluaciones" aria-selected="false">Evaluaciones</button>
       <button role="tab" data-tab="semaforo" aria-selected="false">Semáforo</button>
@@ -282,8 +317,9 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
   </section>
 
   <section data-view="registrar" class="view">
+    <div id="h-cambios"></div>
     <div class="hero">
-      <div><h2><span id="h-saludo">Bienvenido</span><span class="hero-luces" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span></h2><p class="sub" id="hero-fecha"></p></div>
+      <div><h2><span id="h-saludo">Bienvenido</span><span class="hero-luces" aria-hidden="true"><i style="background:var(--verde)"></i><i style="background:var(--amarillo-dot)"></i><i style="background:var(--rojo)"></i></span></h2><p class="sub" id="hero-fecha"></p><p class="hero-agenda" id="h-agenda" hidden></p></div>
       <div class="hero-tiles" id="h-tiles"></div>
       <div class="row">
         <div class="field"><label for="r-fecha">Fecha de la clase</label><input type="date" id="r-fecha"></div>
@@ -295,6 +331,22 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <div class="progress" id="r-prog" aria-hidden="true"><i style="width:0"></i></div>
     </div>
     <div class="students" id="r-list"></div>
+  </section>
+
+  <section data-view="horario" class="view" hidden>
+    <div class="panel" style="margin-bottom:16px">
+      <div class="hz-wk-head" style="margin:0">
+        <div><h2 style="font-size:1.3rem">Horario de clases</h2><p class="note" id="hz-rango" style="margin:2px 0 0"></p></div>
+        <div class="row" style="gap:6px"><button class="btn" id="hz-prev" type="button" aria-label="Semana anterior">‹</button><button class="btn" id="hz-hoy" type="button">Esta semana</button><button class="btn" id="hz-next" type="button" aria-label="Semana siguiente">›</button></div>
+      </div>
+      <div class="row" style="margin-top:12px;gap:12px;align-items:center">
+        <button class="btn primary" id="hz-share" type="button">Compartir imagen</button>
+        <label class="corr-toggle" id="hz-edit-l" hidden style="margin:0"><input type="checkbox" id="hz-edit"> Editar horario (coordinación)</label>
+      </div>
+      <p class="status" id="hz-status" style="margin:8px 0 0"></p>
+    </div>
+    <div id="hz-cambios"></div>
+    <div class="hz-weeks" id="hz-weeks"></div>
   </section>
 
   <section data-view="hitos" class="view" hidden>
@@ -491,7 +543,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       </div>
     </div>
     <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Componentes</h2>
-      <p class="note">Nombre, docente a cargo, horas semanales y módulo en que se dicta.</p>
+      <p class="note">Nombre, docente a cargo, horas semanales, módulo en que se dicta y color en el horario.</p>
       <div class="cfg-list" id="c-comp"></div>
       <div class="row" style="margin-top:10px"><button class="btn" id="c-comp-add" type="button">Agregar componente</button></div>
     </div>
@@ -796,6 +848,7 @@ function renderHero(){
     <div class="hero-tile"><b>${canAdmin?"Todos":mc.length}</b><span title="${esc(mc.map(c=>c.nombre).join(", "))}">${canAdmin?"los componentes (coordinación)":esc(mc.map(c=>c.nombre).join(", ")||"sin componentes asignados")}</span></div>
     <div class="hero-tile"><b>${prox?(dias===0?"Hoy":dias===1?"Mañana":dias+" días"):"—"}</b><span>${prox?"para el "+esc(prox.nombre):"sin hitos próximos"}</span></div>
     <div class="hero-tile"><b>${activos().length}</b><span>participantes en el curso</span></div>`);
+  renderAgenda(); hzBanner($("#h-cambios"));
 }
 function renderRegistrar(){
   renderHero();
@@ -1068,7 +1121,7 @@ function renderConfig(){
   $("#c-inst").innerHTML=draft.instancias.length?draft.instancias.map((m,i)=>`<div class="cfg-item inst" data-i="${i}"><input type="text" id="ci-n-${esc(m.id)}" data-f="nombre" value="${esc(m.nombre)}" placeholder="Nombre de la instancia" aria-label="Nombre de la instancia"><input type="date" id="ci-f-${esc(m.id)}" data-f="fecha" value="${esc(m.fecha)}" aria-label="Fecha"><select id="ci-t-${esc(m.id)}" data-f="tipo" aria-label="Tipo de evaluación"><option value="diagnostico"${m.tipo==="diagnostico"?" selected":""}>Diagnóstico (nota + juicio)</option><option value="final"${m.tipo==="final"?" selected":""}>Final (nota + juicio + rúbrica)</option><option value="general"${m.tipo!=="diagnostico"&&m.tipo!=="final"?" selected":""}>Seguimiento (solo juicio)</option></select><select id="ci-e-${esc(m.id)}" data-f="escala" aria-label="Escala de notas"><option value="12"${String(m.escala||12)==="12"?" selected":""}>Notas 1 a 12</option><option value="7"${String(m.escala)==="7"?" selected":""}>Notas 1 a 7</option></select>${delBtn("instancias",i)}</div>`).join(""):'<p class="muted">Sin instancias.</p>';
   $("#c-rec").innerHTML=draft.recesos.length?draft.recesos.map((r,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cr-n-${i}" data-f="nombre" value="${esc(r.nombre||"")}" placeholder="Receso" aria-label="Nombre del receso"><input type="date" id="cr-d-${i}" data-f="desde" value="${esc(r.desde)}" aria-label="Desde"><input type="date" id="cr-h-${i}" data-f="hasta" value="${esc(r.hasta)}" aria-label="Hasta">${delBtn("recesos",i)}</div>`).join(""):'<p class="muted">Sin recesos.</p>';
   const modOpts=v=>`<option value="t"${!v||v==="t"?" selected":""}>Todo el curso</option>`+draft.modulos.map(m=>`<option value="${esc(m.id)}"${v===m.id?" selected":""}>${esc(m.nombre)}</option>`).join("");
-  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select>${delBtn("componentes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
+  $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select><input type="color" id="cc-col-${esc(c.id)}" data-f="color" value="${esc(colorComp(c))}" aria-label="Color en el horario" title="Color en el horario">${delBtn("componentes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
   $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item est" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><select id="ce-s-${esc(e.id)}" data-f="estado" aria-label="Situación"><option value="activo"${e.estado!=="desvinculado"?" selected":""}>Sigue en el curso</option><option value="desvinculado"${e.estado==="desvinculado"?" selected":""}>Se desvinculó</option></select>${delBtn("estudiantes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
 }
 function bindList(sel,key){
@@ -1105,9 +1158,178 @@ $("#c-save").onclick=async()=>{
   if(bad){$("#c-status").textContent=`En «${bad.nombre||"un receso"}» la fecha final es anterior a la inicial.`;return}
   draft.estudiantes=draft.estudiantes.filter(e=>e.nombre.trim()); draft.componentes=draft.componentes.filter(c=>c.nombre.trim());
   $("#c-status").textContent="Guardando…";
+  const fr=await sb.from("config").select("data").eq("id",1).maybeSingle();
+  if(!fr.error&&fr.data&&fr.data.data) draft.horario=fr.data.data.horario||{};
   const {error}=await sb.from("config").upsert({id:1,data:draft,editado_en:new Date().toISOString(),editado_por:myId});
   if(!error){cfg=Object.assign(structuredClone(DEFAULT_CFG),draft); limpiarCambios(); $("#c-status").textContent="Configuración guardada ✓"; renderAll();}
   else $("#c-status").textContent=esSinPermiso(error)?"No se pudo guardar: solo la coordinación puede cambiar la configuración.":"No se pudo guardar. Revise la conexión y vuelva a intentar.";
+};
+
+
+// ---------- Horario semanal (lo edita la coordinación; se guarda en la configuración) ----------
+const BLOQUES_DEF=[{id:"1",desde:"08:15",hasta:"10:00"},{id:"2",desde:"10:15",hasta:"12:00"}];
+const bloques=()=>Array.isArray(cfg.bloques)&&cfg.bloques.length?cfg.bloques:BLOQUES_DEF;
+const COLOR_DEF={administracion:"#a9d18e",derecho:"#d5ecc6",lectoescritura:"#f2709c",emprendimiento:"#dc8be0",informatica:"#f8cbad",contabilidad:"#b4c7e7",proyecto:"#ffe45c",genero:"#c9b6f2",marketing:"#9fd8e8",marketingredes:"#8ed1c6",comunicacion:"#ffc98a",sexualidad:"#f5b8d0",acompanamiento:"#cfd8e3"};
+const SWATCH=["#ffe45c","#f27ef2","#a9d18e","#d5ecc6","#f2709c","#dc8be0","#f8cbad","#b4c7e7","#9fd8e8","#ffc98a","#cfd8e3"];
+const colorComp=c=>c&&(c.color||COLOR_DEF[c.id])||"#cfd8e3";
+const hm=t=>String(t||"").replace(/^0/,"");
+const DIAS=["Domingo","Lunes","Martes","Miércoles","Jueves","Viernes","Sábado"];
+const hzKey=(f,b)=>f+"|"+b;
+const hzSlot=(f,b)=>(cfg.horario||{})[hzKey(f,b)]||null;
+function hzInfo(sl){ if(!sl||(!sl.c&&!sl.t)) return null; const c=sl.c&&cfg.componentes.find(x=>x.id===sl.c);
+  return {nombre:c?c.nombre:(sl.t||sl.c), color:c?colorComp(c):(sl.col||SWATCH[0]), comp:c?c.id:""}; }
+function hzDia(f,unir){ const out=[];
+  bloques().forEach(b=>{ const sl=hzSlot(f,b.id), inf=hzInfo(sl), prev=out[out.length-1];
+    if(unir&&prev&&inf&&prev.info&&prev.info.nombre===inf.nombre&&!(sl.n)&&!(prev.slot.n)&&!sl.aviso&&!prev.slot.aviso){prev.hasta=b.hasta; prev.bs.push(b.id); return}
+    out.push({bs:[b.id],desde:b.desde,hasta:b.hasta,info:inf,slot:sl||{}}); });
+  return out; }
+const lunesDe=f=>{const d=dayNum(f); return fromDay(d-((wday(d)+6)%7))};
+let hzLunes=null, hzSel=null, hzForm=null;
+const hzVisto=()=>gp("hzVisto")||"";
+function hzRelevante(sl){ return canAdmin||esPropio(sl.c)||esPropio(sl.antesC); }
+function hzCambios(){ const hoy=todayStr(), v=hzVisto();
+  return Object.entries(cfg.horario||{}).filter(([k,sl])=>sl&&sl.aviso&&sl.en&&sl.en>v&&k.slice(0,10)>=hoy&&hzRelevante(sl))
+    .map(([k,sl])=>({f:k.slice(0,10),b:k.slice(11),sl})).sort((a,b)=>(a.f+a.b).localeCompare(b.f+b.b)); }
+function hzTextoCambio(x){ const b=bloques().find(y=>y.id===x.b)||{}, inf=hzInfo(x.sl), d=wday(dayNum(x.f));
+  return `<b>${DIAS[d]} ${fmt(x.f)} · ${esc(hm(b.desde))}</b>: ${inf?"ahora "+esc(inf.nombre):"sin clase"}${x.sl.antes?` (antes: ${esc(x.sl.antes)})`:""}${x.sl.n?` — ${esc(x.sl.n)}`:""}`; }
+function hzBanner(el){ const cs=hzCambios(); $("[data-tab=horario]").classList.toggle("aviso",cs.length>0);
+  setHTML(el,cs.length?`<div class="banner warn hz-cambios" role="status"><b>Cambios en el horario</b><ul>${cs.slice(0,5).map(x=>`<li>${hzTextoCambio(x)}</li>`).join("")}</ul>${cs.length>5?`<p class="note" style="margin:0 0 8px">y ${cs.length-5} más.</p>`:""}<div class="row" style="gap:8px"><button class="btn" type="button" data-hz="ver">Ver horario</button><button class="btn primary" type="button" data-hz="ok">Entendido</button></div></div>`:""); }
+document.addEventListener("click",e=>{const b=e.target.closest("[data-hz]"); if(!b) return;
+  if(b.dataset.hz==="ok"){sp("hzVisto",new Date().toISOString()); renderAll();}
+  if(b.dataset.hz==="ver"){ const cs=hzCambios(); if(cs[0]) hzLunes=lunesDe(cs[0].f); showTab("horario"); }});
+// Próxima clase propia (para la pantalla de inicio)
+function hzProxima(){ const hoy=todayStr(), d0=dayNum(hoy);
+  for(let d=d0; d<=d0+21; d++){ const f=fromDay(d); if(enReceso(f)) continue;
+    const mias=hzDia(f,true).filter(x=>x.info&&esPropio(x.info.comp)); if(mias.length) return {f,mias,hoy:d===d0}; }
+  return null; }
+function renderAgenda(){ const el=$("#h-agenda"), p=hzProxima(); if(!p){el.hidden=true; return}
+  const txt=p.mias.map(x=>`<b>${esc(x.info.nombre)}</b> · ${esc(hm(x.desde))} a ${esc(hm(x.hasta))}`).join(" y ");
+  const cuando=p.hoy?"Hoy tenés clase:":`Tu próxima clase: ${DIAS[wday(dayNum(p.f))].toLowerCase()} ${fmt(p.f)} ·`;
+  el.innerHTML=`${cuando} ${txt}`; el.hidden=false; }
+function renderHorario(){
+  if(!hzLunes) hzLunes=lunesDe(todayStr());
+  const editar=canAdmin&&$("#hz-edit").checked; $("#hz-edit-l").hidden=!canAdmin;
+  const sem=[0,7,14].map(k=>fromDay(dayNum(hzLunes)+k));
+  $("#hz-rango").textContent=`Del ${fmt(sem[0])} al ${fmt(fromDay(dayNum(sem[2])+4))}. ${canAdmin?"Marcá «Editar horario» para cambiar un bloque.":"Tus clases tienen borde azul."}`;
+  hzBanner($("#hz-cambios"));
+  const hoy=todayStr();
+  const html=sem.map(l=>{ const dias=[0,1,2,3,4].map(k=>fromDay(dayNum(l)+k));
+    const cols=dias.map(f=>{ const d=wday(dayNum(f));
+      let cuerpo;
+      if(enReceso(f)) cuerpo=`<div class="hz-vacio">Receso</div>`;
+      else cuerpo=hzDia(f,!editar).map(x=>{ const inf=x.info, sl=x.slot, mio=inf&&esPropio(inf.comp), cambio=sl.aviso&&sl.en&&f>=hoy;
+        const sel=hzSel&&hzSel.f===f&&x.bs.includes(hzSel.b);
+        const inner=`<span class="hz-hora">${esc(hm(x.desde))} – ${esc(hm(x.hasta))}</span><span class="hz-nom">${inf?esc(inf.nombre):"Sin clase"}</span>${sl.n?`<span class="hz-nota">${esc(sl.n)}</span>`:""}${mio||cambio?`<span class="hz-tags">${mio?'<span class="hz-tag">Tu clase</span>':""}${cambio?`<span class="hz-tag cambio" title="${esc(sl.antes?"Antes: "+sl.antes:"")}">Cambió</span>`:""}</span>`:""}`;
+        const cls=`hz-slot${inf?"":" libre"}${mio?" mio":""}${sel?" sel":""}`, st=inf?` style="--c:${esc(inf.color)}"`:"";
+        return editar?`<button type="button" class="${cls}"${st} data-hzf="${f}" data-hzb="${esc(x.bs[0])}" aria-label="Editar ${DIAS[d]} ${fmt(f)} ${esc(hm(x.desde))}">${inner}</button>`:`<div class="${cls}"${st}>${inner}</div>`; }).join("");
+      return `<div class="hz-day${f===hoy?" hoy":""}"><div class="hz-dh">${DIAS[d]} <span>${fmt(f)}</span>${f===hoy?'<span class="hz-hoy">Hoy</span>':""}</div><div class="hz-slots">${cuerpo}</div></div>`; }).join("");
+    const ed=editar&&hzSel&&dias.includes(hzSel.f)?hzEditorHTML():"";
+    return `<div class="panel hz-week" data-lunes="${l}"><div class="hz-wk-head"><h3>Semana del ${fmt(dias[0])} al ${fmt(dias[4])}</h3>${editar?`<button class="btn" type="button" data-hzcopiar="${l}">Completar con la semana anterior</button>`:""}</div><div class="hz-grid">${cols}</div>${ed}</div>`; }).join("");
+  setHTML($("#hz-weeks"),html);
+}
+function hzEditorHTML(){ const f=hzSel.f, b=bloques().find(x=>x.id===hzSel.b)||{}, F=hzForm;
+  const opts=`<option value="">Sin clase</option>`+cfg.componentes.map(c=>`<option value="${esc(c.id)}"${F.c===c.id?" selected":""}>${esc(c.nombre)}</option>`).join("")+`<option value="_otro"${F.c==="_otro"?" selected":""}>Otro (escribir)…</option>`;
+  return `<div class="hz-editor" id="hz-editor"><h3 style="font-size:1rem;margin-bottom:8px">${DIAS[wday(dayNum(f))]} ${fmt(f)} · ${esc(hm(b.desde))} a ${esc(hm(b.hasta))}</h3>
+    <div class="row" style="gap:10px;align-items:flex-end">
+      <div class="field" style="flex:1;min-width:200px"><label for="hz-c">Componente</label><select id="hz-c">${opts}</select></div>
+      ${F.c==="_otro"?`<div class="field" style="flex:1;min-width:160px"><label for="hz-t">Texto</label><input type="text" id="hz-t" value="${esc(F.t)}" placeholder="Por ejemplo: PO TOLS"></div>`:""}
+      <div class="field" style="flex:2;min-width:220px"><label for="hz-n">Nota (opcional)</label><input type="text" id="hz-n" value="${esc(F.n)}" placeholder="Por ejemplo: en el salón 3"></div>
+    </div>
+    ${F.c==="_otro"?`<div class="field" style="margin-top:10px"><label>Color</label><div class="hz-swatches">${SWATCH.map(c=>`<button type="button" data-hzcol="${c}" style="background:${c}" aria-label="Color ${c}" aria-pressed="${F.col===c}"></button>`).join("")}</div></div>`:""}
+    <label class="corr-toggle"><input type="checkbox" id="hz-aviso"${F.aviso?" checked":""}> Avisar a los docentes como cambio de horario</label>
+    <div class="row" style="gap:8px;margin-top:10px"><button class="btn primary" type="button" id="hz-guardar">Guardar</button><button class="btn" type="button" id="hz-cancelar">Cancelar</button></div></div>`; }
+async function hzGuardar(cambios){
+  const r=await sb.from("config").select("data").eq("id",1).maybeSingle(); if(r.error) throw r.error;
+  const data=(r.data&&r.data.data)||{}, h=Object.assign({},data.horario||{});
+  for(const k in cambios){ if(cambios[k]) h[k]=cambios[k]; else delete h[k]; }
+  data.horario=h;
+  const w=await sb.from("config").upsert({id:1,data,editado_en:new Date().toISOString(),editado_por:myId}); if(w.error) throw w.error;
+  cfg.horario=h; if(draft) draft.horario=h; }
+$("#hz-prev").onclick=()=>{hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))-7); hzSel=null; renderHorario();};
+$("#hz-next").onclick=()=>{hzLunes=fromDay(dayNum(hzLunes||lunesDe(todayStr()))+7); hzSel=null; renderHorario();};
+$("#hz-hoy").onclick=()=>{hzLunes=lunesDe(todayStr()); hzSel=null; renderHorario();};
+$("#hz-edit").onchange=()=>{hzSel=null; $("#hz-status").textContent=""; renderHorario();};
+$("#hz-weeks").addEventListener("click",async e=>{
+  const sl=e.target.closest("[data-hzf]");
+  if(sl){ const f=sl.dataset.hzf, b=sl.dataset.hzb, cur=hzSlot(f,b)||{}, inf=hzInfo(cur);
+    hzSel={f,b}; hzForm={c:cur.c||(cur.t?"_otro":""), t:cur.t||"", col:cur.col||SWATCH[0], n:cur.n||"", aviso:!!(inf&&f>=todayStr())};
+    renderHorario(); const ed=$("#hz-editor"); if(ed) ed.scrollIntoView({block:"nearest",behavior:"smooth"}); return }
+  const col=e.target.closest("[data-hzcol]"); if(col){hzForm.col=col.dataset.hzcol; renderHorario(); return}
+  if(e.target.id==="hz-cancelar"){hzSel=null; renderHorario(); return}
+  if(e.target.id==="hz-guardar"){
+    const {f,b}=hzSel, prev=hzSlot(f,b), pinf=hzInfo(prev), F=hzForm;
+    const c=F.c==="_otro"?"":F.c, t=F.c==="_otro"?F.t.trim():"";
+    if(F.c==="_otro"&&!t){$("#hz-status").textContent="Escribí el texto del bloque.";return}
+    let nuevo=(c||t)?{c,t,col:t?F.col:"",n:F.n.trim(),en:new Date().toISOString(),por:myId}:null;
+    if(F.aviso){ nuevo=Object.assign(nuevo||{en:new Date().toISOString(),por:myId,n:F.n.trim()},{aviso:true});
+      const antes=prev&&prev.aviso?prev.antes:(pinf?pinf.nombre:""), antesC=prev&&prev.aviso?prev.antesC:(prev&&prev.c||"");
+      if(antes) nuevo.antes=antes; if(antesC) nuevo.antesC=antesC; }
+    $("#hz-status").textContent="Guardando…";
+    try{ await hzGuardar({[hzKey(f,b)]:nuevo}); hzSel=null; $("#hz-status").textContent="Horario guardado ✓"+(F.aviso?" Los docentes van a ver el aviso del cambio.":""); renderHorario(); }
+    catch(err){ $("#hz-status").textContent=esSinPermiso(err)?"Solo la coordinación puede cambiar el horario.":"No se pudo guardar. Revisá la conexión y volvé a intentar."; }
+    return }
+  const cp=e.target.closest("[data-hzcopiar]");
+  if(cp){ const l=cp.dataset.hzcopiar, cambios={}; let n=0;
+    for(let k=0;k<5;k++){ const f=fromDay(dayNum(l)+k), f0=fromDay(dayNum(l)+k-7);
+      bloques().forEach(b=>{ const src=hzSlot(f0,b.id), dst=hzSlot(f,b.id);
+        if(!hzInfo(dst)&&!(dst&&dst.aviso)&&hzInfo(src)&&!enReceso(f)){ cambios[hzKey(f,b.id)]={c:src.c||"",t:src.t||"",col:src.col||"",n:"",en:new Date().toISOString(),por:myId}; n++; } }); }
+    if(!n){$("#hz-status").textContent="No había bloques vacíos para completar en esa semana.";return}
+    $("#hz-status").textContent="Guardando…";
+    try{ await hzGuardar(cambios); $("#hz-status").textContent=`Listo ✓ Se completaron ${n} bloques con la semana anterior. Revisá los cambios puntuales.`; renderHorario(); }
+    catch(err){ $("#hz-status").textContent="No se pudo guardar. Revisá la conexión y volvé a intentar."; }
+  }
+});
+$("#hz-weeks").addEventListener("input",e=>{ if(!hzForm) return;
+  if(e.target.id==="hz-t") hzForm.t=e.target.value; if(e.target.id==="hz-n") hzForm.n=e.target.value; });
+$("#hz-weeks").addEventListener("change",e=>{ if(!hzForm) return;
+  if(e.target.id==="hz-c"){ hzForm.c=e.target.value; renderHorario(); }
+  if(e.target.id==="hz-aviso") hzForm.aviso=e.target.checked; });
+// Imagen para compartir (WhatsApp, correo)
+function hzRR(x,c,y,w,h,r){x.beginPath();x.moveTo(c+r,y);x.arcTo(c+w,y,c+w,y+h,r);x.arcTo(c+w,y+h,c,y+h,r);x.arcTo(c,y+h,c,y,r);x.arcTo(c,y,c+w,y,r);x.closePath();}
+function hzLineas(x,txt,max){ const ws=String(txt).split(/\s+/), out=[]; let cur="";
+  ws.forEach(w=>{ const t=cur?cur+" "+w:w; if(x.measureText(t).width<=max||!cur) cur=t; else {out.push(cur); cur=w;} }); if(cur) out.push(cur); return out; }
+async function hzImagen(sem){
+  try{ await document.fonts.ready; }catch(e){}
+  const W=1600, pad=40, gapC=14, colW=(W-pad*2-gapC*4)/5, nb=bloques().length, slotH=104, gapS=10, wkHead=58;
+  const weekH=wkHead+40+nb*slotH+(nb-1)*gapS+28, top=150, H=top+sem.length*(weekH+24)+60;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H; const x=cv.getContext("2d");
+  const D="Montserrat, 'Segoe UI', sans-serif", B="'Atkinson Hyperlegible', 'Segoe UI', sans-serif", M="'IBM Plex Mono', monospace";
+  x.fillStyle="#eef3f9"; x.fillRect(0,0,W,H);
+  const g=x.createLinearGradient(0,0,W,120); g.addColorStop(0,"#1667ae"); g.addColorStop(1,"#0f4f8a"); x.fillStyle=g; x.fillRect(0,0,W,120);
+  x.fillStyle="#c4d92e"; hzRR(x,pad,30,210,56,8); x.fill(); x.fillStyle="#0f4f8a"; x.font=`italic 800 32px ${D}`; x.textBaseline="middle"; x.fillText("Jóvenes 26",pad+18,59);
+  x.fillStyle="#ffffff"; x.font=`italic 800 32px ${D}`; x.fillText("CITEF",pad+232,59);
+  ["#1f8a4c","#f0b400","#c23636"].forEach((c,i)=>{x.beginPath();x.arc(pad+358+i*28,59,10,0,7);x.fillStyle=c;x.fill();x.lineWidth=2.5;x.strokeStyle="#fff";x.stroke();});
+  x.textAlign="right"; x.fillStyle="#ffffff"; x.font=`800 34px ${D}`; x.fillText("Horario de clases",W-pad,48);
+  x.fillStyle="#cfe0f2"; x.font=`700 20px ${B}`; x.fillText(`Del ${fmt(sem[0])} al ${fmt(fromDay(dayNum(sem[sem.length-1])+4))}`,W-pad,84); x.textAlign="left";
+  sem.forEach((l,wi)=>{ const y0=top+wi*(weekH+24);
+    x.fillStyle="#ffffff"; hzRR(x,pad-12,y0,W-pad*2+24,weekH,16); x.fill(); x.strokeStyle="#c8d6e6"; x.lineWidth=1.5; x.stroke();
+    x.fillStyle="#0e2338"; x.font=`800 24px ${D}`; x.fillText(`Semana del ${fmt(l)} al ${fmt(fromDay(dayNum(l)+4))}`,pad+6,y0+34);
+    for(let k=0;k<5;k++){ const f=fromDay(dayNum(l)+k), cx=pad+k*(colW+gapC), cy=y0+wkHead;
+      x.fillStyle="#4c6178"; x.font=`800 18px ${D}`; const dn=DIAS[wday(dayNum(f))].toUpperCase(), dw=x.measureText(dn).width; x.fillText(dn,cx+4,cy+10);
+      x.font=`500 17px ${M}`; x.fillText(fmt(f),cx+4+dw+10,cy+10);
+      x.fillStyle="#c8d6e6"; x.fillRect(cx,cy+26,colW,3);
+      let sy=cy+40;
+      if(enReceso(f)){ const h=nb*slotH+(nb-1)*gapS; x.fillStyle="#e2ebf5"; hzRR(x,cx,sy,colW,h,12); x.fill(); x.fillStyle="#4c6178"; x.font=`700 20px ${B}`; x.textAlign="center"; x.fillText("Receso",cx+colW/2,sy+h/2); x.textAlign="left"; continue; }
+      hzDia(f,true).forEach(it=>{ const h=it.bs.length*slotH+(it.bs.length-1)*gapS, inf=it.info;
+        if(inf){ x.fillStyle=inf.color; hzRR(x,cx,sy,colW,h,12); x.fill(); }
+        else { x.setLineDash([7,6]); x.strokeStyle="#c8d6e6"; x.lineWidth=2; hzRR(x,cx+1,sy+1,colW-2,h-2,12); x.stroke(); x.setLineDash([]); }
+        x.fillStyle=inf?"#0e2338":"#8a9bb0"; x.font=`500 15px ${M}`; x.fillText(`${hm(it.desde)} – ${hm(it.hasta)}`,cx+14,sy+22);
+        const nom=(inf?inf.nombre:"Sin clase").toUpperCase(), nota=it.slot.n||"", lim=sy+h-(nota?30:10);
+        let fs=21, ls, base;
+        const medir=()=>{ x.font=`800 ${fs}px ${D}`; ls=hzLineas(x,nom,colW-28); base=sy+(it.bs.length>1?h/2-((ls.length-1)*fs*1.15)/2+6:52); };
+        medir(); while((ls.length>2||base+(ls.length-1)*fs*1.15+fs*0.35>lim)&&fs>13){fs--; medir();}
+        x.fillStyle=inf?"#0e2338":"#8a9bb0"; ls.slice(0,3).forEach((t,i)=>x.fillText(t,cx+14,base+i*fs*1.15));
+        if(nota){ x.font=`italic 400 15px ${B}`; x.fillText(hzLineas(x,nota,colW-28)[0],cx+14,sy+h-14); }
+        sy+=h+gapS; }); } });
+  x.fillStyle="#4c6178"; x.font=`400 16px ${B}`; x.fillText(`Actualizado el ${new Date().toLocaleDateString("es-UY")} · Semáforo Jóvenes 26 · CITEF`,pad,H-28);
+  return await new Promise(r=>cv.toBlob(r,"image/png")); }
+$("#hz-share").onclick=async()=>{
+  const sem=[0,7,14].map(k=>fromDay(dayNum(hzLunes||lunesDe(todayStr()))+k)), st=$("#hz-status");
+  st.textContent="Armando la imagen…";
+  try{ const blob=await hzImagen(sem), nombre=`horario-jovenes26-${sem[0]}.png`, file=new File([blob],nombre,{type:"image/png"});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"Horario Jóvenes 26"}); st.textContent=""; return }catch(err){ if(err&&err.name==="AbortError"){st.textContent="";return} } }
+    descargar(blob,nombre); st.textContent="Imagen descargada ✓ Ya la podés enviar por WhatsApp.";
+  }catch(err){ st.textContent="No se pudo armar la imagen."; }
 };
 
 // ---------- Respaldo completo (archivo .sql que reconstruye la base) ----------
@@ -1486,9 +1708,9 @@ $("#i-acsv").onclick=()=>{const i=$("#e-inst").value; if(!i) return; const {pv}=
 function renderAll(){
   fillPeriodSelectors();
   const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
-  ({registrar:renderRegistrar,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{},evaluaciones:renderEval}[t]||(()=>{}))();
+  ({registrar:renderRegistrar,horario:renderHorario,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{},evaluaciones:renderEval}[t]||(()=>{}))();
 }
-function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre")}
+function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre, #hz-t, #hz-n")}
 
 // ---------- Arranque ----------
 $("#r-fecha").value=todayStr();
