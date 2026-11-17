@@ -185,6 +185,10 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
 .cfg-head.per{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,11rem) 42px}
 .cfg-head.inst{grid-template-columns:minmax(8rem,1fr) minmax(0,11rem) minmax(0,17rem) minmax(0,9rem) 42px}
 .cfg-stack{display:flex;flex-direction:column;gap:16px}
+.field label.corr-toggle,.corr-toggle{display:flex;align-items:center;gap:6px;font-size:.85rem;margin-top:6px;cursor:pointer;text-transform:none;letter-spacing:0;font-weight:600;opacity:.9}
+.corr-toggle input{width:auto;min-height:0}
+.corr-aviso{margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid var(--rojo);background:var(--rojo-bg);color:var(--fg);font-size:.88rem;text-align:left}
+.corr-aviso b{color:var(--rojo)}
 .del-ask{display:flex;gap:4px;align-items:center;white-space:nowrap}
 .btn.danger{background:var(--rojo);border-color:var(--rojo);color:#fff}
 .btn.sm{min-height:34px;padding:4px 10px}
@@ -283,7 +287,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
       <div class="hero-tiles" id="h-tiles"></div>
       <div class="row">
         <div class="field"><label for="r-fecha">Fecha de la clase</label><input type="date" id="r-fecha"></div>
-        <div class="field" style="flex:1;min-width:200px"><label for="r-comp">Componente</label><select id="r-comp"></select></div>
+        <div class="field" style="flex:1;min-width:200px"><label for="r-comp">Componente</label><select id="r-comp"></select><label class="corr-toggle" hidden><input type="checkbox" class="corr-chk" data-v="r"> Corregir otro componente (coordinación)</label></div>
         <button class="btn" id="r-todos" type="button">Todos presentes y puntuales</button>
       </div>
       <p class="banner warn" id="r-aviso" hidden></p>
@@ -296,7 +300,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
   <section data-view="hitos" class="view" hidden>
     <div class="panel">
       <div class="row">
-        <div class="field" style="flex:1;min-width:220px"><label for="h-comp">Componente</label><select id="h-comp"></select></div>
+        <div class="field" style="flex:1;min-width:220px"><label for="h-comp">Componente</label><select id="h-comp"></select><label class="corr-toggle" hidden><input type="checkbox" class="corr-chk" data-v="h"> Corregir otro componente (coordinación)</label></div>
       </div>
       <p class="note">Un hito es una entrega o instancia con fecha: un trabajo práctico, una presentación oral, una prueba. Cada hito pesa en el aspecto <b>Cumplimiento</b> más que una tarea de clase.</p>
     </div>
@@ -322,7 +326,7 @@ td.cell small{display:block;font-size:.7rem;opacity:.8}
     <div class="panel">
       <div class="row">
         <div class="field" style="flex:1;min-width:220px"><label for="e-inst">Instancia de evaluación</label><select id="e-inst"></select></div>
-        <div class="field" style="flex:1;min-width:200px"><label for="e-comp">Componente</label><select id="e-comp"></select></div>
+        <div class="field" style="flex:1;min-width:200px"><label for="e-comp">Componente</label><select id="e-comp"></select><label class="corr-toggle" hidden><input type="checkbox" class="corr-chk" data-v="e"> Corregir otro componente (coordinación)</label></div>
       </div>
       <p class="note">En cada instancia, escriba un juicio formativo de cada estudiante y uno sobre el grupo. Se guarda solo mientras escribe.</p>
       <p class="status" id="e-status"></p>
@@ -770,11 +774,12 @@ function setEval(sid,patch){
 }
 function compSelect(sel,fecha,allowAll,soloMios){
   const cur=sel.value||gp(sel.id), lista=soloMios?misComps():cfg.componentes;
-  if(!lista.length){setHTML(sel,soloMios&&cfg.componentes.length?'<option value="">No tiene componentes asignados: avise a la coordinación</option>':'<option value="">Sin componentes: configúrelos primero</option>');return}
+  if(!lista.length){setHTML(sel,soloMios&&cfg.componentes.length?'<option value="">No tiene componentes asignados: avise a la coordinación</option>':'<option value="">Sin componentes: configúrelos primero</option>'); if(soloMios) avisoCorreccion(sel); return}
   const act=lista.filter(c=>!fecha||moduloActivo(c,fecha)), otros=lista.filter(c=>fecha&&!moduloActivo(c,fecha));
   const opt=c=>`<option value="${esc(c.id)}">${esc(c.nombre)}${c.docente?" — "+esc(c.docente):""}</option>`;
   setHTML(sel,(allowAll?'<option value="all">Todos</option>':"")+(otros.length?`<optgroup label="En curso en esta fecha">${act.map(opt).join("")}</optgroup><optgroup label="Fuera de su módulo en esta fecha">${otros.map(opt).join("")}</optgroup>`:act.map(opt).join("")));
   if([...sel.options].some(o=>o.value===cur)) sel.value=cur; else if(act[0]&&!allowAll) sel.value=act[0].id;
+  if(soloMios) avisoCorreccion(sel);
 }
 // Completo: los cuatro aspectos calificados, o ausencia (rojo o justificada), o sin tarea ese día
 const completo=e=>!!(e.j||e.as==="r"||(!blank(e.as)&&!blank(e.ac)&&!blank(e.co)&&(!blank(e.cu)||e.na)));
@@ -785,7 +790,7 @@ function renderHero(){
   const f=new Date().toLocaleDateString("es-UY",{weekday:"long",day:"numeric",month:"long",year:"numeric"}); $("#hero-fecha").textContent=f.charAt(0).toUpperCase()+f.slice(1);
   const hoy=dayNum(todayStr()), lunes=hoy-((wday(hoy)+6)%7);
   const mias=Object.values(clases).filter(c=>c.fecha&&dayNum(c.fecha)>=lunes&&dayNum(c.fecha)<=lunes+6&&(c.autor===myId||c.editado_por===myId)).length;
-  const mc=misComps(), prox=instancias().filter(i=>i.fecha&&i.fecha>=todayStr()).sort((a,b)=>a.fecha.localeCompare(b.fecha))[0];
+  const mc=compsPropios(), prox=instancias().filter(i=>i.fecha&&i.fecha>=todayStr()).sort((a,b)=>a.fecha.localeCompare(b.fecha))[0];
   const dias=prox?dayNum(prox.fecha)-hoy:null;
   setHTML($("#h-tiles"),`<div class="hero-tile"><b>${mias}</b><span>clase${mias===1?"":"s"} que registraste esta semana</span></div>
     <div class="hero-tile"><b>${canAdmin?"Todos":mc.length}</b><span title="${esc(mc.map(c=>c.nombre).join(", "))}">${canAdmin?"los componentes (coordinación)":esc(mc.map(c=>c.nombre).join(", ")||"sin componentes asignados")}</span></div>
@@ -1158,7 +1163,21 @@ $("#k-csv").onclick=()=>downloadCsv("ranking"); $("#s-csv").onclick=()=>download
 
 // ---------- Componentes de cada docente ----------
 // La coordinación ve y corrige todos; cada docente, solo los que la coordinación le asignó.
-const misComps=()=>canAdmin||!perfil||perfil.componentes===null?cfg.componentes:cfg.componentes.filter(c=>perfil.componentes.includes(c.id));
+// Componentes asignados a quien está usando la app (también para la coordinación).
+const compsPropios=()=>perfil&&Array.isArray(perfil.componentes)?cfg.componentes.filter(c=>perfil.componentes.includes(c.id)):[];
+const esPropio=id=>!!(perfil&&Array.isArray(perfil.componentes)&&perfil.componentes.includes(id));
+// Para cargar o modificar: solo los propios. La coordinación puede abrir el «modo corrección» a propósito.
+let modoCorreccion=false;
+const misComps=()=>canAdmin&&modoCorreccion?cfg.componentes:compsPropios();
+function avisoCorreccion(sel){
+  const f=sel.closest(".field"); if(!f) return; const lab=f.querySelector(".corr-toggle"); if(lab){lab.hidden=!canAdmin; lab.querySelector("input").checked=modoCorreccion;}
+  let av=f.querySelector(".corr-aviso"); const id=sel.value, c=cfg.componentes.find(x=>x.id===id);
+  const mostrar=canAdmin&&modoCorreccion&&id&&id!==TECNICOS&&!esPropio(id);
+  if(!mostrar){if(av) av.remove(); return}
+  if(!av){av=document.createElement("div"); av.className="corr-aviso"; f.appendChild(av);}
+  av.innerHTML=`<b>Modo corrección:</b> «${esc(c?c.nombre:id)}» es de ${esc(c&&c.docente?c.docente:"otro docente")}. Lo que cargues queda registrado a tu nombre.`;
+}
+document.addEventListener("change",e=>{const ch=e.target.closest(".corr-chk"); if(!ch) return; modoCorreccion=ch.checked; renderAll();});
 
 // ---------- Evaluaciones: hitos de INEFOP (juicio conceptual + nota + rúbrica) ----------
 let juicios={}, eOpen=null;
@@ -1243,6 +1262,7 @@ function renderEval(){
   if(canAdmin) mc.push({id:TECNICOS,t:"Informe de los técnicos (coordinación)"});
   setHTML(sc,mc.length?mc.map(c=>`<option value="${esc(c.id)}">${esc(c.t)}</option>`).join(""):'<option value="">No tiene componentes asignados</option>');
   if(mc.some(c=>c.id===cc)) sc.value=cc;
+  avisoCorreccion(sc);
   const instId=si.value, inst=instOf(instId), comp=sc.value, box=$("#e-list"), gbox=$("#e-grupo");
   $("#e-inf").hidden=!canAdmin; if(canAdmin) renderInformesSel();
   if(!instId||!comp){setHTML(gbox,"");setHTML(box,`<div class="panel empty">${!mc.length?"Todavía no tiene componentes asignados. Pida a la coordinación que se los asigne en <b>Configuración → Docentes autorizados</b>.":"Elija una instancia de evaluación."}</div>`);return}

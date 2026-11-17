@@ -113,3 +113,9 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 - **Informe de los técnicos** (coordinación), individual y grupal, en cada hito.
 - Informes: individual, grupal (con planilla de notas), listas de asistencia diaria (Word, PDF y CSV).
 - Participantes desvinculados: Configuración → Estudiantes → «Se desvinculó». No aparecen para calificar ni en el informe final.
+
+## Quién puede cargar en cada componente
+- **Cada persona**, docente o coordinación, ve para cargar (Registrar clase, Hitos y Evaluaciones) **solo los componentes que tiene asignados** en Configuración → Docentes autorizados.
+- **La base de datos** también lo controla. Aunque alguien intentara saltarse la pantalla, un docente no puede guardar nada en un componente ajeno.
+- **Para corregir el error de un docente,** la coordinación marca la casilla **«Corregir otro componente (coordinación)»**. Mientras está marcada, aparece un aviso rojo que dice de quién es el componente. Lo que se cargue queda registrado a nombre de quien corrigió. La casilla se desmarca sola al recargar la página.
+- **Consultar no tiene restricción.** Semáforo, Ranking e Informes muestran todos los componentes a todos.
