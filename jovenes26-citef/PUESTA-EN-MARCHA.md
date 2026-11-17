@@ -129,6 +129,7 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 
 **Para la coordinación, con «Editar horario» marcado:**
 - **Cambiar un bloque:** tocá el bloque y elegí un componente, «Otro (escribir)» o «Sin clase». La nota es opcional.
+- **Mostrar como (opcional):** un bloque de un componente puede verse con otro nombre y color. Por ejemplo, «DAT» queda vinculado a Género: sus docentes lo ven como «Tu clase» y reciben los avisos, pero en el horario y en la imagen dice «DAT».
 - **«Completar con la semana anterior»:** llena solo los bloques vacíos de esa semana. Después se corrigen los cambios puntuales.
 - **«Avisar a los docentes como cambio de horario»:** a los docentes afectados les aparece un aviso en la pantalla de inicio y un punto en la pestaña, hasta que tocan «Entendido».
 - **Colores:** se cambian en Configuración → Componentes. Si dos bloques seguidos tienen el mismo componente, se muestran unidos (por ejemplo, Informática de 8:15 a 12:00).

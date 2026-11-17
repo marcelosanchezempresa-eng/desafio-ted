@@ -4,7 +4,7 @@ const MOCK=fs.readFileSync(__dirname+"/mock-supabase.js","utf8");const OUT=__dir
 const SEED="/home/user/desafio-ted/jovenes26-citef/supabase/horario-noviembre-2026.sql";
 (async()=>{
 await pool.query("truncate clases,hitos,juicios; truncate docentes");
-await pool.query("insert into docentes(email,nombre,rol,componentes) values ('coord@ej.uy','Natalia Ejemplo','coordinacion','{administracion}'),('lect@ej.uy','Marcelo Ejemplo','docente','{lectoescritura}')");
+await pool.query("insert into docentes(email,nombre,rol,componentes) values ('coord@ej.uy','Natalia Ejemplo','coordinacion','{administracion}'),('lect@ej.uy','Marcelo Ejemplo','docente','{lectoescritura}'),('gen@ej.uy','Prof. Género','docente','{genero}')");
 await pool.query("update config set data=data-'horario'-'bloques'");
 execFileSync("su",["postgres","-c","psql -q -h /var/lib/postgresql/j26test -p 55432 -f -"],{input:fs.readFileSync(SEED)});
 const b=await chromium.launch();const errs=[];let fa=0;const ok=(c,m)=>{console.log((c?"  OK  ":"  FALLA ")+m);if(!c)fa++};
@@ -61,4 +61,12 @@ await C.fill("#c-cupos","13");await C.click("#c-save");await C.waitForTimeout(12
 ok((await H("2026-11-25|1"))?.t==="Jornada de integración"&&(await H("2026-12-07|1"))?.c==="administracion","el horario sigue intacto después de guardar la configuración");
 const col=await C.locator('#cc-col-lectoescritura').inputValue();ok(col==="#f2709c","color de Lecto Escritura en Configuración: "+col);
 await pool.query("update config set data=jsonb_set(data,'{cupos}','12')");
+console.log("7) DAT: vinculado a Género, se muestra como «DAT»");
+const G=await abrir("gen@ej.uy");await G.click("[data-tab=horario]");await G.waitForTimeout(400);
+const dat=G.locator('.hz-week[data-lunes="2026-11-23"] .hz-day').nth(1).locator(".hz-slot").nth(1);
+const tx=(await dat.textContent())||"";ok(tx.includes("DAT")&&!tx.includes("Género")&&tx.includes("Tu clase"),"la docente de Género lo ve como «DAT · Tu clase»: «"+tx.trim()+"»");
+await C.click("[data-tab=horario]");await C.click("#hz-hoy");await C.waitForTimeout(300);if(!(await C.isChecked("#hz-edit")))await C.check("#hz-edit");
+await C.click('[data-hzf="2026-11-24"][data-hzb="2"]');await C.waitForTimeout(300);
+ok((await C.inputValue("#hz-c"))==="genero"&&(await C.inputValue("#hz-t"))==="DAT","el editor muestra Género con «Mostrar como: DAT»");
+await C.click("#hz-cancelar");
 console.log("errores JS:",errs.length?errs:"ninguno");console.log(fa?fa+" FALLAS":"TODO OK");await b.close();await pool.end();process.exit(fa?1:0)})();
