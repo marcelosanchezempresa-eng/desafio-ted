@@ -54,7 +54,8 @@ set data = jsonb_set(
  "2026-11-24|2": {
   "c": "genero",
   "t": "DAT",
-  "col": "#f27ef2"
+  "col": "#f27ef2",
+  "sc": true
  },
  "2026-11-25|1": {
   "c": "lectoescritura"
@@ -112,12 +113,11 @@ set data = jsonb_set(
     editado_en = now()
 where id = 1;
 
--- DAT (24/11, 10:15) corresponde a Género: se vincula al componente y se sigue mostrando como «DAT».
--- Corrige también el caso en que este archivo ya se había corrido con la versión anterior.
+-- DAT (24/11, 10:15) corresponde a Género, sin calificación: se vincula al componente y se sigue mostrando como «DAT».
+-- Corrige también el caso en que este archivo ya se había corrido con una versión anterior (conserva notas y demás datos del bloque).
 update public.config
-set data = jsonb_set(data, '{horario,2026-11-24|2}', '{"c":"genero","t":"DAT","col":"#f27ef2"}'::jsonb)
+set data = jsonb_set(data, '{horario,2026-11-24|2}', (data->'horario'->'2026-11-24|2') || '{"c":"genero","sc":true}'::jsonb)
 where id = 1
-  and coalesce(data->'horario'->'2026-11-24|2'->>'c', '') = ''
   and data->'horario'->'2026-11-24|2'->>'t' = 'DAT';
 
 select count(*) as bloques_cargados from public.config, jsonb_object_keys(data->'horario') where id = 1;
