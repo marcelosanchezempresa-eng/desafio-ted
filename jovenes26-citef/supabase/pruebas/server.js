@@ -3,7 +3,7 @@
 const http=require("http"),fs=require("fs"),path=require("path");const {Pool}=require("pg");
 const pool=new Pool({host:"/var/lib/postgresql/j26test",port:55432,user:"postgres",database:"postgres"});
 const DOCS="/home/user/desafio-ted/docs";const subs=new Set();
-const TABLES=new Set(["docentes","config","clases","hitos"]);const COL=/^[a-z_]+$/;
+const TABLES=new Set(["docentes","config","clases","hitos","juicios"]);const COL=/^[a-z_]+$/;
 async function como(email,fn){const c=await pool.connect();try{await c.query("begin");
   await c.query("select set_config('request.jwt.claims',$1,true)",[email?JSON.stringify({email}):""]);
   await c.query(email?"set local role authenticated":"set local role anon");
@@ -16,7 +16,7 @@ async function q(b){const {email,table,op,payload,filters=[],order,limit}=b;if(!
     if(op==="select"){let sql=`select * from public.${table}${where}`;if(order&&COL.test(order.col))sql+=` order by ${order.col} ${order.asc?"asc":"desc"}`;if(limit)sql+=` limit ${+limit}`;
       return (await c.query(sql,vals)).rows.map(fix)}
     const rows=Array.isArray(payload)?payload:[payload];let out=[];
-    for(const p of rows){const ks=Object.keys(p||{}).filter(k=>COL.test(k));const pv=ks.map(k=>typeof p[k]==="object"&&p[k]!==null?JSON.stringify(p[k]):p[k]);
+    for(const p of rows){const ks=Object.keys(p||{}).filter(k=>COL.test(k));const pv=ks.map(k=>typeof p[k]==="object"&&p[k]!==null&&!Array.isArray(p[k])?JSON.stringify(p[k]):p[k]);
       if(op==="insert"||op==="upsert"){const pk=table==="docentes"?"email":"id";
         let sql=`insert into public.${table}(${ks.join(",")}) values(${ks.map((_,i)=>"$"+(i+1)).join(",")})`;
         if(op==="upsert")sql+=` on conflict (${pk}) do update set ${ks.filter(k=>k!==pk).map(k=>`${k}=excluded.${k}`).join(",")}`;

@@ -58,3 +58,13 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 1. SQL Editor → New query → pegar `jovenes26-citef/supabase/autoregistro.sql` → **Run**.
 2. Authentication → Sign In / Providers → *User Signups*: **encender** «Allow new users to sign up» y **apagar** «Confirm email». Guardar.
 3. Contraseña olvidada: Configuración → Docentes autorizados → **Reiniciar contraseña**.
+
+## Actualización 3: componentes por docente, instancias de evaluación e informes
+1. SQL Editor → New query → pegar `jovenes26-citef/supabase/componentes-e-instancias.sql` → **Run**.
+2. En la app: Configuración → Docentes autorizados → **Componentes** junto a cada docente → marcar sus componentes → Guardar.
+   Hasta que se asignen, el docente no puede cargar (la coordinación sí, en todos).
+3. Configuración → **Instancias de evaluación**: revisar nombres y fechas (vienen 30/11/2026, 23/12/2026 y 12/03/2027).
+4. Pestaña **Evaluaciones**: cada docente escribe juicios por estudiante y del grupo. La coordinación descarga los informes en Word o PDF.
+
+## Borrar los datos de prueba
+`jovenes26-citef/supabase/borrar-datos-de-prueba.sql`: primero muestra qué se borra (clases e hitos creados antes del 17/11/2026), después borra. No toca estudiantes, componentes, configuración ni docentes.
