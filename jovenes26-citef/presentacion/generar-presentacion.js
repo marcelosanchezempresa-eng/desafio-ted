@@ -32,7 +32,7 @@ const HEX = { verde: "1F8A4C", amarillo: "F0B400", rojo: "C23636", lima: "C4D92E
   const shot = (s, file, x, y, h, ratio) => { const w = h * ratio;
     s.addShape(pres.shapes.RECTANGLE, { x: x - 0.04, y: y - 0.04, w: w + 0.08, h: h + 0.08, fill: { color: C.background2 }, line: { color: "C8D6E6", width: 1 }, shadow: { type: "outer", blur: 6, offset: 2, angle: 90, color: "0E2338", opacity: 0.18 }, objectName: "marco " + file });
     s.addImage({ path: SH + file, x, y, w, h, altText: "Captura de pantalla de la aplicación (datos de ejemplo)" }); return w; };
-  const PHONE = 800 / 1520, WIDE = 2000 / 1520;
+  const PHONE = 800 / 1520, WIDE = 2000 / 1520, S3 = "../shots3/";
   const num = (s, n, x, y) => { s.addShape(pres.shapes.OVAL, { x, y, w: 0.55, h: 0.55, fill: { color: C.accent2 }, line: { color: C.accent2 }, objectName: "número " + n });
     s.addText(String(n), { x, y, w: 0.55, h: 0.55, fontSize: 20, bold: true, color: C.text2, align: "center", valign: "middle", margin: 0, isTextBox: true }); };
   const paso = (s, n, titulo, texto, x, y, w) => { num(s, n, x, y);
@@ -51,7 +51,7 @@ const HEX = { verde: "1F8A4C", amarillo: "F0B400", rojo: "C23636", lima: "C4D92E
   s.addText("Jóvenes 26", { x: 0.7, y: 1.2, w: 3.3, h: 0.7, fontSize: 30, bold: true, italic: true, color: C.text2, align: "center", valign: "middle", margin: 0, isTextBox: true });
   [HEX.verde, HEX.amarillo, HEX.rojo].forEach((c, i) => s.addShape(pres.shapes.OVAL, { x: 4.25 + i * 0.42, y: 1.38, w: 0.34, h: 0.34, fill: { color: c }, line: { color: "FFFFFF", width: 1.5 }, objectName: "luz " + i }));
   s.addText("Semáforo Jóvenes 26", { placeholder: "title" });
-  s.addText("Cómo entrar a la aplicación y registrar en cada clase", { placeholder: "body" });
+  s.addText("Cómo entrar, registrar cada clase y evaluar el Hito 1 (30/11)", { placeholder: "body" });
   s.addText("CITEF · Curso Jóvenes 26 · INEFOP", { x: 0.7, y: 6.6, w: 8, h: 0.4, fontSize: 14, color: C.background2, margin: 0, isTextBox: true });
   const qrPng = await QR.toDataURL(URL, { margin: 1, width: 600, color: { dark: "0E2338FF", light: "FFFFFFFF" } });
   s.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 9.55, y: 1.6, w: 3.1, h: 3.75, rectRadius: 0.12, fill: { color: C.background1 }, line: { color: C.background1 }, objectName: "tarjeta QR" });
@@ -126,6 +126,37 @@ const HEX = { verde: "1F8A4C", amarillo: "F0B400", rojo: "C23636", lima: "C4D92E
   caja(s, "Un hito vale el doble que una tarea de clase. Una prueba diagnóstica no se carga como hito: mide el punto de partida.", 4.0, 5.2, 8.7, 1.1, "FDF0C8");
   s.addNotes("Los hitos son entregas con fecha. Cuentan el doble dentro de Cumplimiento. Las pruebas diagnósticas no, porque castigarían a quien llega con menos formación.");
 
+  // ===== 7b. Novedad: cada docente ve solo su componente =====
+  s = nueva("Registrar", "Nuevo: cada uno carga solo en su componente");
+  shot(s, S3 + "20-inicio.png", 0.7, 1.45, 5.3, PHONE);
+  paso(s, 1, "La pantalla de inicio te resume", "Clases que registraste esta semana, tu componente, días que faltan para el próximo hito y participantes", 4.0, 1.55, 8.6);
+  paso(s, 2, "En «Componente» aparece solo el tuyo", "Lo mismo en Hitos y en Evaluaciones. Así no hay forma de calificar por error en otro espacio", 4.0, 2.85, 8.6);
+  paso(s, 3, "¿No aparece o falta alguno?", "Avisá a la coordinación: lo asigna en Configuración → Docentes autorizados", 4.0, 4.15, 8.6);
+  caja(s, "La base de datos también lo controla: aunque alguien intentara saltarse la pantalla, no puede guardar en un componente ajeno.", 4.0, 5.45, 8.7, 0.95, "DCF2E4");
+  s.addNotes("Desde esta semana cada docente ve para cargar únicamente su componente, también la coordinación. Si alguien no ve el suyo, es porque falta asignarlo: se arregla en un minuto desde Configuración. Consultar el Semáforo y el Ranking sigue siendo libre.");
+
+  // ===== 7c. Evaluaciones INEFOP =====
+  pres.addSection({ title: "Evaluaciones" });
+  s = nueva("Evaluaciones", "Hito 1 · 30/11: diagnóstico inicial para INEFOP");
+  shot(s, S3 + "22-eval-grupo.png", 0.7, 1.45, 5.3, PHONE);
+  chip(s, "Hito 1 · 30/11/2026", "DCF2E4", HEX.verde, 4.0, 1.55, 2.9);
+  s.addText("Nota de 1 a 12 y juicio conceptual de cada estudiante, más el juicio del grupo", { x: 7.1, y: 1.5, w: 5.6, h: 0.6, fontSize: 15, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
+  chip(s, "Hito 4 · 30/04/2027", "E3ECF7", HEX.azulOsc, 4.0, 2.3, 2.9);
+  s.addText("Nota de 1 a 12, juicio conceptual y rúbrica de competencias transversales", { x: 7.1, y: 2.25, w: 5.6, h: 0.6, fontSize: 15, color: C.text1, valign: "middle", margin: 0, isTextBox: true });
+  paso(s, 1, "Pestaña «Evaluaciones»", "Elegí «Hito 1 · Diagnóstico inicial» y tu componente", 4.0, 3.25, 8.6);
+  paso(s, 2, "Actividad de diagnóstico propuesta", "Escribila una sola vez: vale para todo el grupo", 4.0, 4.3, 8.6);
+  paso(s, 3, "Juicio sobre el grupo", "Cómo llega el grupo a tu área: saberes previos, dinámica, lo que hay que trabajar", 4.0, 5.35, 8.6);
+  s.addNotes("INEFOP pide dos instancias con nota de 1 a 12. La primera es el 30 de noviembre: diagnóstico. Cada docente describe la actividad que propuso, escribe un juicio del grupo y después uno por estudiante. Todo se guarda solo mientras se escribe.");
+
+  s = nueva("Evaluaciones", "El juicio de cada estudiante, con ayuda");
+  shot(s, S3 + "23b-eval-tarjeta-recorte.png", 0.7, 1.45, 5.3, 736 / 1520);
+  paso(s, 4, "Tocá su nombre", "Elegí la nota de 1 a 12 y anotá el resultado que obtuvo en la actividad", 4.0, 1.55, 8.6);
+  paso(s, 5, "Nivel de partida", "Muy buen punto de partida · Aceptable · Necesita apoyo. El semáforo sugiere uno: decidís vos", 4.0, 2.65, 8.6);
+  paso(s, 6, "Frases sugeridas", "Tocá una para agregarla al texto y ajustala con tus palabras", 4.0, 3.75, 8.6);
+  paso(s, 7, "Orientaciones (opcional)", "Sugerencias propias de Jóvenes 26: entrevista laboral, currículum, puntualidad…", 4.0, 4.85, 8.6);
+  caja(s, "Las frases son un punto de partida, no un formulario: el juicio vale cuando describe a ese joven.", 4.0, 5.95, 8.7, 0.8, "FDF0C8");
+  s.addNotes("Mostrar una tarjeta. La nota y el nivel son obligatorios para INEFOP; las orientaciones son opcionales pero muy útiles para el seguimiento. Pedir que personalicen las frases.");
+
   // ===== 8. Revisar =====
   pres.addSection({ title: "Revisar" });
   s = nueva("Revisar", "Revisar lo cargado: Semáforo y Ranking");
@@ -147,6 +178,16 @@ const HEX = { verde: "1F8A4C", amarillo: "F0B400", rojo: "C23636", lima: "C4D92E
   caja(s, "Rol «Coordinación»: autoriza docentes y cambia la configuración. Rol «Docente»: califica y consulta. Cada persona entra con su propia cuenta.", 6.65, 1.45, 6.05, 2.25, HEX.fondo);
   s.addNotes("Arturo, Natalia y Rossana quedan con rol Coordinación. Nadie presta su usuario: cada uno con su correo.");
 
+  // ===== 9b. Coordinación: informes y correcciones =====
+  s = nueva("Coordinación", "Para la coordinación: informes y correcciones");
+  shot(s, S3 + "24-informes.png", 0.6, 1.5, 3.55, 1936 / 780);
+  shot(s, S3 + "25-correccion.png", 9.95, 1.5, 5.3, PHONE);
+  s.addText([{ text: "Informes para INEFOP: ", options: { bold: true } }, { text: "individual, grupal con planilla de notas y listas de asistencia diaria, en Word (editable) o PDF.", options: { breakLine: true } },
+             { text: "Corregir otro componente: ", options: { bold: true } }, { text: "casilla solo para la coordinación, con aviso rojo. Queda registrado quién corrigió.", options: { breakLine: true } },
+             { text: "Respaldo completo: ", options: { bold: true } }, { text: "en Configuración. Descargarlo antes del receso (23/12)." }],
+    { x: 0.6, y: 5.3, w: 8.8, h: 1.55, fontSize: 15, color: C.text1, valign: "top", margin: 0, paraSpaceAfter: 6, isTextBox: true });
+  s.addNotes("Los informes salen de la pestaña Evaluaciones. Si un docente se equivoca, la coordinación corrige marcando la casilla; el aviso rojo evita hacerlo sin querer. Antes del receso, descargar el respaldo completo y guardarlo en dos lugares.");
+
   // ===== 10. Problemas =====
   pres.addSection({ title: "Ayuda" });
   s = nueva("Ayuda", "Si algo no funciona");
@@ -155,23 +196,24 @@ const HEX = { verde: "1F8A4C", amarillo: "F0B400", rojo: "C23636", lima: "C4D92E
     ["«Correo o contraseña incorrectos»", "¿Es la primera vez? Tocá «Crear mi contraseña», no «Entrar»"],
     ["Olvidé mi contraseña", "La coordinación toca «Reiniciar contraseña» y creás una nueva"],
     ["«No se pudo guardar… Se reintentará»", "Se cortó internet. No cierres la página: vuelve a intentar sola"],
-    ["No aparece mi componente", "La coordinación lo agrega en Configuración"]];
+    ["No aparece mi componente", "La coordinación te lo asigna en Docentes autorizados"],
+    ["Quiero cargar en otro componente", "No se puede: cada docente carga solo en el suyo"]];
   s.addTable(filas.map((r, i) => r.map(t => ({ text: t, options: i === 0 ? { bold: true, color: "FFFFFF", fill: { color: HEX.azulOsc } } : { color: HEX.tinta, fill: { color: i % 2 ? "FFFFFF" : HEX.fondo } } }))),
-    { x: 0.6, y: 1.5, w: 12.1, colW: [4.6, 7.5], fontSize: 16, fontFace: "Calibri", border: { type: "solid", pt: 0.75, color: "C8D6E6" }, rowH: 0.72, valign: "middle", margin: [0.06, 0.15, 0.06, 0.15] });
+    { x: 0.6, y: 1.5, w: 12.1, colW: [4.6, 7.5], fontSize: 16, fontFace: "Calibri", border: { type: "solid", pt: 0.75, color: "C8D6E6" }, rowH: 0.68, valign: "middle", margin: [0.06, 0.15, 0.06, 0.15] });
   s.addNotes("Los cinco problemas más probables y su solución. La guía en PDF tiene todos los casos con capturas.");
 
-  // ===== 11. Práctica =====
-  pres.addSection({ title: "Práctica" });
-  s = pres.addSlide({ masterName: "PORTADA", sectionTitle: "Práctica" });
-  s.addText("Probémosla ahora", { placeholder: "title" });
-  s.addText("Unos 15 minutos, todos juntos", { placeholder: "body" });
-  const prac = ["Entrá y creá tu contraseña", "Verificá «Puede guardar»", "Registrá 3 estudiantes de práctica", "Dos docentes, misma clase: ¿ves lo que marca el otro?", "La coordinación lo ve en el Semáforo"];
-  prac.forEach((t, i) => { const y = 1.35 + i * 1.05;
-    s.addShape(pres.shapes.OVAL, { x: 7.9, y, w: 0.6, h: 0.6, fill: { color: C.accent2 }, line: { color: C.accent2 }, objectName: "práctica " + (i + 1) });
+  // ===== 11. Antes del 30/11 =====
+  pres.addSection({ title: "Antes del 30/11" });
+  s = pres.addSlide({ masterName: "PORTADA", sectionTitle: "Antes del 30/11" });
+  s.addText("Antes del 30/11", { placeholder: "title" });
+  s.addText("Lo que tenés que tener cargado para el Hito 1", { placeholder: "body" });
+  const pend = ["Entrá y fijate que veas tu componente", "Seguí registrando cada clase", "Escribí la actividad de diagnóstico y el juicio del grupo", "Cargá nota y juicio de cada estudiante", "¿Dudas o falta tu componente? Avisá a la coordinación"];
+  pend.forEach((t, i) => { const y = 1.35 + i * 1.05;
+    s.addShape(pres.shapes.OVAL, { x: 7.9, y, w: 0.6, h: 0.6, fill: { color: C.accent2 }, line: { color: C.accent2 }, objectName: "pendiente " + (i + 1) });
     s.addText(String(i + 1), { x: 7.9, y, w: 0.6, h: 0.6, fontSize: 20, bold: true, color: C.text2, align: "center", valign: "middle", margin: 0, isTextBox: true });
     s.addText(t, { x: 8.75, y: y - 0.1, w: 4.2, h: 0.8, fontSize: 18, color: C.background1, valign: "middle", margin: 0, isTextBox: true }); });
-  s.addText("Al terminar: tocá de nuevo los botones de práctica para dejarlos vacíos.", { x: 0.7, y: 6.4, w: 6.8, h: 0.6, fontSize: 14, color: C.background2, margin: 0, isTextBox: true });
-  s.addNotes("Ensayo en vivo. Paso 4 es clave: dos docentes en la misma clase y fecha, uno marca y el otro tiene que verlo en segundos. Al final, borrar las calificaciones de práctica tocando de nuevo los botones.");
+  s.addText("La coordinación descarga los informes para INEFOP con lo que esté cargado.", { x: 0.7, y: 6.4, w: 6.8, h: 0.6, fontSize: 14, color: C.background2, margin: 0, isTextBox: true });
+  s.addNotes("Cierre: cinco cosas para tener listas antes del 30 de noviembre. Los informes se arman solos con lo que cada docente haya cargado.");
 
   await pres.writeFile({ fileName: OUT });
   await applyTheme(OUT, THEME);
