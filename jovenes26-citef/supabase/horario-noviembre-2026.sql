@@ -10,7 +10,7 @@ set data = jsonb_set(
   "c": "administracion"
  },
  "2026-11-16|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -30,7 +30,7 @@ set data = jsonb_set(
   "c": "emprendimiento"
  },
  "2026-11-19|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -44,7 +44,7 @@ set data = jsonb_set(
   "c": "administracion"
  },
  "2026-11-23|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -67,7 +67,7 @@ set data = jsonb_set(
   "c": "informatica"
  },
  "2026-11-26|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -81,7 +81,7 @@ set data = jsonb_set(
   "c": "administracion"
  },
  "2026-11-30|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -98,7 +98,7 @@ set data = jsonb_set(
   "c": "emprendimiento"
  },
  "2026-12-03|2": {
-  "c": "",
+  "c": "proyecto",
   "t": "PO TOLS",
   "col": "#ffe45c"
  },
@@ -119,5 +119,16 @@ update public.config
 set data = jsonb_set(data, '{horario,2026-11-24|2}', (data->'horario'->'2026-11-24|2') || '{"c":"genero","sc":true}'::jsonb)
 where id = 1
   and data->'horario'->'2026-11-24|2'->>'t' = 'DAT';
+
+-- «PO TOLS» (herramientas de Proyecto Ocupacional) se vincula a Proyecto Ocupacional y se sigue mostrando como «PO TOLS».
+-- Corrige también los bloques cargados con una versión anterior de este archivo o escritos a mano como texto libre.
+update public.config
+set data = jsonb_set(data, '{horario}', (
+      select jsonb_object_agg(k, case when upper(trim(v->>'t')) in ('PO TOLS','PO TOOLS') and coalesce(v->>'c','') = ''
+                                      then v || '{"c":"proyecto"}'::jsonb else v end)
+      from jsonb_each(data->'horario') as e(k, v)))
+where id = 1
+  and jsonb_typeof(data->'horario') = 'object'
+  and data->'horario' <> '{}'::jsonb;
 
 select count(*) as bloques_cargados from public.config, jsonb_object_keys(data->'horario') where id = 1;

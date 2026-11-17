@@ -4,7 +4,7 @@ const MOCK=fs.readFileSync(__dirname+"/mock-supabase.js","utf8");const OUT=__dir
 const SEED="/home/user/desafio-ted/jovenes26-citef/supabase/horario-noviembre-2026.sql";
 (async()=>{
 await pool.query("truncate clases,hitos,juicios; truncate docentes");
-await pool.query("insert into docentes(email,nombre,rol,componentes) values ('coord@ej.uy','Natalia Ejemplo','coordinacion','{administracion}'),('lect@ej.uy','Marcelo Ejemplo','docente','{lectoescritura}'),('gen@ej.uy','Prof. Género','docente','{genero}')");
+await pool.query("insert into docentes(email,nombre,rol,componentes) values ('coord@ej.uy','Natalia Ejemplo','coordinacion','{administracion}'),('lect@ej.uy','Marcelo Ejemplo','docente','{lectoescritura}'),('gen@ej.uy','Prof. Género','docente','{genero}'),('po@ej.uy','Prof. Proyecto','docente','{proyecto}')");
 await pool.query("update config set data=data-'horario'-'bloques'");
 execFileSync("su",["postgres","-c","psql -q -h /var/lib/postgresql/j26test -p 55432 -f -"],{input:fs.readFileSync(SEED)});
 const b=await chromium.launch();const errs=[];let fa=0;const ok=(c,m)=>{console.log((c?"  OK  ":"  FALLA ")+m);if(!c)fa++};
@@ -75,4 +75,9 @@ await C.click("#hz-cancelar");
 await pool.query("update config set data=jsonb_set(data,'{horario}',(data->'horario')-'2026-12-01|2'-'2026-12-01|1')");
 await C.reload();await C.waitForTimeout(1300);await C.click("[data-tab=horario]");await C.check("#hz-edit");await C.click("#hz-next");await C.waitForTimeout(300);await C.click('[data-hzcopiar="2026-11-30"]');await C.waitForTimeout(1200);
 ok((await H("2026-12-01|1"))?.c==="derecho"&&!(await H("2026-12-01|2")),"«Completar» no copia el DAT ocasional (sin calificación)");
+console.log("8) PO TOLS: vinculado a Proyecto Ocupacional");
+const PO=await abrir("po@ej.uy",430);const agp=await PO.textContent("#h-agenda");
+ok(agp.includes("PO TOLS"),"inicio de la docente de Proyecto Ocupacional: «"+agp+"»");
+await PO.click("[data-tab=horario]");await PO.waitForTimeout(300);
+const mios=await PO.locator(".hz-slot.mio").allTextContents();ok(mios.length>=4&&mios.every(t=>t.includes("PO TOLS")),"ve sus bloques «PO TOLS» como «Tu clase»: "+mios.length);
 console.log("errores JS:",errs.length?errs:"ninguno");console.log(fa?fa+" FALLAS":"TODO OK");await b.close();await pool.end();process.exit(fa?1:0)})();
