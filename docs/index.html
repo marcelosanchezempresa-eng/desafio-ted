@@ -128,6 +128,17 @@ textarea{width:100%;min-height:60px;resize:vertical}
 .stu-head{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;width:100%;background:none;border:0;text-align:left}
 .stu-head .n{font-family:var(--font-data);color:var(--muted);width:1.8em;flex:none}
 .stu-head .name{font-weight:700;flex:1;min-width:0}
+/* Fotos de los participantes (privadas: solo docentes autorizados) */
+.av{width:38px;height:38px;border-radius:50%;flex:none;object-fit:cover;background:var(--surface-2);box-shadow:0 0 0 2px var(--surface),0 0 0 3px var(--line);display:inline-flex;align-items:center;justify-content:center;font-family:var(--font-display);font-weight:800;font-size:.8rem;color:#0e2338;letter-spacing:.02em;user-select:none}
+.av.ini{background:hsl(var(--h) 55% 86%)}
+.av.sm{width:30px;height:30px;font-size:.68rem}
+.av.lg{width:96px;height:96px;font-size:1.6rem;box-shadow:0 0 0 3px var(--surface),0 0 0 5px var(--lima)}
+.hrow .av{margin-right:8px;vertical-align:middle}
+.rk .av{margin-right:8px}
+.ficha-head{display:flex;gap:16px;align-items:center}
+.foto-btn{all:unset;cursor:pointer;border-radius:50%;line-height:0}
+.foto-btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.foto-acc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
 .stu-head .sum{display:flex;gap:5px}
 .stu-head .chev{color:var(--muted);transition:transform .15s}
 .stu[open-card] .chev{transform:rotate(180deg)}
@@ -235,7 +246,7 @@ button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid va
 .btn.sm{min-height:34px;padding:4px 10px}
 .cfg-dirty{color:var(--rojo);font-weight:700}
 .respaldo-list{margin:6px 0 0;padding-left:1.2em;font-size:.9rem}
-.cfg-item.est{grid-template-columns:2em minmax(0,1fr) minmax(0,9em) minmax(0,9.5em) auto}
+.cfg-item.est{grid-template-columns:2em 2.6rem minmax(0,1fr) minmax(0,9em) minmax(0,9.5em) auto}
 @media (max-width:640px){.cfg-item,.cfg-item.comp,.cfg-item.per,.cfg-item.inst,.cfg-item.est{grid-template-columns:1fr 1fr}.cfg-item>.idx{display:none}.cfg-item>input:first-of-type{grid-column:1/-1}.cfg-item>:last-child{grid-column:1/-1;justify-self:end}.cfg-head{display:none}.cfg-item.inst>:nth-child(2){order:1}.cfg-item.inst>:nth-child(4){order:2}.cfg-item.inst>:nth-child(3){order:3;grid-column:1/-1}.cfg-item.inst>:nth-child(5){order:4}.cfg-item{padding-bottom:8px;border-bottom:1px solid var(--line)}}
 .rubric{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:10px}
 .rubric div{background:var(--surface-2);border-radius:8px;padding:10px;font-size:.88rem}
@@ -556,6 +567,11 @@ button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid va
     </div>
     <div class="panel"><h2 style="font-size:1.15rem;margin-bottom:6px">Estudiantes</h2>
       <p class="note">Nombre, nivel educativo alcanzado (dato de contexto, no puntúa) y situación. Quien se desvincula deja de aparecer para calificar y no entra en el informe final; su historial se conserva.</p>
+      <div class="foto-acc" id="c-fotos-acc" hidden>
+        <button class="btn" id="c-fotos-varias" type="button">Subir varias fotos</button><input type="file" id="c-fotos-in" accept="image/*" multiple hidden><input type="file" id="c-foto-uno" accept="image/*" hidden>
+        <span class="note" style="margin:0">Tocá la foto de un participante para cambiarla. «Subir varias» reconoce cada archivo por el nombre del participante.</span>
+      </div>
+      <p class="status" id="c-fotos-status"></p>
       <div class="cfg-list" id="c-est"></div>
       <div class="field" style="margin-top:10px"><label for="c-bulk">Agregar varios (uno por línea: Nombre Apellido ; nivel)</label><textarea id="c-bulk" placeholder="Ana Pérez ; Bachillerato completo"></textarea></div>
       <div class="row" style="margin-top:6px"><button class="btn" id="c-bulk-add" type="button">Agregar a la lista</button></div>
@@ -874,7 +890,7 @@ function renderRegistrar(){
   setHTML(list,activos().map((s,i)=>{
     const open=openCard===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
-      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${DIMS.map(d=>`<span class="dot" data-k="${d.k}" title="${esc(d.n)}"></span>`).join("")}</span><span class="chev" aria-hidden="true">▾</span></button>
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span>${avatar(s.id)}<span class="name">${esc(s.nombre)}</span><span class="sum" aria-hidden="true">${DIMS.map(d=>`<span class="dot" data-k="${d.k}" title="${esc(d.n)}"></span>`).join("")}</span><span class="chev" aria-hidden="true">▾</span></button>
       ${open?`<div class="stu-body">${DIMS.map(d=>`<div class="dim" data-k="${d.k}"><div class="dim-title">${esc(d.n)}</div>
           <div class="levels">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false"><span class="dot ${l}"></span><span class="t">${LV[l].t}</span></button>`).join("")}</div>
           ${d.extra?`<label class="extra"><input type="checkbox" class="ex" id="ex-${d.extra.k}-${esc(s.id)}" data-x="${d.extra.k}"> ${esc(d.extra.n)}</label>`:""}
@@ -959,7 +975,7 @@ function renderHitoEval(){
   setHTML(box,`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
     <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
     <p class="status" id="h-estatus"></p>
-    <div>${activos().map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${esc(s.nombre)}</span>
+    <div>${activos().map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${avatar(s.id,"sm")}${esc(s.nombre)}</span>
       ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
       <button type="button" class="lvl" data-l="x" aria-pressed="false" title="${esc(HITO_LV.x)}">N/C</button>
       <input type="text" class="obs-in" id="hobs-${esc(selHito)}-${esc(s.id)}" placeholder="Observación (opcional)" hidden></div>`).join("")}</div>
@@ -1025,7 +1041,7 @@ function renderRanking(){
   if(!order.length||order.every(s=>!s.n)){$("#k-list").innerHTML='<div class="empty">El ranking aparece cuando haya registros de clase o hitos evaluados en el período.</div>';return}
   let html=""; order.forEach((s,i)=>{
     const pos=i+1, few=s.idx===null||s.n<cfg.min;
-    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r" title="Requiere entrevista">!</span>':""}</span>
+    html+=`<div class="rk"><span class="pos">${pos}</span><span class="nm" title="${esc(nameOf(s.id))}">${avatar(s.id,"sm")}${esc(nameOf(s.id))} ${few?'<span class="pill">pocos datos</span>':""}${s.alerta?' <span class="pill r" title="Requiere entrevista">!</span>':""}</span>
       <span class="bar"><i style="width:${s.idx||0}%;background:var(--${few?"gris-dot":band(s.idx)==="v"?"verde":band(s.idx)==="a"?"amarillo-dot":"rojo"})"></i></span><span class="val">${s.idx===null?"—":s.idx.toFixed(1)}</span></div>`;
     if(pos===+cfg.cupos) html+=`<div class="cut">Línea de pasantías · ${cfg.cupos} cupos</div>`;
     if(pos===+cfg.cupos2&&+cfg.cupos2>+cfg.cupos) html+=`<div class="cut amp">Cupos ampliados · ${cfg.cupos2}</div>`;
@@ -1043,7 +1059,7 @@ function renderFicha(){
   const byComp=cfg.componentes.map(c=>({c,x:stats(pv,c.id)[sid]})).filter(o=>o.x.n);
   const recs=s.recs.sort((a,b)=>b.fecha.localeCompare(a.fecha));
   const hrecs=s.hrecs.sort((a,b)=>(b.h.fecha||"").localeCompare(a.h.fecha||""));
-  body.innerHTML=`<div class="panel"><div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div>
+  body.innerHTML=`<div class="panel"><div class="ficha-head">${avatar(sid,"lg")}<div><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div></div>
     <div class="kpis" style="margin-top:12px">
       <div class="kpi"><b>${s.idx===null?"—":s.idx}</b><span>Índice del período</span></div>
       <div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>
@@ -1119,6 +1135,7 @@ $("#c-docentes").addEventListener("click",async e=>{
   $("#d-status").textContent=error?"No se pudo cambiar. Vuelva a intentar.":"Cambio guardado ✓"; cargarDocentes();
 });
 function renderConfig(){
+  $("#c-fotos-acc").hidden=!canAdmin;
   $("#cfg-lock").hidden=canAdmin; $("#c-save").disabled=!canAdmin; $("#c-respaldo-panel").hidden=!canAdmin; $("#c-discard").hidden=!(canAdmin&&cfgDirty); renderDocentes();
   if(!draft) draft=structuredClone(cfg);
   ["nombre","inicio","fin","hora","tol","cupos","cupos2","min","pesoHito"].forEach(k=>$("#c-"+k).value=draft[k]??"");
@@ -1129,7 +1146,7 @@ function renderConfig(){
   $("#c-rec").innerHTML=draft.recesos.length?draft.recesos.map((r,i)=>`<div class="cfg-item per" data-i="${i}"><input type="text" id="cr-n-${i}" data-f="nombre" value="${esc(r.nombre||"")}" placeholder="Receso" aria-label="Nombre del receso"><input type="date" id="cr-d-${i}" data-f="desde" value="${esc(r.desde)}" aria-label="Desde"><input type="date" id="cr-h-${i}" data-f="hasta" value="${esc(r.hasta)}" aria-label="Hasta">${delBtn("recesos",i)}</div>`).join(""):'<p class="muted">Sin recesos.</p>';
   const modOpts=v=>`<option value="t"${!v||v==="t"?" selected":""}>Todo el curso</option>`+draft.modulos.map(m=>`<option value="${esc(m.id)}"${v===m.id?" selected":""}>${esc(m.nombre)}</option>`).join("");
   $("#c-comp").innerHTML=draft.componentes.length?draft.componentes.map((c,i)=>`<div class="cfg-item comp" data-i="${i}"><input type="text" id="cc-n-${esc(c.id)}" data-f="nombre" value="${esc(c.nombre)}" placeholder="Componente" aria-label="Componente"><input type="text" id="cc-d-${esc(c.id)}" data-f="docente" value="${esc(c.docente||"")}" placeholder="Docente" aria-label="Docente"><input type="number" id="cc-h-${esc(c.id)}" data-f="horas" value="${esc(c.horas||"")}" placeholder="h/sem" aria-label="Horas semanales"><select id="cc-m-${esc(c.id)}" data-f="modulo" aria-label="Módulo">${modOpts(c.modulo)}</select><input type="color" id="cc-col-${esc(c.id)}" data-f="color" value="${esc(colorComp(c))}" aria-label="Color en el horario" title="Color en el horario">${delBtn("componentes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
-  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item est" data-i="${i}"><span class="idx num muted">${i+1}</span><input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><select id="ce-s-${esc(e.id)}" data-f="estado" aria-label="Situación"><option value="activo"${e.estado!=="desvinculado"?" selected":""}>Sigue en el curso</option><option value="desvinculado"${e.estado==="desvinculado"?" selected":""}>Se desvinculó</option></select>${delBtn("estudiantes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
+  $("#c-est").innerHTML=draft.estudiantes.length?draft.estudiantes.map((e,i)=>`<div class="cfg-item est" data-i="${i}"><span class="idx num muted">${i+1}</span>${canAdmin?`<button type="button" class="foto-btn" data-foto="${esc(e.id)}" title="${fotos[e.id]?"Cambiar la foto":"Subir una foto"}" aria-label="${fotos[e.id]?"Cambiar la foto de ":"Subir una foto de "}${esc(e.nombre)}">${avatar(e.id)}</button>`:avatar(e.id)}<input type="text" id="ce-n-${esc(e.id)}" data-f="nombre" value="${esc(e.nombre)}" aria-label="Nombre"><input type="text" id="ce-l-${esc(e.id)}" data-f="nivel" value="${esc(e.nivel||"")}" placeholder="Nivel" aria-label="Nivel educativo"><select id="ce-s-${esc(e.id)}" data-f="estado" aria-label="Situación"><option value="activo"${e.estado!=="desvinculado"?" selected":""}>Sigue en el curso</option><option value="desvinculado"${e.estado==="desvinculado"?" selected":""}>Se desvinculó</option></select>${delBtn("estudiantes",i)}</div>`).join(""):'<p class="muted">Lista vacía.</p>';
 }
 function bindList(sel,key){
   const h=e=>{const it=e.target.closest(".cfg-item"); if(!it||!e.target.dataset.f) return; draft[key][+it.dataset.i][e.target.dataset.f]=e.target.value; marcarCambio();};
@@ -1401,6 +1418,62 @@ $("#hz-weeks").addEventListener("input",e=>{ if(!hzSemana) return;
   if(kt){ hzSemana.celdas[kt].t=e.target.value; hzSemana.celdas[kt].col=""; }
   if(kn) hzSemana.celdas[kn].n=e.target.value; });
 
+
+// ---------- Fotos de los participantes ----------
+// Se guardan en Supabase Storage (bucket privado «fotos», archivo <id>.jpg). Solo los docentes autorizados las ven;
+// solo la coordinación sube o quita. No van en informes, CSV, imágenes ni respaldos.
+let fotos={}, fotosEn=0;
+const iniciales=n=>String(n||"").trim().split(/\s+/).filter(Boolean).map(w=>w[0]).filter((c,i,a)=>i===0||i===a.length-1).join("").toUpperCase()||"?";
+const hueDe=id=>{let h=0; for(const c of String(id)) h=(h*37+c.charCodeAt(0))%360; return h};
+function avatar(sid,cls=""){ const e=cfg.estudiantes.find(x=>x.id===sid)||{}, f=fotos[sid];
+  return f?`<img class="av ${cls}" src="${esc(f)}" alt="" loading="lazy" decoding="async">`:`<span class="av ini ${cls}" style="--h:${hueDe(sid)}" aria-hidden="true">${esc(iniciales(e.nombre))}</span>`; }
+async function cargarFotos(){
+  if(!sb||!sb.storage) return;
+  try{ const r=await sb.storage.from("fotos").list("",{limit:500}); if(r.error||!r.data) return;
+    const ids=new Set(cfg.estudiantes.map(e=>e.id)), paths=r.data.map(o=>o.name).filter(n=>/\.jpg$/.test(n)&&ids.has(n.slice(0,-4)));
+    const nuevo={};
+    if(paths.length){ const u=await sb.storage.from("fotos").createSignedUrls(paths,60*60*12); if(u.error) return;
+      (u.data||[]).forEach(x=>{ if(x&&x.signedUrl&&x.path) nuevo[x.path.slice(0,-4)]=x.signedUrl; }); }
+    fotos=nuevo; fotosEn=Date.now(); renderAll();
+  }catch(e){}
+}
+setInterval(()=>{ if(sb&&perfil&&perfil.autorizado&&Date.now()-fotosEn>6*3600e3) cargarFotos(); },10*60e3);
+function recortarFoto(file){ return new Promise((ok,ko)=>{ const url=URL.createObjectURL(file), im=new Image();
+  im.onload=()=>{ const sd=Math.min(im.naturalWidth,im.naturalHeight), x=(im.naturalWidth-sd)/2, y=(im.naturalHeight-sd)*0.3, T=Math.min(256,sd);
+    const cv=document.createElement("canvas"); cv.width=T; cv.height=T; const c=cv.getContext("2d"); c.imageSmoothingQuality="high"; c.drawImage(im,x,y,sd,sd,0,0,T,T);
+    URL.revokeObjectURL(url); cv.toBlob(b=>b?ok(b):ko(new Error("imagen")),"image/jpeg",0.86); };
+  im.onerror=()=>{URL.revokeObjectURL(url); ko(new Error("imagen"));}; im.src=url; }); }
+async function subirFoto(sid,file){ const blob=await recortarFoto(file);
+  const r=await sb.storage.from("fotos").upload(sid+".jpg",blob,{upsert:true,contentType:"image/jpeg",cacheControl:"3600"}); if(r.error) throw r.error; }
+const normNom=t=>String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/z/g,"s").replace(/y/g,"i").replace(/[^a-zñ\s]/g," ").split(/\s+/).filter(Boolean);
+function estDeArchivo(nombre){ const base=nombre.replace(/\.[^.]+$/,""), m=base.match(/^(e\d+)\b/i), ests=cfg.estudiantes;
+  if(m){ const e=ests.find(x=>x.id.toLowerCase()===m[1].toLowerCase()); if(e) return e; }
+  const w=normNom(base.replace(/^e\d+\s*-?\s*/i,"")); if(!w.length) return null;
+  const igual=ests.filter(e=>normNom(e.nombre).join(" ")===w.join(" ")); if(igual.length===1) return igual[0];
+  const sub=ests.filter(e=>{const a=new Set(normNom(e.nombre)); return w.every(x=>a.has(x))||[...a].every(x=>w.includes(x));}); return sub.length===1?sub[0]:null; }
+let fotoPara=null;
+const elegirFoto=sid=>{ fotoPara=sid; $("#c-foto-uno").value=""; $("#c-foto-uno").click(); };
+$("#c-est").addEventListener("click",e=>{ const b=e.target.closest("[data-foto]"); if(!b||!canAdmin) return; const sid=b.dataset.foto;
+  if(!fotos[sid]){ elegirFoto(sid); return }
+  const est=cfg.estudiantes.find(x=>x.id===sid)||{nombre:sid};
+  $("#c-fotos-status").innerHTML=`Foto de <b>${esc(est.nombre)}</b>: <button class="btn sm" type="button" data-fa="cambiar" data-sid="${esc(sid)}">Cambiar</button> <button class="btn sm danger" type="button" data-fa="quitar" data-sid="${esc(sid)}">Quitar</button> <button class="btn sm" type="button" data-fa="no">Cancelar</button>`; });
+$("#c-fotos-status").addEventListener("click",async e=>{ const b=e.target.closest("[data-fa]"); if(!b) return; const st=$("#c-fotos-status");
+  if(b.dataset.fa==="no"){ st.textContent=""; return }
+  if(b.dataset.fa==="cambiar"){ st.textContent=""; elegirFoto(b.dataset.sid); return }
+  if(b.dataset.fa==="quitar"){ try{ await quitarFoto(b.dataset.sid); st.textContent="Foto quitada ✓"; }catch(err){ st.textContent="No se pudo quitar la foto."; } } });
+$("#c-foto-uno").onchange=async e=>{ const f=e.target.files[0], st=$("#c-fotos-status"); if(!f||!fotoPara) return;
+  const est=cfg.estudiantes.find(x=>x.id===fotoPara)||{nombre:fotoPara}; st.textContent="Subiendo la foto…";
+  try{ await subirFoto(fotoPara,f); await cargarFotos(); st.textContent=`Foto de ${est.nombre} guardada ✓`; }
+  catch(err){ st.textContent=esSinPermiso(err)||/row-level|policy|403|Unauthorized/i.test(String(err&&err.message))?"Solo la coordinación puede subir fotos.":"No se pudo subir la foto. Revisá la conexión y volvé a intentar."; } };
+$("#c-fotos-varias").onclick=()=>{ $("#c-fotos-in").value=""; $("#c-fotos-in").click(); };
+$("#c-fotos-in").onchange=async e=>{ const fs=[...e.target.files], st=$("#c-fotos-status"); if(!fs.length) return;
+  const asig=[], sin=[]; fs.forEach(f=>{ const est=estDeArchivo(f.name); est?asig.push([est,f]):sin.push(f.name); });
+  let ok=0, mal=[];
+  for(const [est,f] of asig){ st.textContent=`Subiendo ${ok+mal.length+1} de ${asig.length}…`; try{ await subirFoto(est.id,f); ok++; }catch(err){ mal.push(est.nombre); } }
+  await cargarFotos();
+  st.innerHTML=`Listo ✓ ${ok} foto${ok===1?"":"s"} guardada${ok===1?"":"s"}.`+(sin.length?` <b>Sin participante reconocido:</b> ${sin.map(esc).join(", ")}. Subilas tocando la foto de cada uno.`:"")+(mal.length?` <b>No se pudieron subir:</b> ${mal.map(esc).join(", ")}.`:""); };
+async function quitarFoto(sid){ const r=await sb.storage.from("fotos").remove([sid+".jpg"]); if(r.error) throw r.error; delete fotos[sid]; renderAll(); }
+
 // ---------- Respaldo completo (archivo .sql que reconstruye la base) ----------
 async function leerTabla(t,orden){const out=[];
   for(let a=0;;a+=1000){const {data,error}=await sb.from(t).select("*").order(orden,{ascending:true}).range(a,a+999);
@@ -1571,7 +1644,7 @@ function renderEval(){
   setHTML(gbox,`<div class="panel"><h2 style="font-size:1.1rem;margin-bottom:4px">${comp===TECNICOS?"Informe grupal de los técnicos":"Juicio sobre el grupo"}</h2><p class="note" style="margin:0 0 8px">${esc(compNombre(comp))} · ${esc(inst.nombre||"")}${tema&&comp!==TECNICOS?" · "+esc(tema):""}</p><div class="stu-body" style="border:0;padding:0">${actividad}${campos(C.gru,"_grupo")}</div></div>`);
   setHTML(box,est.map((s,i)=>{const open=eOpen===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
-      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span><span class="name">${esc(s.nombre)}</span><span class="sum jsum muted num" aria-hidden="true"></span><span class="chev" aria-hidden="true">▾</span></button>
+      <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span>${avatar(s.id)}<span class="name">${esc(s.nombre)}</span><span class="sum jsum muted num" aria-hidden="true"></span><span class="chev" aria-hidden="true">▾</span></button>
       ${open?`<div class="stu-body">${nota(s.id)}${campos(C.est,s.id)}${rub(s.id)}
         <div class="stu-foot"><button type="button" class="btn primary next">${i<est.length-1?"Siguiente estudiante →":"Terminar"}</button></div></div>`:""}
     </div>`}).join(""));
@@ -1831,7 +1904,7 @@ async function entrar(session){
     $$(".view").forEach(x=>x.hidden=true); $("nav.tabs").hidden=true;
     $("#ro").innerHTML+="<br><br>Usted entró como <b>"+esc(perfil.email)+"</b>. Si ese no es el correo que le dio la coordinación, toque «Salir» y entre con el correcto."; return; }
   try{ await cargarTodo(); }catch(e){ $("#conn").className="banner error"; $("#conn").textContent="No se pudieron leer los datos. Recargue la página."; return; }
-  $("#conn").hidden=true; marcarEstado("ok","Puede guardar"); escuchar(); cargarDocentes();
+  $("#conn").hidden=true; marcarEstado("ok","Puede guardar"); escuchar(); cargarDocentes(); cargarFotos();
 }
 
 // ---------- Ingreso ----------

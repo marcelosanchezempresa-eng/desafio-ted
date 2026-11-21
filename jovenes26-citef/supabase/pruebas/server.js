@@ -33,15 +33,32 @@ async function rpc(b){const {email,fn,args}=b;
     if(fn==="evaluar_hito"){await c.query("select public.evaluar_hito($1,$2)",[args.p_id,JSON.stringify(args.p_cambios)]);return {id:args.p_id,table:"hitos"}}
     throw new Error("fn")})}
 async function reemitir(table,id){const r=(await pool.query(`select * from public.${table} where ${table==="docentes"?"email":"id"}=$1`,[id])).rows[0];if(r)emitir(table,"UPDATE",fix(r))}
+const STDIR=path.join(__dirname,"storage-fotos");fs.mkdirSync(STDIR,{recursive:true});const TOK=new Map();
+const okName=n=>/^[A-Za-z0-9_-]+\.jpg$/.test(n);
+async function st(b){const {email,op,bucket,paths=[],data}=b;
+  return como(email,async c=>{
+    if(op==="list")return (await c.query("select name, updated_at from storage.objects where bucket_id=$1 order by name",[bucket])).rows.map(fix);
+    if(op==="up"){const n=paths[0];if(!okName(n))throw new Error("nombre");
+      await c.query("insert into storage.objects(bucket_id,name) values($1,$2) on conflict (bucket_id,name) do update set updated_at=now()",[bucket,n]);
+      fs.writeFileSync(path.join(STDIR,n),Buffer.from(data,"base64"));return {path:n}}
+    if(op==="rm"){const r=(await c.query("delete from storage.objects where bucket_id=$1 and name = any($2) returning name",[bucket,paths])).rows;
+      r.forEach(x=>{try{fs.unlinkSync(path.join(STDIR,x.name))}catch(e){}});return r}
+    if(op==="urls"){const vis=new Set((await c.query("select name from storage.objects where bucket_id=$1 and name = any($2)",[bucket,paths])).rows.map(x=>x.name));
+      return paths.map(n=>{if(!vis.has(n))return {path:n,error:"Object not found",signedUrl:null};const t=Math.random().toString(36).slice(2);TOK.set(t,n);return {path:n,signedUrl:"/st/get/"+n+"?token="+t}})}
+    throw new Error("op")})}
 http.createServer(async(req,res)=>{
+  if(req.url.startsWith("/st/get/")){const u=new URL(req.url,"http://x"),n=decodeURIComponent(u.pathname.slice(8));
+    if(TOK.get(u.searchParams.get("token"))!==n||!okName(n)){res.writeHead(400);res.end();return}
+    fs.readFile(path.join(STDIR,n),(e,d)=>{if(e){res.writeHead(404);res.end();return}res.writeHead(200,{"content-type":"image/jpeg"});res.end(d)});return}
   if(req.url==="/events"){res.writeHead(200,{"content-type":"text/event-stream","cache-control":"no-cache"});res.write(":ok\n\n");subs.add(res);req.on("close",()=>subs.delete(res));return}
-  if(req.method==="POST"){let body="";req.on("data",d=>body+=d);req.on("end",async()=>{const b=JSON.parse(body);
+  if(req.method==="POST"){let body="";req.setEncoding("utf8");req.on("data",d=>body+=d);req.on("end",async()=>{const b=JSON.parse(body);
     try{await new Promise(r=>setTimeout(r,150));let data;
       if(req.url==="/signup"){ // imita GoTrue: inserta en auth.users como el servicio de autenticación (dispara el trigger)
         try{const ex=(await pool.query("select 1 from auth.users where lower(email)=lower($1)",[b.email])).rowCount;
           if(ex)throw {message:"User already registered"};
           await pool.query("insert into auth.users(email) values($1)",[b.email]);data={ok:true}}
         catch(e){res.writeHead(200,{"content-type":"application/json"});res.end(JSON.stringify({error:{message:e.message==="User already registered"?e.message:"Database error saving new user"}}));return}}
+      else if(req.url==="/st"){data=await st(b)}
       else if(req.url==="/rpc"){data=await rpc(b);if(data&&data.table){await reemitir(data.table,data.id);data=null}}
       else{const r=await q(b);if(b.op==="select")data=r;else{data=r.rows;for(const row of r.rows)if(b.table!=="docentes")emitir(b.table,b.op==="delete"?"DELETE":"UPDATE",row)}}
       res.writeHead(200,{"content-type":"application/json"});res.end(JSON.stringify({data}))}

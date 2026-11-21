@@ -13,6 +13,11 @@ window.supabase={createClient(){const cbs=[];const fire=(ev)=>{const s=me()?{use
     async signInWithPassword({email,password}){if(password!=="clave1234")return{error:{message:"Invalid login credentials"}};localStorage.setItem("mockEmail",email);fire("SIGNED_IN");return{error:null}},
     async signUp({email,password}){const r=await post("/signup",{email});if(r.error)return{data:{},error:r.error};localStorage.setItem("mockEmail",email);fire("SIGNED_IN");return{data:{session:{user:{email}}},error:null}},async resetPasswordForEmail(){return{error:null}},async updateUser(){return{error:null}},
     async signOut(){localStorage.removeItem("mockEmail");fire("SIGNED_OUT");return{error:null}}},
+  storage:{from(bucket){const call=(op,o)=>post("/st",{op,bucket,email:me(),...o}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null});
+    return{list(){return call("list",{})},
+      async upload(p,blob){const buf=new Uint8Array(await blob.arrayBuffer());let bin="";for(let i=0;i<buf.length;i+=8192)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+8192));return call("up",{paths:[p],data:btoa(bin)})},
+      remove(paths){return call("rm",{paths})},
+      createSignedUrls(paths){return call("urls",{paths})}}}},
   rpc:(fn,args)=>post("/rpc",{fn,args,email:me()}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null}),
   from:t=>builder(t),
   channel(){const hs=[];const ch={on(_t,f,cb){hs.push([f.table,cb]);return ch},subscribe(cb){const es=new EventSource("/events");

@@ -141,3 +141,21 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 **Pantalla de inicio:** cada docente ve «Hoy tenés clase…» o «Tu próxima clase…».
 
 > Los avisos aparecen al abrir la app. No llegan como notificación al teléfono con la app cerrada.
+
+## Fotos de los participantes
+**Una sola vez:** SQL Editor → New query → pegar `jovenes26-citef/supabase/fotos-participantes.sql` → **Run**. Crea un espacio privado para las fotos:
+- las ven solo los docentes y la coordinación autorizados, con su contraseña;
+- solo la coordinación puede subirlas, cambiarlas o quitarlas.
+
+**Subirlas (coordinación):** Configuración → Estudiantes → **«Subir varias fotos»** → elegí todos los archivos juntos.
+- Cada archivo se reconoce por el id (`e01 - …`) o por el nombre del participante, sin importar tildes ni mayúsculas.
+- La app avisa si algún archivo no coincide con nadie.
+- La app recorta cada foto en cuadrado y la achica antes de guardarla.
+
+**Cambiar o quitar una foto:** tocá la foto del participante en la lista. Si alguien no tiene foto, al tocar su círculo de iniciales se sube una.
+
+**Dónde aparecen:** en Registrar clase, Hitos, Evaluaciones, Ranking y la Ficha. Quien no tiene foto aparece con sus iniciales en un círculo de color.
+
+**Dónde no aparecen:** en los informes para INEFOP, los CSV, la imagen del horario ni el respaldo completo. Guardá las fotos originales aparte.
+
+> Las fotos son datos personales (Ley 18.331). Nunca se suben a GitHub: van directo del dispositivo de la coordinación al espacio privado de Supabase.
