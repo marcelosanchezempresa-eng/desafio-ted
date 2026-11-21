@@ -18,4 +18,8 @@ create policy j26_fotos_subir   on storage.objects for insert to authenticated w
 create policy j26_fotos_cambiar on storage.objects for update to authenticated using (bucket_id = 'fotos' and public.es_coordinacion()) with check (bucket_id = 'fotos' and public.es_coordinacion());
 create policy j26_fotos_quitar  on storage.objects for delete to authenticated using (bucket_id = 'fotos' and public.es_coordinacion());
 
-select id, public, file_size_limit from storage.buckets where id = 'fotos';
+-- Comprobación: tiene que mostrar el espacio «fotos» (privado) y los 4 permisos.
+select 'espacio' as que, id as nombre, case when public then 'PÚBLICO (revisar)' else 'privado' end as detalle from storage.buckets where id = 'fotos'
+union all
+select 'permiso', policyname::text, cmd::text from pg_policies where schemaname = 'storage' and tablename = 'objects' and policyname like 'j26_fotos%'
+order by 1, 2;
