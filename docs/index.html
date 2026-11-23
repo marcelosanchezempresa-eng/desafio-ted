@@ -1062,7 +1062,7 @@ function renderFicha(){
   body.innerHTML=`<div class="panel"><div class="ficha-head">${avatar(sid,"lg")}<div><h2 style="font-size:1.3rem">${esc(est.nombre)}</h2><span class="muted">${esc(est.nivel||"")}</span></div></div>
     <div class="kpis" style="margin-top:12px">
       <div class="kpi"><b>${s.idx===null?"—":s.idx}</b><span>Índice del período</span></div>
-      <div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>
+      ${(()=>{const sa=stats("all")[sid], sin=!sa||sa.idx===null||sa.n<cfg.min; return sin?`<div class="kpi"><b>—</b><span>Puesto en el acumulado: todavía sin datos suficientes (mín. ${cfg.min} registros)</span></div>`:`<div class="kpi"><b>${pos||"—"}º</b><span>Puesto en el acumulado</span></div>`})()}
       ${DIMS.map((d,i)=>`<div class="kpi"><b style="color:var(--${bandVar(s.pct[i])})">${s.pct[i]===null?"—":s.pct[i]+"%"}</b><span>${esc(d.n)}</span></div>`).join("")}
     </div></div>
     <div class="grid2">
