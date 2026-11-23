@@ -19,7 +19,8 @@ async function abrir(email,w=1100,h=900){const ctx=await b.newContext({viewport:
   await ctx.route(/cdn\.jsdelivr\.net\/npm\/@supabase/,r=>r.fulfill({contentType:"text/javascript",body:MOCK}));
   await ctx.addInitScript(e=>{try{localStorage.clear();localStorage.setItem("mockEmail",e)}catch(x){}},email);
   const p=await ctx.newPage();p.on("pageerror",e=>errs.push(e.message));await p.goto("http://localhost:8765/");await p.waitForTimeout(1500);return p}
-const filas=async()=>(await pool.query("select name from storage.objects where bucket_id='fotos' order by name")).rows.map(r=>r.name);
+const filasRaw=async()=>(await pool.query("select name from storage.objects where bucket_id='fotos' order by name")).rows.map(r=>r.name);
+const filas=async()=>(await filasRaw()).map(n=>n.replace(/__[a-z0-9]+\.jpg$/,".jpg"));
 console.log("1) La coordinación sube varias fotos");
 const C=await abrir("coord@ej.uy");await C.click("[data-tab=config]");await C.waitForTimeout(400);
 ok(await C.isVisible("#c-fotos-varias"),"ve «Subir varias fotos»");
@@ -27,7 +28,8 @@ await C.setInputFiles("#c-fotos-in",fs.readdirSync(TMP).map(f=>TMP+f));await C.w
 const msg=await C.textContent("#c-fotos-status");console.log("    «"+msg+"»");
 ok(JSON.stringify(await filas())==='["e0.jpg","e1.jpg","e2.jpg"]',"se guardaron 3 (por id, por nombre y sin importar mayúsculas): "+(await filas()).join(", "));
 ok(msg.includes("3 fotos guardadas")&&msg.includes("Desconocido Perez"),"avisa cuál archivo no reconoció");
-const dim=execFileSync("python3",["-I","-c","from PIL import Image;import sys;print(Image.open(sys.argv[1]).size)",__dirname+"/storage-fotos/e0.jpg"]).toString().trim();
+const f0=(await filasRaw()).find(n=>n.startsWith("e0__"));ok(!!f0,"cada foto se guarda con nombre propio de versión: "+f0);
+const dim=execFileSync("python3",["-I","-c","from PIL import Image;import sys;print(Image.open(sys.argv[1]).size)",__dirname+"/storage-fotos/"+f0]).toString().trim();
 ok(dim==="(256, 256)","la app recorta en cuadrado y achica: "+dim);
 console.log("2) El docente las ve");
 const L=await abrir("lect@ej.uy",430);await L.selectOption("#r-comp","lectoescritura");await L.waitForTimeout(500);
@@ -50,6 +52,17 @@ await C.locator('[data-foto="e3"]').click();await C.waitForTimeout(200);
 await C.setInputFiles("#c-foto-uno",TMP+"Desconocido Perez.jpg");await C.waitForTimeout(1500);
 ok((await filas()).includes("e3.jpg"),"tocar a alguien sin foto sube una foto para esa persona: «"+await C.textContent("#c-fotos-status")+"»");
 await C.locator("#c-est").screenshot({path:OUT+"fotos-config.png",clip:undefined}).catch(()=>{});
+console.log("4b) Reemplazar una foto subida con la versión anterior (mismo nombre e2.jpg)");
+await pool.query("insert into storage.objects(bucket_id,name) values('fotos','e2.jpg') on conflict do nothing");fs.writeFileSync(__dirname+"/storage-fotos/e2.jpg",fs.readFileSync(TMP+"Bruno Ejemplo.jpg"));
+await pool.query("delete from storage.objects where name like 'e2\\_\\_%'");
+await C.reload();await C.waitForTimeout(1500);await C.click("[data-tab=config]");await C.waitForTimeout(400);
+const antesSrc=await C.locator('[data-foto="e2"] img').getAttribute("src");
+await C.locator('[data-foto="e2"]').click();await C.waitForTimeout(200);await C.click('[data-fa="cambiar"]');
+await C.setInputFiles("#c-foto-uno",TMP+"CARLA ejemplo.jpg");await C.waitForTimeout(1800);
+const e2=(await filasRaw()).filter(n=>n.startsWith("e2"));ok(e2.length===1&&e2[0].startsWith("e2__"),"queda una sola foto, con nombre nuevo (la vieja e2.jpg se borró): "+e2.join(", "));
+const despSrc=await C.locator('[data-foto="e2"] img').getAttribute("src");ok(despSrc!==antesSrc&&despSrc.includes(e2[0]),"la app ya muestra la foto nueva (otra dirección, sin caché vieja)");
+const L2=await abrir("lect@ej.uy",430);await L2.selectOption("#r-comp","lectoescritura");await L2.waitForTimeout(500);
+ok((await L2.locator("#r-list .stu").nth(2).locator("img.av").getAttribute("src")).includes(e2[0]),"el docente, al abrir la app, ve la foto nueva");
 console.log("5) Las fotos no salen en descargas");
 const csv=await C.evaluate(()=>document.documentElement.outerHTML.includes("storage-fotos"));ok(!csv,"sin rutas de archivos en la página");
 console.log("errores JS:",errs.length?errs:"ninguno");console.log(fa?fa+" FALLAS":"TODO OK");await b.close();await pool.end();process.exit(fa?1:0)})();

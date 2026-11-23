@@ -1427,13 +1427,19 @@ const iniciales=n=>String(n||"").trim().split(/\s+/).filter(Boolean).map(w=>w[0]
 const hueDe=id=>{let h=0; for(const c of String(id)) h=(h*37+c.charCodeAt(0))%360; return h};
 function avatar(sid,cls=""){ const e=cfg.estudiantes.find(x=>x.id===sid)||{}, f=fotos[sid];
   return f?`<img class="av ${cls}" src="${esc(f)}" alt="" loading="lazy" decoding="async">`:`<span class="av ini ${cls}" style="--h:${hueDe(sid)}" aria-hidden="true">${esc(iniciales(e.nombre))}</span>`; }
+let fotoArchivos=[];
+const fotoArchivo=n=>{ const m=/^(.+?)(?:__([a-z0-9]+))?\.jpg$/.exec(n||""); return m?{sid:m[1],v:m[2]?parseInt(m[2],36):0}:null; };
+const archivosDe=sid=>fotoArchivos.filter(n=>{const x=fotoArchivo(n); return x&&x.sid===sid;});
 async function cargarFotos(){
   if(!sb||!sb.storage) return;
   try{ const r=await sb.storage.from("fotos").list("",{limit:500}); if(r.error||!r.data) return;
-    const ids=new Set(cfg.estudiantes.map(e=>e.id)), paths=r.data.map(o=>o.name).filter(n=>/\.jpg$/.test(n)&&ids.has(n.slice(0,-4)));
-    const nuevo={};
+    // Cada versión tiene su propio nombre (<id>__<versión>.jpg) para que la caché nunca muestre una foto vieja.
+    const ids=new Set(cfg.estudiantes.map(e=>e.id)), ultima={};
+    r.data.forEach(o=>{ const x=fotoArchivo(o.name); if(x&&ids.has(x.sid)&&(!ultima[x.sid]||x.v>ultima[x.sid].v)) ultima[x.sid]={v:x.v,name:o.name}; });
+    fotoArchivos=r.data.map(o=>o.name);
+    const paths=Object.values(ultima).map(x=>x.name), deCual=Object.fromEntries(Object.entries(ultima).map(([sid,x])=>[x.name,sid])), nuevo={};
     if(paths.length){ const u=await sb.storage.from("fotos").createSignedUrls(paths,60*60*12); if(u.error) return;
-      (u.data||[]).forEach(x=>{ if(x&&x.signedUrl&&x.path) nuevo[x.path.slice(0,-4)]=x.signedUrl; }); }
+      (u.data||[]).forEach(x=>{ if(x&&x.signedUrl&&x.path&&deCual[x.path]) nuevo[deCual[x.path]]=x.signedUrl; }); }
     fotos=nuevo; fotosEn=Date.now(); renderAll();
   }catch(e){}
 }
@@ -1443,8 +1449,9 @@ function recortarFoto(file){ return new Promise((ok,ko)=>{ const url=URL.createO
     const cv=document.createElement("canvas"); cv.width=T; cv.height=T; const c=cv.getContext("2d"); c.imageSmoothingQuality="high"; c.drawImage(im,x,y,sd,sd,0,0,T,T);
     URL.revokeObjectURL(url); cv.toBlob(b=>b?ok(b):ko(new Error("imagen")),"image/jpeg",0.86); };
   im.onerror=()=>{URL.revokeObjectURL(url); ko(new Error("imagen"));}; im.src=url; }); }
-async function subirFoto(sid,file){ const blob=await recortarFoto(file);
-  const r=await sb.storage.from("fotos").upload(sid+".jpg",blob,{upsert:true,contentType:"image/jpeg",cacheControl:"3600"}); if(r.error) throw r.error; }
+async function subirFoto(sid,file){ const blob=await recortarFoto(file), viejos=archivosDe(sid), nombre=`${sid}__${Date.now().toString(36)}.jpg`;
+  const r=await sb.storage.from("fotos").upload(nombre,blob,{upsert:false,contentType:"image/jpeg",cacheControl:"3600"}); if(r.error) throw r.error;
+  fotoArchivos.push(nombre); if(viejos.length){ await sb.storage.from("fotos").remove(viejos); fotoArchivos=fotoArchivos.filter(n=>!viejos.includes(n)); } }
 const normNom=t=>String(t||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().replace(/z/g,"s").replace(/y/g,"i").replace(/[^a-zñ\s]/g," ").split(/\s+/).filter(Boolean);
 function estDeArchivo(nombre){ const base=nombre.replace(/\.[^.]+$/,""), m=base.match(/^(e\d+)\b/i), ests=cfg.estudiantes;
   if(m){ const e=ests.find(x=>x.id.toLowerCase()===m[1].toLowerCase()); if(e) return e; }
@@ -1472,7 +1479,7 @@ $("#c-fotos-in").onchange=async e=>{ const fs=[...e.target.files], st=$("#c-foto
   for(const [est,f] of asig){ st.textContent=`Subiendo ${ok+mal.length+1} de ${asig.length}…`; try{ await subirFoto(est.id,f); ok++; }catch(err){ mal.push(est.nombre); } }
   await cargarFotos();
   st.innerHTML=`Listo ✓ ${ok} foto${ok===1?"":"s"} guardada${ok===1?"":"s"}.`+(sin.length?` <b>Sin participante reconocido:</b> ${sin.map(esc).join(", ")}. Subilas tocando la foto de cada uno.`:"")+(mal.length?` <b>No se pudieron subir:</b> ${mal.map(esc).join(", ")}.`:""); };
-async function quitarFoto(sid){ const r=await sb.storage.from("fotos").remove([sid+".jpg"]); if(r.error) throw r.error; delete fotos[sid]; renderAll(); }
+async function quitarFoto(sid){ const todos=archivosDe(sid); const r=await sb.storage.from("fotos").remove(todos.length?todos:[sid+".jpg"]); if(r.error) throw r.error; fotoArchivos=fotoArchivos.filter(n=>!todos.includes(n)); delete fotos[sid]; renderAll(); }
 
 // ---------- Respaldo completo (archivo .sql que reconstruye la base) ----------
 async function leerTabla(t,orden){const out=[];
