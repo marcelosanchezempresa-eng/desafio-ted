@@ -159,3 +159,10 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 **Dónde no aparecen:** en los informes para INEFOP, los CSV, la imagen del horario ni el respaldo completo. Guardá las fotos originales aparte.
 
 > Las fotos son datos personales (Ley 18.331). Nunca se suben a GitHub: van directo del dispositivo de la coordinación al espacio privado de Supabase.
+
+## Ranking y clases pendientes
+- **Puesto en el ranking:** solo lleva número quien tiene el mínimo de registros del período (Configuración → «Mín. registros para rankear»).
+- **«Todavía sin datos suficientes»:** los demás aparecen en esta sección aparte, sin puesto, con su índice parcial y cuántos registros tienen (por ejemplo, «2/10 reg.»).
+- **Etiqueta «Entrevista»:** marca a quien tiene algún aspecto por debajo del 50 % o al menos el 15 % de sus marcas en «No logrado».
+- **«Ranking provisorio»:** mientras haya participantes sin datos suficientes, la coordinación ve este aviso. Incluye cuántas clases del horario de los últimos 14 días faltan registrar, por componente.
+- **Aviso a cada docente:** en el inicio aparecen sus clases del horario sin registrar, con un botón que abre esa fecha y ese componente. No se cuentan los bloques «sin calificación» ni los recesos.
