@@ -720,7 +720,8 @@ function startDay(){
 }
 function periodOptions(tipo){
   if(tipo==="curso") return [{v:"all",t:"Todo el curso (acumulado)"}];
-  if(tipo==="modulo") return (cfg.modulos||[]).filter(m=>m.desde&&m.hasta).map(m=>({v:dayNum(m.desde)+":"+dayNum(m.hasta),t:m.nombre+" · "+fmt(m.desde)+" al "+fmt(m.hasta)})).reverse();
+  // Módulos en orden cronológico (Módulo 1 arriba); semanas y quincenas, la más reciente primero.
+  if(tipo==="modulo") return (cfg.modulos||[]).filter(m=>m.desde&&m.hasta).slice().sort((a,b)=>a.desde.localeCompare(b.desde)).map(m=>({v:dayNum(m.desde)+":"+dayNum(m.hasta),t:m.nombre+" · "+fmt(m.desde)+" al "+fmt(m.hasta)}));
   const len=tipo==="semana"?7:14, s=startDay();
   let last=dayNum(todayStr()); if(cfg.fin) last=Math.min(last,dayNum(cfg.fin));
   Object.values(clases).forEach(c=>{if(c.fecha) last=Math.max(last,dayNum(c.fecha))});
@@ -738,6 +739,10 @@ function fillPeriodSelectors(){
     const opts=periodOptions(sel.value);
     per.innerHTML=opts.length?opts.map(o=>`<option value="${o.v}">${esc(o.t)}</option>`).join(""):'<option value="none">Sin períodos todavía</option>';
     if(opts.some(o=>o.v===prev)) per.value=prev;
+    else if(sel.value==="modulo"&&opts.length){ // por defecto, el módulo en curso (o el último que empezó)
+      const hoy=dayNum(todayStr()), rango=o=>o.v.split(":").map(Number);
+      const cur=opts.find(o=>{const [a,b]=rango(o);return hoy>=a&&hoy<=b})||opts.filter(o=>rango(o)[0]<=hoy).pop()||opts[0];
+      per.value=cur.v; }
     per.onchange=renderAll;
   });
 }
