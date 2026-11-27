@@ -139,6 +139,18 @@ textarea{width:100%;min-height:60px;resize:vertical}
 .foto-btn{all:unset;cursor:pointer;border-radius:50%;line-height:0}
 .foto-btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .foto-acc{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+/* Evidencias (archivos adjuntos) */
+.evid{margin-top:8px;border:1.5px dashed var(--line);border-radius:10px;padding:10px 12px;background:var(--surface)}
+.evid-h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between}
+.evid-h b{font-size:.9rem}
+.evid-h .note{margin:0;font-size:.8rem}
+.evid ul{list-style:none;margin:8px 0 0;padding:0;display:flex;flex-direction:column;gap:6px}
+.evid li{display:flex;align-items:center;gap:10px;background:var(--surface-2);border-radius:8px;padding:6px 8px;min-width:0}
+.evid li .ic{width:38px;height:38px;border-radius:6px;flex:none;display:flex;align-items:center;justify-content:center;font:800 .62rem var(--font-display);color:#fff;letter-spacing:.02em;object-fit:cover}
+.evid li .fn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:700;font-size:.88rem}
+.evid li .fn small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
+.evid li .btn{min-height:32px;padding:3px 9px;font-size:.82rem}
+.evid .st{margin:6px 0 0;font-size:.82rem;color:var(--muted)}
 .stu-head .sum{display:flex;gap:5px}
 .stu-head .chev{color:var(--muted);transition:transform .15s}
 .stu[open-card] .chev{transform:rotate(180deg)}
@@ -415,6 +427,7 @@ button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid va
     </div>
     <div id="e-grupo"></div>
     <div class="students" id="e-list"></div>
+    <input type="file" id="ev-in" multiple hidden accept=".pdf,.doc,.docx,.odt,.ppt,.pptx,.odp,.xls,.xlsx,.ods,.txt,image/*,video/*,audio/*">
     <div class="panel" id="e-inf" hidden>
       <h2 style="font-size:1.15rem;margin-bottom:6px">Informes para INEFOP</h2>
       <p class="note">Para la instancia elegida arriba. El Word se puede editar antes de enviarlo. En el Hito 4 solo entran los participantes que sostienen hasta el final.</p>
@@ -429,6 +442,9 @@ button.hz-slot{cursor:pointer} button.hz-slot:focus-visible{outline:3px solid va
       <h3 style="font-size:.98rem;margin:14px 0 6px">Listas de asistencia diaria <span class="muted" style="font-weight:400">(por componente, desde el inicio del curso hasta la fecha del hito)</span></h3>
       <div class="row"><button class="btn" id="i-aword" type="button">Word</button><button class="btn" id="i-apdf" type="button">PDF</button><button class="btn" id="i-acsv" type="button">Excel (CSV)</button></div>
       <p class="status" id="i-status"></p>
+      <h3 style="font-size:.98rem;margin:10px 0 6px">Evidencias adjuntas <span class="muted" style="font-weight:400">(actividades y producciones de todos los componentes)</span></h3>
+      <div class="row"><button class="btn" id="i-evzip" type="button">Descargar evidencias (ZIP)</button></div>
+      <p class="status" id="i-evst"></p>
     </div>
   </section>
 
@@ -991,6 +1007,8 @@ function renderHitoEval(){
   const h=hitos[selHito], ev=h.ev||{};
   setHTML(box,`<div class="row" style="justify-content:space-between;align-items:baseline"><h2 style="font-size:1.1rem">${esc(h.nombre)}</h2><span class="muted">${esc(TIPOS[h.tipo]||"")} · ${h.fecha?fmt(h.fecha):"sin fecha"}</span></div>
     <p class="note">Verde: ${esc(HITO_LV.v)} Amarillo: ${esc(HITO_LV.a)} Rojo: ${esc(HITO_LV.r)}</p>
+    ${evidHTML(`${h.comp}/hito/${selHito}`,h.comp,"Evidencias del hito","Consigna, entregas o fotos del trabajo realizado.")}
+    <div class="row" style="margin-top:6px;gap:8px;align-items:center"><button class="btn" type="button" id="h-zip">Descargar evidencias (ZIP)</button><span class="status" id="h-zip-st" style="margin:0"></span></div>
     <p class="status" id="h-estatus"></p>
     <div>${activos().map(s=>`<div class="hrow" data-sid="${esc(s.id)}"><span class="nm">${avatar(s.id,"sm")}${esc(s.nombre)}</span>
       ${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false" aria-label="${LV[l].t}"><span class="dot ${l}"></span></button>`).join("")}
@@ -1000,6 +1018,7 @@ function renderHitoEval(){
   $$("#h-eval .hrow").forEach(row=>{const e=ev[row.dataset.sid]||{};
     row.querySelectorAll(".lvl").forEach(b=>b.setAttribute("aria-pressed",String(e.l===b.dataset.l)));
     const inp=row.querySelector(".obs-in"); inp.hidden=blank(e.l); if(document.activeElement!==inp) inp.value=e.obs||"";});
+  pintarEvid();
 }
 $("#h-comp").onchange=()=>{sp("h-comp",$("#h-comp").value);selHito=null;delAsk=false;renderHitos()};
 $("#h-list").addEventListener("click",e=>{const b=e.target.closest(".hito"); if(!b) return; selHito=b.dataset.id; delAsk=false; renderHitos();});
@@ -1530,6 +1549,90 @@ $("#c-fotos-in").onchange=async e=>{ const fs=[...e.target.files], st=$("#c-foto
   st.innerHTML=`Listo ✓ ${ok} foto${ok===1?"":"s"} guardada${ok===1?"":"s"}.`+(sin.length?` <b>Sin participante reconocido:</b> ${sin.map(esc).join(", ")}. Subilas tocando la foto de cada uno.`:"")+(mal.length?` <b>No se pudieron subir:</b> ${mal.map(esc).join(", ")}.`:""); };
 async function quitarFoto(sid){ const todos=archivosDe(sid); const r=await sb.storage.from("fotos").remove(todos.length?todos:[sid+".jpg"]); if(r.error) throw r.error; fotoArchivos=fotoArchivos.filter(n=>!todos.includes(n)); delete fotos[sid]; renderAll(); }
 
+
+// ---------- Evidencias: archivos adjuntos (Supabase Storage, bucket privado «evidencias») ----------
+// Ruta: <componente>/eval/<instancia>/<sujeto>/<marca>__<nombre>  ·  <componente>/hito/<idHito>/<marca>__<nombre>
+// Ver y descargar: docentes autorizados. Subir y borrar: el docente del componente y la coordinación.
+const EV_MAX=50*1024*1024, evid={};
+const evPuede=comp=>canAdmin||esPropio(comp);
+const evNombre=n=>{const m=/^[a-z0-9]+__(.+)$/.exec(n||""); return m?m[1]:n;};
+const evSeguro=n=>{const p=String(n).lastIndexOf("."), ext=p>0?String(n).slice(p).toLowerCase().replace(/[^.a-z0-9]/g,""):"", base=(p>0?String(n).slice(0,p):String(n)).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9._-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,70)||"archivo"; return base+ext;};
+const evTipo=n=>{const e=(String(n).split(".").pop()||"").toLowerCase();
+  if(/^(jpe?g|png|webp|gif|heic)$/.test(e)) return {t:"IMG",c:"#1f8a4c",img:true};
+  if(e==="pdf") return {t:"PDF",c:"#c23636"}; if(/^(docx?|odt|txt)$/.test(e)) return {t:"DOC",c:"#1667ae"};
+  if(/^(pptx?|odp)$/.test(e)) return {t:"PPT",c:"#d35400"}; if(/^(xlsx?|ods)$/.test(e)) return {t:"XLS",c:"#1f7a4c"};
+  if(/^(mp4|mov|webm|m4v|3gp)$/.test(e)) return {t:"VIDEO",c:"#6b3fa0"}; if(/^(mp3|m4a|ogg|opus|wav)$/.test(e)) return {t:"AUDIO",c:"#4c6178"};
+  return {t:(e||"ARCH").slice(0,5).toUpperCase(),c:"#4c6178"}; };
+const evTam=b=>b>=1048576?(b/1048576).toFixed(1).replace(".",",")+" MB":Math.max(1,Math.round(b/1024))+" KB";
+function evidHTML(prefijo,comp,titulo,ayuda){ return `<div class="evid" data-prefijo="${esc(prefijo)}" data-comp="${esc(comp)}" data-titulo="${esc(titulo)}" data-ayuda="${esc(ayuda||"")}"></div>`; }
+async function evCargar(prefijo){
+  evid[prefijo]={files:(evid[prefijo]||{}).files||[],cargando:true};
+  try{ const r=await sb.storage.from("evidencias").list(prefijo,{limit:200,sortBy:{column:"name",order:"asc"}});
+    if(r.error) throw r.error;
+    const files=(r.data||[]).filter(o=>o.id!==null&&o.name&&!o.name.endsWith("/")).map(o=>({path:prefijo+"/"+o.name,name:evNombre(o.name),size:(o.metadata&&o.metadata.size)||0,img:evTipo(o.name).img}));
+    const imgs=files.filter(f=>f.img).map(f=>f.path);
+    if(imgs.length){ const u=await sb.storage.from("evidencias").createSignedUrls(imgs,3600); (u.data||[]).forEach(x=>{const f=files.find(y=>y.path===x.path); if(f&&x.signedUrl) f.thumb=x.signedUrl;}); }
+    evid[prefijo]={files,cargando:false};
+  }catch(e){ evid[prefijo]={files:[],cargando:false,error:true}; }
+  pintarEvid(); }
+function pintarEvid(){
+  $$(".evid").forEach(box=>{ const p=box.dataset.prefijo, c=evid[p], puede=evPuede(box.dataset.comp)&&!soloLectura;
+    if(!c){ evCargar(p); return; }
+    const lista=c.files.map(f=>{const tp=evTipo(f.name);
+      return `<li>${f.thumb?`<img class="ic" src="${esc(f.thumb)}" alt="">`:`<span class="ic" style="background:${tp.c}">${tp.t}</span>`}<span class="fn" title="${esc(f.name)}">${esc(f.name)}<small>${tp.t==="IMG"?"Imagen":tp.t==="VIDEO"?"Video":"Documento"} · ${evTam(f.size)}</small></span>
+        <button type="button" class="btn" data-ev-bajar="${esc(f.path)}">Descargar</button>${puede?`<button type="button" class="btn" data-ev-quitar="${esc(f.path)}" aria-label="Quitar ${esc(f.name)}">✕</button>`:""}</li>`}).join("");
+    const html=`<div class="evid-h"><div><b>📎 ${esc(box.dataset.titulo)} ${c.files.length?`(${c.files.length})`:""}</b>${box.dataset.ayuda?`<p class="note">${esc(box.dataset.ayuda)}</p>`:""}</div>
+      ${puede?`<button type="button" class="btn" data-ev-subir="${esc(p)}">Adjuntar archivos</button>`:""}</div>
+      ${c.cargando&&!c.files.length?'<p class="st">Cargando…</p>':c.error?'<p class="st">No se pudieron leer las evidencias. ¿Ya se activó el espacio de evidencias en Supabase?</p>':c.files.length?`<ul>${lista}</ul>`:`<p class="st">Sin archivos todavía.${puede?" Word, PDF, PowerPoint, imágenes, audio o video (hasta 50 MB cada uno).":""}</p>`}
+      <p class="st" data-ev-st></p>`;
+    if(box._html!==html){ const st=box.querySelector("[data-ev-st]"), prev=st?st.textContent:""; box.innerHTML=html; box._html=html; if(prev) box.querySelector("[data-ev-st]").textContent=prev; } }); }
+let evDestino=null;
+document.addEventListener("click",async e=>{
+  const sub=e.target.closest("[data-ev-subir]"); if(sub){ evDestino=sub.dataset.evSubir; $("#ev-in").value=""; $("#ev-in").click(); return; }
+  const baj=e.target.closest("[data-ev-bajar]"); if(baj){ const p=baj.dataset.evBajar;
+    const r=await sb.storage.from("evidencias").createSignedUrl(p,600,{download:evNombre(p.split("/").pop())});
+    if(r.data&&r.data.signedUrl){ const a=document.createElement("a"); a.href=r.data.signedUrl; a.download=evNombre(p.split("/").pop()); a.target="_blank"; a.rel="noopener"; document.body.appendChild(a); a.click(); a.remove(); }
+    return; }
+  const qu=e.target.closest("[data-ev-quitar]"); if(qu){ if(qu.dataset.ok!=="1"){ qu.dataset.ok="1"; qu.textContent="¿Quitar?"; return; }
+    const p=qu.dataset.evQuitar, pref=p.slice(0,p.lastIndexOf("/")), box=qu.closest(".evid");
+    const r=await sb.storage.from("evidencias").remove([p]);
+    if(r.error||!(r.data||[]).length){ const st=box&&box.querySelector("[data-ev-st]"); if(st) st.textContent="No se pudo quitar el archivo."; return; }
+    await evCargar(pref); return; }
+});
+$("#ev-in").onchange=async e=>{ const fs=[...e.target.files], p=evDestino; if(!fs.length||!p) return;
+  const box=[...$$(".evid")].find(b=>b.dataset.prefijo===p), st=()=>box&&box.querySelector("[data-ev-st]");
+  const grandes=fs.filter(f=>f.size>EV_MAX), ok=fs.filter(f=>f.size<=EV_MAX); let n=0, mal=[];
+  for(const f of ok){ if(st()) st().textContent=`Subiendo ${n+mal.length+1} de ${ok.length}: ${f.name}…`;
+    const nombre=`${Date.now().toString(36)}${Math.random().toString(36).slice(2,5)}__${evSeguro(f.name)}`;
+    const r=await sb.storage.from("evidencias").upload(p+"/"+nombre,f,{contentType:f.type||"application/octet-stream",upsert:false});
+    if(r.error) mal.push(f.name); else n++; }
+  await evCargar(p);
+  const msg=(n?`Listo ✓ ${n} archivo${n===1?"":"s"} adjuntado${n===1?"":"s"}.`:"")+(grandes.length?` Superan 50 MB: ${grandes.map(f=>f.name).join(", ")}. Para videos largos, pegá el enlace de Drive o YouTube en el cuadro de texto.`:"")+(mal.length?` No se pudieron subir: ${mal.join(", ")}.`:"");
+  if(st()) st().textContent=msg; };
+$("#i-evzip").onclick=()=>{ const inst=$("#e-inst").value, ins=instOf(inst)||{}; if(!inst) return;
+  const comps=[...cfg.componentes.map(c=>[c.id,c.nombre]),[TECNICOS,"Informe de los técnicos"]];
+  evZip(comps.map(([id,n])=>[`${id}/eval/${inst}`,n]),`evidencias-${evSeguro(ins.nombre||inst)}.zip`,$("#i-evst")); };
+document.addEventListener("click",e=>{ if(e.target.id!=="h-zip"||!selHito) return; const h=hitos[selHito]||{};
+  evZip([[`${h.comp}/hito/${selHito}`,String(h.nombre||"Hito").replace(/[\\/:*?"<>|]/g,"-")]],`evidencias-hito-${evSeguro(h.nombre||selHito)}.zip`,$("#h-zip-st")); });
+// Descarga de todas las evidencias en un ZIP (coordinación y docentes)
+let JSZipP=null;
+const cargarZip=()=>JSZipP||(JSZipP=new Promise((ok,ko)=>{ if(window.JSZip) return ok(window.JSZip); const sc=document.createElement("script"); sc.src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"; sc.onload=()=>ok(window.JSZip); sc.onerror=()=>{JSZipP=null;ko(new Error("zip"));}; document.head.appendChild(sc); }));
+async function evListarTodo(prefijo){ // recorre carpetas (list no es recursivo)
+  const out=[]; const r=await sb.storage.from("evidencias").list(prefijo,{limit:500}); if(r.error) throw r.error;
+  for(const o of r.data||[]){ if(o.id===null) out.push(...await evListarTodo(prefijo+"/"+o.name)); else out.push(prefijo+"/"+o.name); }
+  return out; }
+async function evZip(prefijos,nombreZip,st){
+  st.textContent="Buscando archivos…";
+  try{ const Z=await cargarZip(), zip=new Z(); let n=0;
+    for(const [pref,carpeta] of prefijos){ let ps=[]; try{ ps=await evListarTodo(pref); }catch(e){}
+      for(const p of ps){ st.textContent=`Descargando ${++n}…`; const r=await sb.storage.from("evidencias").createSignedUrl(p,600); if(!r.data) continue;
+        const b=await (await fetch(r.data.signedUrl)).blob(); const rel=p.slice(pref.length+1).split("/").map((x,i,a)=>i===a.length-1?evNombre(x):carpetaSujeto(x)).join("/");
+        zip.file(carpeta+"/"+rel,b); } }
+    if(!n){ st.textContent="No hay evidencias adjuntas todavía."; return; }
+    st.textContent="Armando el ZIP…"; descargar(await zip.generateAsync({type:"blob"}),nombreZip); st.textContent=`Listo ✓ ${n} archivo${n===1?"":"s"} en el ZIP.`;
+  }catch(e){ st.textContent="No se pudo armar el ZIP. Revisá la conexión y volvé a intentar."; } }
+const carpetaSujeto=x=>x==="_actividad"?"Actividad propuesta":x==="_grupo"?"Grupo":((cfg.estudiantes.find(e=>e.id===x)||{}).nombre||x);
+
 // ---------- Respaldo completo (archivo .sql que reconstruye la base) ----------
 async function leerTabla(t,orden){const out=[];
   for(let a=0;;a+=1000){const {data,error}=await sb.from(t).select("*").order(orden,{ascending:true}).range(a,a+999);
@@ -1693,7 +1796,7 @@ function renderEval(){
     const niveles=tag==="juicio"&&esEst&&NIVEL_J[tipo]?`<div class="nivel-sel levels" data-suj="${esc(suj)}">${["v","a","r"].map(l=>`<button type="button" class="lvl" data-l="${l}" aria-pressed="false"><span class="dot ${l}"></span><span class="t">${esc(NIVEL_J[tipo][l])}</span></button>`).join("")}</div><div class="sem-hint" data-suj="${esc(suj)}"></div>`:"";
     const chips=esEst&&(tag==="juicio"||tag==="orient")?`<div class="sug-chips" data-suj="${esc(suj)}" data-k="${k}" data-tag="${tag}"></div>`:"";
     return `<div class="field"><label for="j-${esc(suj)}-${k}">${esc(t)}</label>${niveles}<textarea id="j-${esc(suj)}-${k}" class="jtxt" data-suj="${esc(suj)}" data-k="${k}" placeholder="${esc(ph)}" rows="3"></textarea>${chips}</div>`}).join("");
-  const actividad=ACTIVIDAD[tipo]&&comp!==TECNICOS?`<div class="field"><label for="j-_actividad-logros">${esc(ACTIVIDAD[tipo][0])}</label><textarea id="j-_actividad-logros" class="jtxt" data-suj="_actividad" data-k="logros" placeholder="${esc(ACTIVIDAD[tipo][1])}" rows="3"></textarea></div>`:"";
+  const actividad=ACTIVIDAD[tipo]&&comp!==TECNICOS?`<div class="field"><label for="j-_actividad-logros">${esc(ACTIVIDAD[tipo][0])}</label><textarea id="j-_actividad-logros" class="jtxt" data-suj="_actividad" data-k="logros" placeholder="${esc(ACTIVIDAD[tipo][1])}" rows="3"></textarea>${evidHTML(`${comp}/eval/${instId}/_actividad`,comp,"Evidencias de la actividad","Consigna, materiales o producciones del grupo.")}</div>`:comp!==TECNICOS?evidHTML(`${comp}/eval/${instId}/_actividad`,comp,"Evidencias de la actividad","Consigna, materiales o producciones del grupo."):"";
   const nota=suj=>usaNota(inst)&&comp!==TECNICOS?`<div class="field"><label for="jn-${esc(suj)}">Nota (1 a ${escalaDe(inst)})</label><select id="jn-${esc(suj)}" class="jnota" data-suj="${esc(suj)}" style="max-width:8em"><option value="">—</option>${Array.from({length:escalaDe(inst)},(_,i)=>`<option value="${i+1}">${i+1}</option>`).join("")}</select></div>`:"";
   const rub=suj=>usaRubrica(inst)&&comp!==TECNICOS?`<div class="dim-title" style="margin-top:6px">Rúbrica de competencias transversales</div>${RUBRICA.map(r=>`<div class="dim rub" data-r="${r.k}"><div class="dim-title" style="font-weight:600">${esc(r.n)}</div>
      <div class="levels" style="grid-template-columns:repeat(4,1fr)">${NIV.map((n,i)=>`<button type="button" class="lvl" data-n="${i+1}" aria-pressed="false"><span class="t">${esc(n)}</span></button>`).join("")}</div><div class="desc"></div></div>`).join("")}`:"";
@@ -1702,10 +1805,10 @@ function renderEval(){
   setHTML(box,est.map((s,i)=>{const open=eOpen===s.id;
     return `<div class="stu" ${open?"open-card":""} data-sid="${esc(s.id)}">
       <button class="stu-head" type="button" aria-expanded="${open}"><span class="n">${i+1}</span>${avatar(s.id)}<span class="name">${esc(s.nombre)}</span><span class="sum jsum muted num" aria-hidden="true"></span><span class="chev" aria-hidden="true">▾</span></button>
-      ${open?`<div class="stu-body">${nota(s.id)}${campos(C.est,s.id)}${rub(s.id)}
+      ${open?`<div class="stu-body">${nota(s.id)}${campos(C.est,s.id)}${rub(s.id)}${comp!==TECNICOS?evidHTML(`${comp}/eval/${instId}/${s.id}`,comp,"Producciones del participante","Trabajos, fotos o grabaciones de este participante."):""}
         <div class="stu-foot"><button type="button" class="btn primary next">${i<est.length-1?"Siguiente estudiante →":"Terminar"}</button></div></div>`:""}
     </div>`}).join(""));
-  paintEval();
+  paintEval(); pintarEvid();
 }
 function paintEval(){
   const instId=$("#e-inst").value, inst=instOf(instId), comp=$("#e-comp").value; if(!instId||!comp) return;

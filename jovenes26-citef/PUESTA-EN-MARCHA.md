@@ -166,3 +166,25 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 - **Etiqueta «Entrevista»:** marca a quien tiene algún aspecto por debajo del 50 % o al menos el 15 % de sus marcas en «No logrado».
 - **«Ranking provisorio»:** mientras haya participantes sin datos suficientes, la coordinación ve este aviso. Incluye cuántas clases del horario de los últimos 14 días faltan registrar, por componente.
 - **Aviso a cada docente:** en el inicio aparecen sus clases del horario sin registrar, con un botón que abre esa fecha y ese componente. No se cuentan los bloques «sin calificación» ni los recesos.
+
+## Evidencias (archivos adjuntos)
+**Una sola vez:** SQL Editor → New query → pegar `jovenes26-citef/supabase/evidencias.sql` → **Run**. Tiene que mostrar el espacio «evidencias» (privado · 50 MB por archivo) y 3 permisos.
+
+**Dónde se adjuntan**
+- **Evaluaciones → Evidencias de la actividad:** debajo de la actividad de diagnóstico propuesta. Consigna, materiales o producciones del grupo.
+- **Evaluaciones → Producciones del participante:** dentro de la tarjeta de cada participante.
+- **Hitos → Evidencias del hito:** en cada hito.
+
+**Qué se puede subir:** Word, PDF, PowerPoint, Excel, imágenes, audio y video, hasta **50 MB por archivo**. Para videos más largos, conviene pegar el enlace de Drive o YouTube en el cuadro de texto.
+
+**Quién puede hacer qué**
+- **Ver y descargar:** todos los docentes autorizados.
+- **Subir y quitar:** el docente del componente y la coordinación.
+
+**Descarga de todo junto (ZIP)**
+- **Evaluaciones → Informes para INEFOP → «Descargar evidencias (ZIP)»:** todas las evidencias de la instancia elegida, ordenadas por componente y participante.
+- **Hitos → «Descargar evidencias (ZIP)»:** las evidencias de ese hito.
+
+**Espacio:** el plan gratuito de Supabase tiene **1 GB en total**. Los documentos y las fotos ocupan poco; los videos, mucho.
+
+**Respaldo:** el respaldo completo (.sql) no incluye los archivos adjuntos. Para guardarlos, usá los ZIP.

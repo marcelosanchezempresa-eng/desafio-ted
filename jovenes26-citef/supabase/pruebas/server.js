@@ -34,22 +34,28 @@ async function rpc(b){const {email,fn,args}=b;
     throw new Error("fn")})}
 async function reemitir(table,id){const r=(await pool.query(`select * from public.${table} where ${table==="docentes"?"email":"id"}=$1`,[id])).rows[0];if(r)emitir(table,"UPDATE",fix(r))}
 const STDIR=path.join(__dirname,"storage-fotos");fs.mkdirSync(STDIR,{recursive:true});const TOK=new Map();
-const okName=n=>/^[A-Za-z0-9_-]+\.jpg$/.test(n);
-async function st(b){const {email,op,bucket,paths=[],data}=b;
+const okName=n=>/^[A-Za-z0-9_.\-]+(\/[A-Za-z0-9_.\-]+)*$/.test(n)&&!n.includes("..");
+const fpath=(b,n)=>path.join(STDIR,(b==="fotos"?"":b+"%2F")+n.replace(/\//g,"%2F"));
+async function st(b){const {email,op,bucket,paths=[],data,prefix=""}=b;
   return como(email,async c=>{
-    if(op==="list")return (await c.query("select name, updated_at from storage.objects where bucket_id=$1 order by name",[bucket])).rows.map(fix);
+    if(op==="list"){const rows=(await c.query("select name, updated_at from storage.objects where bucket_id=$1 order by name",[bucket])).rows.map(fix);
+      const pre=prefix?prefix.replace(/\/$/,"")+"/":"", out=[], dirs=new Set();
+      rows.forEach(r=>{ if(!r.name.startsWith(pre)) return; const rest=r.name.slice(pre.length);
+        if(rest.includes("/")){const d=rest.split("/")[0]; if(!dirs.has(d)){dirs.add(d);out.push({name:d,id:null})}}
+        else{let size=0;try{size=fs.statSync(fpath(bucket,r.name)).size}catch(e){} out.push({name:rest,id:"o",updated_at:r.updated_at,metadata:{size}})} });
+      return out}
     if(op==="up"){const n=paths[0];if(!okName(n))throw new Error("nombre");
       await c.query("insert into storage.objects(bucket_id,name) values($1,$2) on conflict (bucket_id,name) do update set updated_at=now()",[bucket,n]);
-      fs.writeFileSync(path.join(STDIR,n),Buffer.from(data,"base64"));return {path:n}}
+      fs.writeFileSync(fpath(bucket,n),Buffer.from(data,"base64"));return {path:n}}
     if(op==="rm"){const r=(await c.query("delete from storage.objects where bucket_id=$1 and name = any($2) returning name",[bucket,paths])).rows;
-      r.forEach(x=>{try{fs.unlinkSync(path.join(STDIR,x.name))}catch(e){}});return r}
+      r.forEach(x=>{try{fs.unlinkSync(fpath(bucket,x.name))}catch(e){}});return r}
     if(op==="urls"){const vis=new Set((await c.query("select name from storage.objects where bucket_id=$1 and name = any($2)",[bucket,paths])).rows.map(x=>x.name));
-      return paths.map(n=>{if(!vis.has(n))return {path:n,error:"Object not found",signedUrl:null};const t=Math.random().toString(36).slice(2);TOK.set(t,n);return {path:n,signedUrl:"/st/get/"+n+"?token="+t}})}
+      return paths.map(n=>{if(!vis.has(n))return {path:n,error:"Object not found",signedUrl:null};const t=Math.random().toString(36).slice(2);TOK.set(t,[bucket,n]);return {path:n,signedUrl:"/st/get/"+encodeURIComponent(n)+"?token="+t}})}
     throw new Error("op")})}
 http.createServer(async(req,res)=>{
-  if(req.url.startsWith("/st/get/")){const u=new URL(req.url,"http://x"),n=decodeURIComponent(u.pathname.slice(8));
-    if(TOK.get(u.searchParams.get("token"))!==n||!okName(n)){res.writeHead(400);res.end();return}
-    fs.readFile(path.join(STDIR,n),(e,d)=>{if(e){res.writeHead(404);res.end();return}res.writeHead(200,{"content-type":"image/jpeg"});res.end(d)});return}
+  if(req.url.startsWith("/st/get/")){const u=new URL(req.url,"http://x"),n=decodeURIComponent(u.pathname.slice(8)),tk=TOK.get(u.searchParams.get("token"));
+    if(!tk||tk[1]!==n||!okName(n)){res.writeHead(400);res.end();return}
+    fs.readFile(fpath(tk[0],n),(e,d)=>{if(e){res.writeHead(404);res.end();return}res.writeHead(200,{"content-type":tk[0]==="fotos"?"image/jpeg":"application/octet-stream"});res.end(d)});return}
   if(req.url==="/events"){res.writeHead(200,{"content-type":"text/event-stream","cache-control":"no-cache"});res.write(":ok\n\n");subs.add(res);req.on("close",()=>subs.delete(res));return}
   if(req.method==="POST"){let body="";req.setEncoding("utf8");req.on("data",d=>body+=d);req.on("end",async()=>{const b=JSON.parse(body);
     try{await new Promise(r=>setTimeout(r,150));let data;

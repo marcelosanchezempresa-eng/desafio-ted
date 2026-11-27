@@ -14,7 +14,8 @@ window.supabase={createClient(){const cbs=[];const fire=(ev)=>{const s=me()?{use
     async signUp({email,password}){const r=await post("/signup",{email});if(r.error)return{data:{},error:r.error};localStorage.setItem("mockEmail",email);fire("SIGNED_IN");return{data:{session:{user:{email}}},error:null}},async resetPasswordForEmail(){return{error:null}},async updateUser(){return{error:null}},
     async signOut(){localStorage.removeItem("mockEmail");fire("SIGNED_OUT");return{error:null}}},
   storage:{from(bucket){const call=(op,o)=>post("/st",{op,bucket,email:me(),...o}).then(r=>r.error?{data:null,error:r.error}:{data:r.data,error:null});
-    return{list(){return call("list",{})},
+    return{list(prefix){return call("list",{prefix:prefix||""})},
+      async createSignedUrl(p){const r=await call("urls",{paths:[p]});return r.error?r:{data:(r.data&&r.data[0]&&r.data[0].signedUrl)?{signedUrl:r.data[0].signedUrl}:null,error:r.data&&r.data[0]&&r.data[0].error?{message:r.data[0].error}:null}},
       async upload(p,blob){const buf=new Uint8Array(await blob.arrayBuffer());let bin="";for(let i=0;i<buf.length;i+=8192)bin+=String.fromCharCode.apply(null,buf.subarray(i,i+8192));return call("up",{paths:[p],data:btoa(bin)})},
       remove(paths){return call("rm",{paths})},
       createSignedUrls(paths){return call("urls",{paths})}}}},
