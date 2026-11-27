@@ -175,7 +175,13 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 - **Evaluaciones → Producciones del participante:** dentro de la tarjeta de cada participante.
 - **Hitos → Evidencias del hito:** en cada hito.
 
-**Qué se puede subir:** Word, PDF, PowerPoint, Excel, imágenes, audio y video, hasta **50 MB por archivo**. Para videos más largos, conviene pegar el enlace de Drive o YouTube en el cuadro de texto.
+**Qué se puede subir:** Word, PDF, PowerPoint, Excel, imágenes, audio y video, hasta **50 MB por archivo**.
+
+**Enlaces:** con **«🔗 Agregar enlace»** se guarda un título y una dirección web (YouTube, Drive, Canva u otro sitio).
+- El título queda **resaltado y es el enlace**: al tocarlo, abre la página.
+- Cada enlace lleva un ícono según el sitio.
+- En el ZIP, cada enlace va como acceso directo (`.url`) que abre la página.
+- Es la forma recomendada para los videos largos, porque no ocupa espacio en Supabase.
 
 **Quién puede hacer qué**
 - **Ver y descargar:** todos los docentes autorizados.

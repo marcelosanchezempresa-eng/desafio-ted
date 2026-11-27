@@ -151,6 +151,16 @@ textarea{width:100%;min-height:60px;resize:vertical}
 .evid li .fn small{display:block;font-weight:400;color:var(--muted);font-size:.76rem}
 .evid li .btn{min-height:32px;padding:3px 9px;font-size:.82rem}
 .evid .st{margin:6px 0 0;font-size:.82rem;color:var(--muted)}
+.evid-bt{display:flex;flex-wrap:wrap;gap:6px}
+.evid a.btn{color:var(--fg);text-decoration:none;display:inline-flex;align-items:center}
+.evid li.lnk .fn{white-space:normal;line-height:1.35}
+.evid li.lnk a.tl{display:inline;-webkit-box-decoration-break:clone;box-decoration-break:clone}
+@media (max-width:640px){.evid li.lnk a.btn{display:none}}
+.evid li.lnk a.tl{color:var(--accent);font-weight:800;text-decoration:underline;text-decoration-thickness:2px;text-underline-offset:3px;background:color-mix(in srgb,var(--lima) 28%,transparent);border-radius:4px;padding:0 4px}
+.evid li.lnk a.tl:hover{background:color-mix(in srgb,var(--lima) 55%,transparent)}
+.ev-form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.4fr) auto auto;gap:6px;margin-top:8px;align-items:center}
+.ev-form input{min-width:0;width:100%}
+@media (max-width:640px){.ev-form{grid-template-columns:1fr 1fr}.ev-form input{grid-column:1/-1}}
 .stu-head .sum{display:flex;gap:5px}
 .stu-head .chev{color:var(--muted);transition:transform .15s}
 .stu[open-card] .chev{transform:rotate(180deg)}
@@ -1555,7 +1565,14 @@ async function quitarFoto(sid){ const todos=archivosDe(sid); const r=await sb.st
 // Ver y descargar: docentes autorizados. Subir y borrar: el docente del componente y la coordinación.
 const EV_MAX=50*1024*1024, evid={};
 const evPuede=comp=>canAdmin||esPropio(comp);
-const evNombre=n=>{const m=/^[a-z0-9]+__(.+)$/.exec(n||""); return m?m[1]:n;};
+const b64u=t=>btoa(unescape(encodeURIComponent(t))).replace(/\+/g,"-").replace(/\//g,"_").replace(/=+$/,"");
+const deB64u=t=>{try{return decodeURIComponent(escape(atob(t.replace(/-/g,"+").replace(/_/g,"/"))))}catch(e){return null}};
+const evEnlace=n=>{const m=/^[a-z0-9]+__([A-Za-z0-9_-]+)\.enlace$/.exec(n||""); if(!m) return null; try{const o=JSON.parse(deB64u(m[1])); return o&&/^https?:\/\//i.test(o.u)?o:null}catch(e){return null}};
+const evNombre=n=>{const l=evEnlace(n); if(l) return l.t; const m=/^[a-z0-9]+__(.+)$/.exec(n||""); return m?m[1]:n;};
+const evSitio=u=>{let h=""; try{h=new URL(u).hostname.replace(/^www\./,"")}catch(e){}
+  if(/youtu\.?be/.test(h)) return {t:"▶ YT",c:"#c4302b",h}; if(/drive\.google|docs\.google/.test(h)) return {t:"DRIVE",c:"#1f8a4c",h};
+  if(/canva\./.test(h)) return {t:"CANVA",c:"#7d2ae8",h}; return {t:"🔗",c:"#1667ae",h}; };
+const evForm={};
 const evSeguro=n=>{const p=String(n).lastIndexOf("."), ext=p>0?String(n).slice(p).toLowerCase().replace(/[^.a-z0-9]/g,""):"", base=(p>0?String(n).slice(0,p):String(n)).normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^A-Za-z0-9._-]+/g,"_").replace(/^_+|_+$/g,"").slice(0,70)||"archivo"; return base+ext;};
 const evTipo=n=>{const e=(String(n).split(".").pop()||"").toLowerCase();
   if(/^(jpe?g|png|webp|gif|heic)$/.test(e)) return {t:"IMG",c:"#1f8a4c",img:true};
@@ -1569,7 +1586,7 @@ async function evCargar(prefijo){
   evid[prefijo]={files:(evid[prefijo]||{}).files||[],cargando:true};
   try{ const r=await sb.storage.from("evidencias").list(prefijo,{limit:200,sortBy:{column:"name",order:"asc"}});
     if(r.error) throw r.error;
-    const files=(r.data||[]).filter(o=>o.id!==null&&o.name&&!o.name.endsWith("/")).map(o=>({path:prefijo+"/"+o.name,name:evNombre(o.name),size:(o.metadata&&o.metadata.size)||0,img:evTipo(o.name).img}));
+    const files=(r.data||[]).filter(o=>o.id!==null&&o.name&&!o.name.endsWith("/")).map(o=>{const l=evEnlace(o.name); return {path:prefijo+"/"+o.name,name:evNombre(o.name),size:(o.metadata&&o.metadata.size)||0,img:!l&&evTipo(o.name).img,link:l};});
     const imgs=files.filter(f=>f.img).map(f=>f.path);
     if(imgs.length){ const u=await sb.storage.from("evidencias").createSignedUrls(imgs,3600); (u.data||[]).forEach(x=>{const f=files.find(y=>y.path===x.path); if(f&&x.signedUrl) f.thumb=x.signedUrl;}); }
     evid[prefijo]={files,cargando:false};
@@ -1578,14 +1595,35 @@ async function evCargar(prefijo){
 function pintarEvid(){
   $$(".evid").forEach(box=>{ const p=box.dataset.prefijo, c=evid[p], puede=evPuede(box.dataset.comp)&&!soloLectura;
     if(!c){ evCargar(p); return; }
-    const lista=c.files.map(f=>{const tp=evTipo(f.name);
+    const lista=c.files.map(f=>{ if(f.link){ const si=evSitio(f.link.u);
+        return `<li class="lnk"><span class="ic" style="background:${si.c}">${si.t}</span><span class="fn"><a class="tl" href="${esc(f.link.u)}" target="_blank" rel="noopener noreferrer" title="${esc(f.link.u)}">${esc(f.link.t)}</a><small>Enlace · ${esc(si.h)}</small></span>
+        <a class="btn" href="${esc(f.link.u)}" target="_blank" rel="noopener noreferrer">Abrir</a>${puede?`<button type="button" class="btn" data-ev-quitar="${esc(f.path)}" aria-label="Quitar ${esc(f.link.t)}">✕</button>`:""}</li>`; }
+      const tp=evTipo(f.name);
       return `<li>${f.thumb?`<img class="ic" src="${esc(f.thumb)}" alt="">`:`<span class="ic" style="background:${tp.c}">${tp.t}</span>`}<span class="fn" title="${esc(f.name)}">${esc(f.name)}<small>${tp.t==="IMG"?"Imagen":tp.t==="VIDEO"?"Video":"Documento"} · ${evTam(f.size)}</small></span>
         <button type="button" class="btn" data-ev-bajar="${esc(f.path)}">Descargar</button>${puede?`<button type="button" class="btn" data-ev-quitar="${esc(f.path)}" aria-label="Quitar ${esc(f.name)}">✕</button>`:""}</li>`}).join("");
     const html=`<div class="evid-h"><div><b>📎 ${esc(box.dataset.titulo)} ${c.files.length?`(${c.files.length})`:""}</b>${box.dataset.ayuda?`<p class="note">${esc(box.dataset.ayuda)}</p>`:""}</div>
-      ${puede?`<button type="button" class="btn" data-ev-subir="${esc(p)}">Adjuntar archivos</button>`:""}</div>
-      ${c.cargando&&!c.files.length?'<p class="st">Cargando…</p>':c.error?'<p class="st">No se pudieron leer las evidencias. ¿Ya se activó el espacio de evidencias en Supabase?</p>':c.files.length?`<ul>${lista}</ul>`:`<p class="st">Sin archivos todavía.${puede?" Word, PDF, PowerPoint, imágenes, audio o video (hasta 50 MB cada uno).":""}</p>`}
+      ${puede?`<div class="evid-bt"><button type="button" class="btn" data-ev-subir="${esc(p)}">Adjuntar archivos</button><button type="button" class="btn" data-ev-link="${esc(p)}">🔗 Agregar enlace</button></div>`:""}</div>
+      ${puede&&evForm[p]?`<div class="ev-form"><input type="text" data-evl-t maxlength="80" placeholder="Título (p. ej.: Video de la consigna)" aria-label="Título del enlace"><input type="url" data-evl-u maxlength="400" placeholder="Enlace: https://youtube.com/… o https://drive.google.com/…" aria-label="Enlace"><button type="button" class="btn primary" data-evl-ok="${esc(p)}">Guardar enlace</button><button type="button" class="btn" data-evl-no="${esc(p)}">Cancelar</button></div>`:""}
+      ${c.cargando&&!c.files.length?'<p class="st">Cargando…</p>':c.error?'<p class="st">No se pudieron leer las evidencias. ¿Ya se activó el espacio de evidencias en Supabase?</p>':c.files.length?`<ul>${lista}</ul>`:`<p class="st">Sin archivos todavía.${puede?" Word, PDF, PowerPoint, imágenes, audio o video (hasta 50 MB cada uno), o enlaces a YouTube, Drive u otros sitios.":""}</p>`}
       <p class="st" data-ev-st></p>`;
-    if(box._html!==html){ const st=box.querySelector("[data-ev-st]"), prev=st?st.textContent:""; box.innerHTML=html; box._html=html; if(prev) box.querySelector("[data-ev-st]").textContent=prev; } }); }
+    if(box._html!==html){ const st=box.querySelector("[data-ev-st]"), prev=st?st.textContent:""; box.innerHTML=html; box._html=html; if(prev) box.querySelector("[data-ev-st]").textContent=prev;
+      const f=evForm[p]; if(f){ const t=box.querySelector("[data-evl-t]"), u=box.querySelector("[data-evl-u]"); if(t){t.value=f.t||""; u.value=f.u||"";} } } }); }
+document.addEventListener("input",e=>{ const box=e.target.closest(".evid"); if(!box) return; const f=evForm[box.dataset.prefijo]; if(!f) return;
+  if(e.target.matches("[data-evl-t]")) f.t=e.target.value; if(e.target.matches("[data-evl-u]")) f.u=e.target.value; });
+document.addEventListener("click",async e=>{
+  const ab=e.target.closest("[data-ev-link]"); if(ab){ const p=ab.dataset.evLink; evForm[p]=evForm[p]||{t:"",u:""}; pintarEvid(); const box=[...$$(".evid")].find(b=>b.dataset.prefijo===p); const t=box&&box.querySelector("[data-evl-t]"); if(t) t.focus(); return; }
+  const no=e.target.closest("[data-evl-no]"); if(no){ delete evForm[no.dataset.evlNo]; pintarEvid(); return; }
+  const okb=e.target.closest("[data-evl-ok]"); if(!okb) return; const p=okb.dataset.evlOk, f=evForm[p]||{}, box=okb.closest(".evid"), st=box.querySelector("[data-ev-st]");
+  let u=String(f.u||"").trim(); if(u&&!/^[a-z]+:\/\//i.test(u)) u="https://"+u;
+  let ok=false; try{ const x=new URL(u); ok=/^https?:$/.test(x.protocol)&&!!x.hostname.includes("."); }catch(err){}
+  if(!ok){ st.textContent="Revisá el enlace: tiene que ser una dirección web, por ejemplo https://youtube.com/…"; return; }
+  if(u.length>400){ st.textContent="El enlace es demasiado largo. Usá el botón «Compartir» de YouTube o Drive para copiar un enlace corto."; return; }
+  const t=String(f.t||"").trim()||evSitio(u).h||"Enlace";
+  const nombre=`${Date.now().toString(36)}${Math.random().toString(36).slice(2,5)}__${b64u(JSON.stringify({t:t.slice(0,80),u}))}.enlace`;
+  st.textContent="Guardando el enlace…";
+  const r=await sb.storage.from("evidencias").upload(p+"/"+nombre,new Blob([JSON.stringify({t,u})],{type:"text/plain"}),{contentType:"text/plain",upsert:false});
+  if(r.error){ st.textContent="No se pudo guardar el enlace. Revisá la conexión y volvé a intentar."; return; }
+  delete evForm[p]; await evCargar(p); const st2=[...$$(".evid")].find(b=>b.dataset.prefijo===p); if(st2) st2.querySelector("[data-ev-st]").textContent=`Enlace «${t}» agregado ✓`; });
 let evDestino=null;
 document.addEventListener("click",async e=>{
   const sub=e.target.closest("[data-ev-subir]"); if(sub){ evDestino=sub.dataset.evSubir; $("#ev-in").value=""; $("#ev-in").click(); return; }
@@ -1607,7 +1645,7 @@ $("#ev-in").onchange=async e=>{ const fs=[...e.target.files], p=evDestino; if(!f
     const r=await sb.storage.from("evidencias").upload(p+"/"+nombre,f,{contentType:f.type||"application/octet-stream",upsert:false});
     if(r.error) mal.push(f.name); else n++; }
   await evCargar(p);
-  const msg=(n?`Listo ✓ ${n} archivo${n===1?"":"s"} adjuntado${n===1?"":"s"}.`:"")+(grandes.length?` Superan 50 MB: ${grandes.map(f=>f.name).join(", ")}. Para videos largos, pegá el enlace de Drive o YouTube en el cuadro de texto.`:"")+(mal.length?` No se pudieron subir: ${mal.join(", ")}.`:"");
+  const msg=(n?`Listo ✓ ${n} archivo${n===1?"":"s"} adjuntado${n===1?"":"s"}.`:"")+(grandes.length?` Superan 50 MB: ${grandes.map(f=>f.name).join(", ")}. Para videos largos, subilos a Drive o YouTube y usá «🔗 Agregar enlace».`:"")+(mal.length?` No se pudieron subir: ${mal.join(", ")}.`:"");
   if(st()) st().textContent=msg; };
 $("#i-evzip").onclick=()=>{ const inst=$("#e-inst").value, ins=instOf(inst)||{}; if(!inst) return;
   const comps=[...cfg.componentes.map(c=>[c.id,c.nombre]),[TECNICOS,"Informe de los técnicos"]];
@@ -1625,7 +1663,10 @@ async function evZip(prefijos,nombreZip,st){
   st.textContent="Buscando archivos…";
   try{ const Z=await cargarZip(), zip=new Z(); let n=0;
     for(const [pref,carpeta] of prefijos){ let ps=[]; try{ ps=await evListarTodo(pref); }catch(e){}
-      for(const p of ps){ st.textContent=`Descargando ${++n}…`; const r=await sb.storage.from("evidencias").createSignedUrl(p,600); if(!r.data) continue;
+      for(const p of ps){ const lk=evEnlace(p.split("/").pop());
+        if(lk){ n++; const rel=p.slice(pref.length+1).split("/").map((x,i,a)=>i===a.length-1?(evSeguro(lk.t).replace(/\.[^.]*$/,"")||"Enlace")+".url":carpetaSujeto(x)).join("/");
+          zip.file(carpeta+"/"+rel,`[InternetShortcut]\r\nURL=${lk.u}\r\n`); continue; }
+        st.textContent=`Descargando ${++n}…`; const r=await sb.storage.from("evidencias").createSignedUrl(p,600); if(!r.data) continue;
         const b=await (await fetch(r.data.signedUrl)).blob(); const rel=p.slice(pref.length+1).split("/").map((x,i,a)=>i===a.length-1?evNombre(x):carpetaSujeto(x)).join("/");
         zip.file(carpeta+"/"+rel,b); } }
     if(!n){ st.textContent="No hay evidencias adjuntas todavía."; return; }
@@ -2012,7 +2053,7 @@ function renderAll(){
   const t=($$("nav.tabs button").find(b=>b.getAttribute("aria-selected")==="true")||{}).dataset?.tab;
   ({registrar:renderRegistrar,horario:renderHorario,hitos:renderHitos,semaforo:renderSemaforo,ranking:renderRanking,ficha:renderFicha,criterios:renderCriterios,config:renderConfig,ayuda:()=>{},evaluaciones:renderEval}[t]||(()=>{}))();
 }
-function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre, #hz-t, #hz-n, .hz-sheet input")}
+function typing(){const ae=document.activeElement; return ae&&ae.matches&&ae.matches("textarea.obs, textarea.jtxt, input.obs-in, #c-bulk, .cfg-item input, #h-nombre, #hz-t, #hz-n, .hz-sheet input, .ev-form input")}
 
 // ---------- Arranque ----------
 $("#r-fecha").value=todayStr();
