@@ -194,3 +194,40 @@ Cada docente crea su propia contraseña la primera vez, **solo si su correo est�
 **Espacio:** el plan gratuito de Supabase tiene **1 GB en total**. Los documentos y las fotos ocupan poco; los videos, mucho.
 
 **Respaldo:** el respaldo completo (.sql) no incluye los archivos adjuntos. Para guardarlos, usá los ZIP.
+
+## Informe integrado (síntesis de todos los componentes)
+**Evaluaciones → Informes para INEFOP → Informe integrado:** los documentos se arman solos, en Word o en PDF, con lo que cargó cada componente.
+
+**Perfil individual:** un participante, o todos en un solo archivo. Incluye:
+- una síntesis con el perfil y el promedio de notas;
+- las fortalezas y los aspectos a fortalecer, cruzando los componentes;
+- la asistencia y el seguimiento en clase;
+- lo principal de cada componente;
+- las orientaciones, sin repetir;
+- la mirada del equipo técnico;
+- un cierre.
+
+**Informe del grupo:**
+- síntesis y distribución de perfiles;
+- promedios por componente;
+- participantes que requieren seguimiento prioritario;
+- lo principal de cada componente sobre el grupo;
+- las orientaciones;
+- una tabla con el perfil de cada participante.
+
+**Redacción:** sigue la guía «Recomendaciones para una escritura correcta» de Agesic (2010):
+- inicio relevante, párrafos breves y cierre que sintetiza;
+- números de un dígito en letras y coma decimal;
+- siglas desarrolladas la primera vez;
+- sin marcar género.
+
+**Corrector automático del texto de los docentes:**
+- espacios y signos de puntuación;
+- mayúsculas al inicio de oración;
+- comillas tipográficas;
+- tildes inequívocas (área, básica, también, -ción, -sión);
+- coma decimal en las notas.
+
+Respeta las direcciones web y los correos.
+
+**Es un borrador:** el documento lo dice al comienzo. Conviene leerlo y ajustarlo en Word antes de enviarlo.
